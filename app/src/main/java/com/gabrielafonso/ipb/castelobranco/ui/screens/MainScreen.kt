@@ -24,34 +24,23 @@ import com.gabrielafonso.ipb.castelobranco.ui.components.ButtonGrid
 
 @Composable
 fun MainScreen() {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopBar(
-                appName = "IPB Castelo Branco",
-                logo = painterResource(id = R.drawable.teste_logo),
-                accountImage = painterResource(id = R.drawable.ic_account),
-                onMenuClick = { /* abrir menu */ },
-                onAccountClick = { /* abrir login */ }
-            )
-        }
+    BaseScreen(
+        tabName = "IPB Castelo Branco",
+        logo = painterResource(id = R.drawable.teste_logo),
+        accountImage = painterResource(id = R.drawable.ic_account),
+        onMenuClick = { /* abrir menu */ },
+        onAccountClick = { /* abrir login */ }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            verticalArrangement = Arrangement.Top, // melhor para o destaque aparecer no topo
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Placeholder do destaque
             Spacer(modifier = Modifier.height(60.dp))
-
             Highlight()
-
-
-
             Spacer(modifier = Modifier.height(60.dp))
-
             ButtonGrid()
         }
     }

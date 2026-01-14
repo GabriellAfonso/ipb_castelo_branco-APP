@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IPBCasteloBranco">
         <activity
+            android:name=".PraiseActivity"
+            android:exported="false"
+            android:label="@string/title_activity_praise"
+            android:theme="@style/Theme.IPBCasteloBranco" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
