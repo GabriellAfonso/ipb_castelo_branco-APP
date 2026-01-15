@@ -39,6 +39,22 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            // Remove o erro do INDEX.LIST
+            excludes += "/META-INF/INDEX.LIST"
+
+            // Resolve o seu erro atual do Netty
+            excludes += "/META-INF/io.netty.versions.properties"
+
+            // Evita erros comuns que costumam vir logo depois com essas bibliotecas
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/LICENSE*"
+            excludes += "/META-INF/NOTICE*"
+            excludes += "/META-INF/*.kotlin_module"
+        }
+    }
 }
 
 dependencies {
@@ -55,6 +71,12 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    // Retrofit
+    implementation(libs.retrofit)
+    // Conversor JSON
+    implementation(libs.converter.gson)
+    implementation(libs.firebase.appdistribution.gradle)
+    implementation(libs.androidx.compose.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -62,4 +84,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
 }

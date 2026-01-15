@@ -153,36 +153,15 @@ private fun Header(titles: List<Pair<String, Float>>) {
 }
 
 @Composable
-fun LazyListScope.TableBody(
-    view: TableView,
-    data: List<SongRow>
-) {
-    if (view == TableView.LAST_SONGS) {
-        val grouped = data.groupBy { it.date ?: "Sem data" }
-
-        grouped.forEach { (date, songs) ->
-            item {
-                DateHeader(date)
-            }
-
-            items(songs) { song ->
-                TableRow(view, song)
-            }
-        }
-    } else {
-        items(data) { row ->
-            TableRow(view, row)
-        }
-    }
-}
-@Composable
-fun DateHeader(date: String) {
+fun DateHeader(date: String, isFirst: Boolean = false) {
     Text(
         text = date,
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFc7dbd2))
-            .padding(vertical = 0.dp),
+            // Se for o primeiro, padding 0. Caso contrário, 10.dp
+            .padding(top = if (isFirst) 0.dp else 5.dp)
+            .background(Color(0xFFd1e7dd))
+            .padding(vertical = 10.dp),
 
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold
@@ -194,7 +173,8 @@ fun TableRow(view: TableView, row: SongRow) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFd1e7dd))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 8.dp)
+            .padding(top = 4.dp, bottom = 8.dp)
 
     ) {
         when (view) {
