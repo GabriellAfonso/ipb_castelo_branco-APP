@@ -1,5 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.ui.components
 
+import com.gabrielafonso.ipb.castelobranco.R
 import androidx.compose.foundation.Image
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,12 +18,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 
 @Composable
 fun CustomButton(
     onClick: () -> Unit,
-    image: Painter,
+    image: Painter = painterResource(id = R.drawable.teste_logo),
     text: String = "",
     backgroundColor: Color = Color.Blue,
     size: Dp = 100.dp
