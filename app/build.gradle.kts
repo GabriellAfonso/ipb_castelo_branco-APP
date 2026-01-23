@@ -1,7 +1,10 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+
 }
 
 android {
@@ -21,8 +24,14 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000/\"")
             isMinifyEnabled = false
+        }
+
+        release {
+            buildConfigField("String", "API_BASE_URL", "\"https://gabrielafonso.com.br/api/\"")
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -38,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -75,8 +85,8 @@ dependencies {
     implementation(libs.retrofit)
     // Conversor JSON
     implementation(libs.converter.gson)
-    implementation(libs.firebase.appdistribution.gradle)
     implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.compose.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,5 +94,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
+    implementation("androidx.navigation:navigation-compose:2.9.6")
+
 
 }
