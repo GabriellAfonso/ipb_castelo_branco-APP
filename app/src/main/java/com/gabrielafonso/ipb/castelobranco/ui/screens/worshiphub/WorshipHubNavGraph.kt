@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.WorshipHubScreen
+import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.views.WorshipHubScreen
 
 object WorshipHubRoutes {
     const val Hub = "worship_hub"
@@ -13,17 +13,21 @@ object WorshipHubRoutes {
 }
 
 @Composable
-fun WorshipHubNavGraph(navController: NavHostController) {
+fun WorshipHubNavGraph(
+    navController: NavHostController,
+    viewModel: WorshipHubViewModel
+) {
     NavHost(navController = navController, startDestination = WorshipHubRoutes.Hub) {
         composable(WorshipHubRoutes.Hub) {
             WorshipHubScreen(
                 onTablesClick = { navController.navigate(WorshipHubRoutes.Tables) },
-//                onOtherClick = { navController.navigate(WorshipHubRoutes.Other) }
             )
         }
         composable(WorshipHubRoutes.Tables) {
-            WorshipSongsTableScreen(onBack = { navController.popBackStack() })
+            WorshipSongsTableScreen(
+                onBack = { navController.popBackStack() },
+                viewModel = viewModel
+            )
         }
-        // Adicione outras telas desta Activity aqui
     }
 }
