@@ -20,29 +20,13 @@ class MainViewModel(
 
     private fun preload() {
         viewModelScope.launch {
-            val result = repository.getSongsBySunday()
-
-            if (result.isNullOrEmpty()) {
-                Log.w(TAG, "getSongsBySunday retornou null ou lista vazia")
+            val ok = repository.refreshSongsBySunday()
+            repository.refreshTopSongs()
+            repository.refreshTopTones()
+            if (!ok) {
+                Log.w(TAG, "refreshSongsBySunday falhou")
             } else {
-                Log.d(
-                    TAG,
-                    "getSongsBySunday sucesso: ${result.size} dias"
-                )
-
-                result.forEach { day ->
-                    Log.d(
-                        TAG,
-                        "Data: ${day.date}, músicas: ${day.songs.size}"
-                    )
-
-                    day.songs.forEach { song ->
-                        Log.d(
-                            TAG,
-                            " - ${song.position}. ${song.title} (${song.artist})"
-                        )
-                    }
-                }
+                Log.d(TAG, "refreshSongsBySunday sucesso")
             }
         }
     }
