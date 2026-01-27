@@ -3,7 +3,6 @@ package com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.views
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,13 +18,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.ui.components.CustomButton
-import com.gabrielafonso.ipb.castelobranco.ui.components.Highlight
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
 
+
 @Composable
-fun WorshipHubScreen(onTablesClick: () -> Unit) {
-    // Use LocalActivity quando disponível; fallback para resolver Activity via ContextWrapper.
-    val activity = LocalActivity.current ?: LocalContext.current.findActivity()
+fun WorshipHubView(onTablesClick: () -> Unit) {
+    val activity = LocalContext.current.findActivity()
 
     BaseScreen(
         tabName = "Louvor",
@@ -45,6 +43,7 @@ fun WorshipHubScreen(onTablesClick: () -> Unit) {
             Spacer(modifier = Modifier.height(60.dp))
 
             CustomButton(
+                image = painterResource(id = R.drawable.table_icon),
                 onClick = onTablesClick,
                 text = "Tabelas",
                 backgroundColor = Color(0xFF157C53),
