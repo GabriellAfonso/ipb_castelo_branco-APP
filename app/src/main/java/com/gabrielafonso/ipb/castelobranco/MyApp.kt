@@ -4,11 +4,13 @@ import android.app.Application
 import com.gabrielafonso.ipb.castelobranco.core.di.AppContainer
 
 class MyApp : Application() {
-    lateinit var appContainer: AppContainer
-        private set
+
+    val appContainer: AppContainer by lazy {
+        AppContainer(this)
+    }
 
     override fun onCreate() {
         super.onCreate()
-        appContainer = AppContainer(this)
+        // Inicialização já acontece no lazy
     }
 }

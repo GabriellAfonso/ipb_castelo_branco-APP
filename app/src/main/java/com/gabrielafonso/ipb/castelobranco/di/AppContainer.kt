@@ -7,6 +7,9 @@ import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
 import com.gabrielafonso.ipb.castelobranco.data.repository.HymnalRepositoryImpl
 import com.gabrielafonso.ipb.castelobranco.data.repository.MonthScheduleRepositoryImpl
 import com.gabrielafonso.ipb.castelobranco.data.repository.SongsRepositoryImpl
+import com.gabrielafonso.ipb.castelobranco.domain.repository.HymnalRepository
+import com.gabrielafonso.ipb.castelobranco.domain.repository.MonthScheduleRepository
+import com.gabrielafonso.ipb.castelobranco.domain.repository.SongsRepository
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -46,21 +49,18 @@ class AppContainer(context: Context) {
 
     private val jsonSnapshotStorage = JsonSnapshotStorage(appContext)
 
-    val songsRepository: SongsRepositoryImpl =
-        SongsRepositoryImpl(
-            api = backendApi,
-            jsonStorage = jsonSnapshotStorage
-        )
+    val songsRepository: SongsRepository = SongsRepositoryImpl(
+        api = backendApi,
+        jsonStorage = jsonSnapshotStorage
+    )
 
-    val hymnalRepository: HymnalRepositoryImpl =
-        HymnalRepositoryImpl(
-            api = backendApi,
-            jsonStorage = jsonSnapshotStorage
-        )
+    val hymnalRepository: HymnalRepository = HymnalRepositoryImpl(
+        api = backendApi,
+        jsonStorage = jsonSnapshotStorage
+    )
 
-    val monthScheduleRepository: MonthScheduleRepositoryImpl =
-        MonthScheduleRepositoryImpl(
-            api = backendApi,
-            jsonStorage = jsonSnapshotStorage
-        )
+    val monthScheduleRepository: MonthScheduleRepository = MonthScheduleRepositoryImpl(
+        api = backendApi,
+        jsonStorage = jsonSnapshotStorage
+    )
 }
