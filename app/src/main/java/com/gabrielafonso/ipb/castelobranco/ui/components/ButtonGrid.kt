@@ -14,6 +14,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 //import com.gabrielafonso.ipb.castelobranco.PraiseActivity
 import com.gabrielafonso.ipb.castelobranco.R
+import com.gabrielafonso.ipb.castelobranco.ui.screens.hymnal.HymnalActivity
+import com.gabrielafonso.ipb.castelobranco.ui.screens.monthschedule.MonthScheduleActivity
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.WorshipHubActivity
 
 data class ButtonInfo(
@@ -42,7 +44,10 @@ fun ButtonGrid() {
             drawable = R.drawable.calendar_icon,
             label = "Escala",
             color = iconColor,
-            onClick = { println("Escala clicked") }
+            onClick = {
+                val intent = Intent(context, MonthScheduleActivity::class.java)
+                context.startActivity(intent)
+            }
         ),
         ButtonInfo(
             drawable = R.drawable.gallery_icon,
@@ -51,20 +56,23 @@ fun ButtonGrid() {
             onClick = { println("Galeria clicked") }
         ),
         ButtonInfo(
-            drawable = R.drawable.teste_logo,
+            drawable = R.drawable.sarca_ipb,
             label = "Hinário",
             color = iconColor,
-            onClick = { println("Hinário clicked") }
+            onClick = {
+                val intent = Intent(context, HymnalActivity::class.java)
+                context.startActivity(intent)
+            }
         ),
         ButtonInfo(
-            drawable = R.drawable.teste_logo,
-            label = "Sample 1",
+            drawable = R.drawable.sarca_ipb,
+            label = "Exemplo",
             color = iconColor,
             onClick = { println("Sample 1 clicked") }
         ),
         ButtonInfo(
-            drawable = R.drawable.teste_logo,
-            label = "Sample 2",
+            drawable = R.drawable.sarca_ipb,
+            label = "Exemplo",
             color = iconColor,
             onClick = { println("Sample 2 clicked") }
         )
