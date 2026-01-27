@@ -11,40 +11,55 @@ class JsonSnapshotStorage(
 ) {
     private val dirName = "snapshots"
 
-    private fun fileForKey(key: String): File {
+    private fun safeKey(key: String): String {
         val safe = key
             .trim()
             .lowercase()
-            // mantém só [a-z0-9_-] para virar nome de ficheiro
             .replace(Regex("[^a-z0-9_-]+"), "_")
             .trim('_')
 
         require(safe.isNotBlank()) { "Snapshot key inválida" }
-
-        val dir = File(appContext.filesDir, dirName).apply { mkdirs() }
-        return File(dir, "$safe.json")
+        return safe
     }
 
+    private fun dir(): File = File(appContext.filesDir, dirName).apply { mkdirs() }
+
+    private fun jsonFileForKey(key: String): File =
+        File(dir(), "${safeKey(key)}.json")
+
+    private fun etagFileForKey(key: String): File =
+        File(dir(), "${safeKey(key)}_etag.txt")
+
     suspend fun save(key: String, json: String) = withContext(Dispatchers.IO) {
-        fileForKey(key).writeText(json)
+        jsonFileForKey(key).writeText(json)
     }
 
     suspend fun loadOrNull(key: String): String? = withContext(Dispatchers.IO) {
-        val file = fileForKey(key)
+        val file = jsonFileForKey(key)
         if (!file.exists()) return@withContext null
         file.readText()
     }
 
     suspend fun clear(key: String) = withContext(Dispatchers.IO) {
-        val file = fileForKey(key)
-        if (file.exists()) file.delete()
+        jsonFileForKey(key).takeIf { it.exists() }?.delete()
+        etagFileForKey(key).takeIf { it.exists() }?.delete()
     }
 
     suspend fun clearAll() = withContext(Dispatchers.IO) {
-        val dir = File(appContext.filesDir, dirName)
-        if (dir.exists()) dir.deleteRecursively()
+        val d = File(appContext.filesDir, dirName)
+        if (d.exists()) d.deleteRecursively()
+    }
+
+    suspend fun loadETagOrNull(key: String): String? = withContext(Dispatchers.IO) {
+        val file = etagFileForKey(key)
+        if (!file.exists()) return@withContext null
+        file.readText().trim().takeIf { it.isNotBlank() }
+    }
+
+    suspend fun saveETag(key: String, etag: String) = withContext(Dispatchers.IO) {
+        etagFileForKey(key).writeText(etag)
     }
 
     fun getAbsolutePathForDebug(key: String): String =
-        fileForKey(key).absolutePath
+        jsonFileForKey(key).absolutePath
 }
