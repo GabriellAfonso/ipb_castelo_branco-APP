@@ -7,6 +7,7 @@ object Endpoints {
     const val TOP_TONES_PATH = "${ApiConstants.BASE_PATH}top-tones/"
     const val SUGGESTED_SONGS_PATH = "${ApiConstants.BASE_PATH}suggested-songs/"
 
+    const val HYMNAL_PATH = "${ApiConstants.BASE_PATH}hymnal/"
     // Schedule generation
     const val GENERATE_SCHEDULE_PATH = "${ApiConstants.BASE_PATH}generate-schedule/"
 
