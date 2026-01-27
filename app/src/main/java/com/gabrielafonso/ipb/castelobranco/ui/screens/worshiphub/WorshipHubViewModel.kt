@@ -3,7 +3,8 @@ package com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielafonso.ipb.castelobranco.data.repository.SongsRepositoryImpl
+
+import com.gabrielafonso.ipb.castelobranco.domain.repository.SongsRepository
 import com.gabrielafonso.ipb.castelobranco.domain.model.SuggestedSong
 import com.gabrielafonso.ipb.castelobranco.domain.model.SundaySet
 import com.gabrielafonso.ipb.castelobranco.domain.model.TopSong
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
 class WorshipHubViewModel(
-    private val repository: SongsRepositoryImpl
+    private val repository: SongsRepository
 ) : ViewModel() {
 
     private val _lastSundays = MutableStateFlow<List<SundaySet>>(emptyList())

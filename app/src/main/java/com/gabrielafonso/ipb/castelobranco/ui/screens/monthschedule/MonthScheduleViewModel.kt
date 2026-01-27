@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.data.repository.MonthScheduleRepositoryImpl
 import com.gabrielafonso.ipb.castelobranco.domain.model.MonthSchedule
+import com.gabrielafonso.ipb.castelobranco.domain.repository.MonthScheduleRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MonthScheduleViewModel(
-    private val repository: MonthScheduleRepositoryImpl
+    private val repository: MonthScheduleRepository
 ) : ViewModel() {
 
     private val _monthSchedule = MutableStateFlow<MonthSchedule?>(null)

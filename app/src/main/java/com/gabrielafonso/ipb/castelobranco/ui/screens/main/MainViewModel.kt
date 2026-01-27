@@ -6,12 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.data.repository.HymnalRepositoryImpl
 import com.gabrielafonso.ipb.castelobranco.data.repository.MonthScheduleRepositoryImpl
 import com.gabrielafonso.ipb.castelobranco.data.repository.SongsRepositoryImpl
+import com.gabrielafonso.ipb.castelobranco.domain.repository.HymnalRepository
+import com.gabrielafonso.ipb.castelobranco.domain.repository.MonthScheduleRepository
+import com.gabrielafonso.ipb.castelobranco.domain.repository.SongsRepository
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val repository: SongsRepositoryImpl,
-    private val hymnalRepository: HymnalRepositoryImpl,
-    private val monthScheduleRepository: MonthScheduleRepositoryImpl
+    private val repository: SongsRepository,
+    private val hymnalRepository: HymnalRepository,
+    private val monthScheduleRepository: MonthScheduleRepository
 ) : ViewModel() {
 
     companion object {
