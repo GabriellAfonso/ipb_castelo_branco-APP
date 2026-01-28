@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import com.gabrielafonso.ipb.castelobranco.ui.theme.IPBCasteloBrancoTheme
 
+
 abstract class BaseActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,7 +19,7 @@ abstract class BaseActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            IPBCasteloBrancoTheme {
+            IPBCasteloBrancoTheme(dynamicColor = false) {
                 ScreenContent()
             }
         }
