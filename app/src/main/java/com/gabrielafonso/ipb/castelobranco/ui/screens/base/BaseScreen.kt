@@ -1,10 +1,14 @@
 package com.gabrielafonso.ipb.castelobranco.ui.screens.base
 
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.PaddingValues
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -16,7 +20,11 @@ import com.gabrielafonso.ipb.castelobranco.R
 
 
 import com.gabrielafonso.ipb.castelobranco.ui.components.TopBar
-
+tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 @Composable
 fun BaseScreen(
     tabName: String,
@@ -26,11 +34,10 @@ fun BaseScreen(
     onMenuClick: () -> Unit = {}, // talvez vai ter apenas um menu, definir aqui
     onBackClick: () -> Unit = {},
     onAccountClick: () -> Unit = {},
-    backgroundColor: Color = Color.White,
     content: @Composable (innerPadding: PaddingValues) -> Unit
 ) {
     Scaffold(
-        containerColor = backgroundColor,
+        containerColor =  MaterialTheme.colorScheme.background,
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopBar(
