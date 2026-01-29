@@ -22,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,20 +36,37 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.gabrielafonso.ipb.castelobranco.domain.model.Hymn
 import com.gabrielafonso.ipb.castelobranco.domain.model.HymnLyric
 import com.gabrielafonso.ipb.castelobranco.domain.model.HymnLyricType
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
 
+
+
+
 @Composable
 fun HymnDetailView(
     hymnId: String,
-    onBack: () -> Unit,
-    viewModel: HymnalViewModel
+    viewModel: HymnalViewModel,
+    onBack: () -> Unit
 ) {
-    val hymnalState = viewModel.hymnal.collectAsStateWithLifecycle()
-    val hymn = remember(hymnId, hymnalState.value) {
-        hymnalState.value.firstOrNull { it.number == hymnId }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val hymn = remember(hymnId, state.hymns) {
+        state.hymns.firstOrNull { it.number == hymnId }
     }
+
+    HymnDetailScreen(
+        hymn = hymn,
+        onBack = onBack
+    )
+}
+
+@Composable
+fun HymnDetailScreen(
+    hymn: Hymn?,
+    onBack: () -> Unit
+) {
 
     val pageBg = Color(0xFFE9E9E9)
     val headerGreen = Color(0xFF0F6B5C)
@@ -57,7 +75,6 @@ fun HymnDetailView(
         tabName = "Hinário",
         showBackArrow = true,
         onBackClick = onBack,
-        backgroundColor = pageBg
     ) { innerPadding ->
         Column(
             modifier = Modifier
