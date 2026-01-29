@@ -22,14 +22,15 @@ import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
 
 
 @Composable
-fun WorshipHubView(onTablesClick: () -> Unit) {
-    val activity = LocalContext.current.findActivity()
-
+fun WorshipHubView(
+    onTablesClick: () -> Unit,
+    onBackClick: () -> Unit
+) {
     BaseScreen(
         tabName = "Louvor",
         logo = painterResource(id = R.drawable.louvor_icon),
         showBackArrow = true,
-        onBackClick = { activity?.finish() }
+        onBackClick = onBackClick
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -39,7 +40,6 @@ fun WorshipHubView(onTablesClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(60.dp))
-//            Highlight()
             Spacer(modifier = Modifier.height(60.dp))
 
             CustomButton(
@@ -51,10 +51,4 @@ fun WorshipHubView(onTablesClick: () -> Unit) {
             )
         }
     }
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
