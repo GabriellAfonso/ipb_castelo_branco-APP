@@ -1,6 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.ui.theme
 import androidx.compose.ui.graphics.Color
 
+val ipbGreen = Color(0xFF045A48)
 val primaryLight = Color(0xFF004233)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFF125B49)
