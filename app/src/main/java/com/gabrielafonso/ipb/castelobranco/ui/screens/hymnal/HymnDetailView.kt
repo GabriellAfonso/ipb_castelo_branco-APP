@@ -75,6 +75,7 @@ fun HymnDetailScreen(
         tabName = "Hinário",
         showBackArrow = true,
         onBackClick = onBack,
+        containerColor = MaterialTheme.colorScheme.surfaceDim
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -125,7 +126,7 @@ private fun LyricCard(
     lyric: HymnLyric,
     fontSizeSp: Float
 ) {
-    val container = Color(0xFFFFFFFF)
+    val container = MaterialTheme.colorScheme.surfaceBright
     val stripe = when (lyric.type) {
         HymnLyricType.VERSE -> Color(0xFFF2A300)
         HymnLyricType.CHORUS -> Color(0xFF0F6B5C)
@@ -156,7 +157,7 @@ private fun LyricCard(
 
             Text(
                 text = lyric.text.trim(),
-                color = Color(0xFF111111),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = fontSizeSp.sp,
                 lineHeight = (fontSizeSp + 10f).sp,
                 style = MaterialTheme.typography.bodyLarge
