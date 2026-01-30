@@ -11,11 +11,13 @@ import com.gabrielafonso.ipb.castelobranco.domain.model.SundaySet
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.components.Header
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,18 +27,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 
 import com.gabrielafonso.ipb.castelobranco.domain.model.SundaySetItem
+import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.components.ColumnAlignment
+import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.components.TableColumn
 
-@androidx.compose.runtime.Composable
+private val columns = listOf(
+    TableColumn("#", 0.3f, ColumnAlignment.Center),
+    TableColumn("Nome", 3.5f),
+    TableColumn("Tom", 0.7f, ColumnAlignment.Start),
+    TableColumn("Artista", 1f)
+)
+
+@Composable
 fun LastSundaysTab(sundays: List<SundaySet>) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Header(
-            listOf(
-                "#" to 0.9f,
-                "Nome" to 4f,
-                "Tom" to 1f,
-                "Artista" to 2f
-            )
-        )
+        Header(columns)
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
@@ -56,17 +60,19 @@ fun SundaySection(sunday: SundaySet) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFd1e7dd))
+            .background(color = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+
         ) {
             Text(
                 text = sunday.date,
                 modifier = Modifier.padding(vertical = 8.dp),
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -85,22 +91,37 @@ fun SundaySongRow(
     song: SundaySetItem,
     modifier: Modifier = Modifier
 ) {
+    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .padding(start = 10.dp)
+            .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
-        Text(text = song.position.toString(), modifier = Modifier.weight(0.9f))
-        Text(text = song.title, modifier = Modifier.weight(4.5f))
-        Text(text = song.tone, modifier = Modifier.weight(1f))
-        Text(
-            text = song.artist,
-            modifier = Modifier
-                .weight(2f)
-                .padding(end = 3.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+
+        Box(Modifier.weight(columns[0].weight), contentAlignment = Alignment.Center) {
+            Text(song.position.toString(), color = textColor)
+        }
+
+        Box(Modifier.weight(columns[1].weight).padding(end = 30.dp), contentAlignment = Alignment.CenterStart) {
+            Text(
+                song.title,
+                color = textColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Box(Modifier.weight(columns[2].weight), contentAlignment = Alignment.CenterStart) {
+            Text(song.tone, color = textColor)
+        }
+
+        Box(Modifier.weight(columns[3].weight), contentAlignment = Alignment.CenterStart) {
+            Text(
+                song.artist,
+                color = textColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
