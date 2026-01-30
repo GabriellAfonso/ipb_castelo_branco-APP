@@ -1,36 +1,37 @@
 package com.gabrielafonso.ipb.castelobranco.ui.components
 
-import com.gabrielafonso.ipb.castelobranco.R
 import androidx.compose.foundation.Image
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+private val ButtonCornerRadius = 16.dp
+private val ButtonContentPadding = 8.dp
+private const val ImageSizeRatio = 0.6f
+private val TextSpacing = 4.dp
 
 @Composable
 fun CustomButton(
     onClick: () -> Unit,
-    image: Painter = painterResource(id = R.drawable.sarca_ipb),
-    text: String = "",
-    backgroundColor: Color = Color.Blue,
-    size: Dp = 100.dp
+    image: Painter,
+    text: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 100.dp,
+    backgroundColor: Color = Color(0xFF045A48),
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(8.dp), // padding interno
-        modifier = Modifier.size(size)
+        modifier = modifier.size(size),
+        shape = RoundedCornerShape(ButtonCornerRadius),
+        contentPadding = PaddingValues(ButtonContentPadding),
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -39,14 +40,15 @@ fun CustomButton(
             Image(
                 painter = image,
                 contentDescription = text,
-                modifier = Modifier.size(size * 0.6f) // ocupa 60% do botão
+                modifier = Modifier.size(size * ImageSizeRatio)
             )
-            if (text.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(4.dp))
+
+            if (text.isNotBlank()) {
+                Spacer(modifier = Modifier.height(TextSpacing))
                 Text(
                     text = text,
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }
