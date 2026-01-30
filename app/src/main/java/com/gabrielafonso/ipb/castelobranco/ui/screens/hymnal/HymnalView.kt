@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -96,9 +97,9 @@ fun HymnalScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding )
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+//            Spacer(modifier = Modifier.height(12.dp))
 
             // calcular filtro uma vez por composição (evita múltiplos .filter)
             val filteredHymns = remember(state.hymns, state.query) {
@@ -157,13 +158,12 @@ private fun SearchCard(
     resultsCount: Int,
     onSearchClick: () -> Unit,
 ) {
-    val cardBg = Color(0xFFE9E9E9)
+    val cardBg = MaterialTheme.colorScheme.surfaceContainer
     val green = Color(0xFF0F6B5C)
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         shape = RoundedCornerShape(10.dp)
     ) {
@@ -194,10 +194,10 @@ private fun SearchCard(
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        focusedBorderColor = Color(0xFFBEBEBE),
-                        unfocusedBorderColor = Color(0xFFBEBEBE),
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedBorderColor = MaterialTheme.colorScheme.inverseSurface,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.inverseSurface,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent
                     )
@@ -264,7 +264,7 @@ private fun HymnRow(
 
             Text(
                 text = preview,
-                color = Color(0xFF7A7A7A),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
