@@ -30,8 +30,8 @@ fun WorshipHubNavGraph(
             )
         }
         composable(WorshipHubRoutes.Tables) {
-            WorshipSongsTableScreen(
-                onBack = {
+            WorshipSongsTableView(
+                onBackClick = {
                     val popped = navController.popBackStack()
                     if (!popped) onFinish()
                 },
