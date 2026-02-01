@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.views.WorshipHubView
+import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.views.WorshipSongsTableView
 
 object WorshipHubRoutes {
     const val Hub = "worship_hub"
