@@ -11,51 +11,115 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.ui.components.Highlight
 import com.gabrielafonso.ipb.castelobranco.ui.components.CustomButton
+import com.gabrielafonso.ipb.castelobranco.ui.components.ThemeToggle
+import com.gabrielafonso.ipb.castelobranco.ui.screens.auth.AuthActivity
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.ui.screens.hymnal.HymnalActions
 import com.gabrielafonso.ipb.castelobranco.ui.screens.hymnal.HymnalActivity
+import com.gabrielafonso.ipb.castelobranco.ui.screens.hymnal.HymnalScreen
+import com.gabrielafonso.ipb.castelobranco.ui.screens.hymnal.HymnalViewModel
 import com.gabrielafonso.ipb.castelobranco.ui.screens.monthschedule.MonthScheduleActivity
+import com.gabrielafonso.ipb.castelobranco.ui.screens.settings.SettingsActivity
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.WorshipHubActivity
+import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreen() {
+fun NavigationDrawer(actions: MainActions, content: @Composable (openDrawer: () -> Unit) -> Unit) {
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.8f)) {
+                // passa uma função que fecha a drawer e então executa a ação
+                DrawerContent(actions) { action ->
+                    scope.launch {
+                        drawerState.close()
+                        action()
+                    }
+                }
+            }
+        },
+        content = {
+            content { scope.launch { drawerState.open() } }
+        }
+    )
+}
+
+
+@Composable
+fun MainView(
+    viewModel: MainViewModel = hiltViewModel(),
+
+) {
     val context = LocalContext.current
-    val actions = remember(context) { MainActions(context) }
 
-    BaseScreen(tabName = "IPB Castelo Branco") { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(60.dp))
-            Highlight()
-            Spacer(modifier = Modifier.height(60.dp))
+    val actions =  remember(context) { MainActions(context) }
 
-            ButtonGrid(actions = actions)
+
+    MainScreen(
+        actions = actions,
+
+    )
+}
+
+@Composable
+fun MainScreen(
+    actions: MainActions
+) {
+
+    NavigationDrawer(actions) { openDrawer ->
+        BaseScreen(
+            tabName = "IPB Castelo Branco",
+            onMenuClick = openDrawer // aqui o botão do TopBar chama openDrawer
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Spacer(modifier = Modifier.height(60.dp))
+                Highlight()
+                Spacer(modifier = Modifier.height(60.dp))
+
+                ButtonGrid(actions = actions)
+            }
         }
     }
 }
-
 class MainActions(private val context: Context) {
 
     fun openWorshipHub() = openActivity(WorshipHubActivity::class.java)
     fun openSchedule() = openActivity(MonthScheduleActivity::class.java)
     fun openHymnal() = openActivity(HymnalActivity::class.java)
+    fun openAuth() = openActivity(AuthActivity::class.java)
+    fun openSettings() = openActivity(SettingsActivity::class.java)
 
     private fun <T> openActivity(activity: Class<T>) {
         context.startActivity(Intent(context, activity))
     }
 }
 
-/**
- * Modelo puro (sem Android)
- */
 data class ButtonInfo(
     val iconRes: Int,
     val label: String,
@@ -96,6 +160,72 @@ private fun ButtonRow(rowButtons: List<ButtonInfo>) {
                 text = button.label,
                 backgroundColor = button.color,
                 onClick = button.onClick
+            )
+        }
+    }
+}
+
+//@Composable
+//fun NavigationDrawer(content: @Composable () -> Unit) {
+//    val drawerState = rememberDrawerState(DrawerValue.Closed)
+//
+//    ModalNavigationDrawer(
+//        drawerState = drawerState,
+//        drawerContent = {
+//            ModalDrawerSheet {
+//                DrawerContent()
+//            }
+//        },
+//        content = content
+//    )
+//}
+@Composable
+fun DrawerContent(actions: MainActions, onItemClick: (action: () -> Unit) -> Unit) {
+    val textColor = MaterialTheme.colorScheme.onSurface
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        TextButton(
+            onClick = { onItemClick { actions.openAuth() } },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            colors = ButtonDefaults.textButtonColors(contentColor = textColor)
+        ) {
+            Text(
+                "Entrar",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                color = textColor
+            )
+        }
+
+        TextButton(
+            onClick = { onItemClick { /* navegar para perfil */ } },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            colors = ButtonDefaults.textButtonColors(contentColor = textColor)
+        ) {
+            Text(
+                "Perfil",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                color = textColor
+            )
+        }
+
+        TextButton(
+            onClick = { onItemClick { actions.openSettings() } },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            colors = ButtonDefaults.textButtonColors(contentColor = textColor)
+        ) {
+            Text(
+                "Configurações",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                color = textColor
             )
         }
     }
