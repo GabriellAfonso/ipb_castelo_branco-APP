@@ -1,5 +1,4 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/screens/worshiphub/WorshipSongsTableScreen.kt
-package com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub
+package com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +29,7 @@ import com.gabrielafonso.ipb.castelobranco.domain.model.SundaySet
 import com.gabrielafonso.ipb.castelobranco.domain.model.TopSong
 import com.gabrielafonso.ipb.castelobranco.domain.model.TopTone
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.WorshipHubViewModel
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.tabs.LastSundaysTab
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.tabs.SuggestionsTab
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.tabs.TopSongsTab
@@ -42,6 +42,7 @@ data class WorshipSongsUiState(
     val suggestedSongs: List<SuggestedSong> = emptyList(),
     val isRefreshingSuggestions: Boolean = false
 )
+
 
 data class WorshipSongsActions(
     val onBackClick: () -> Unit,
@@ -86,7 +87,7 @@ fun WorshipSongsTableScreen(
 
     BaseScreen(
         tabName = "Tabelas",
-        logo = painterResource(id = R.drawable.louvor_icon),
+        logoRes =  R.drawable.louvor_icon,
         showBackArrow = true,
         onBackClick = actions.onBackClick
     ) { innerPadding ->
@@ -98,26 +99,38 @@ fun WorshipSongsTableScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = barColor,
-                contentColor = Color.Black,
-                indicator = { tabPositions ->
-                    TabRowDefaults.SecondaryIndicator(
-                        modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                        color = indicatorColor,
-                        height = 3.dp
-                    )
-                },
-                divider = { }
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(text = title, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp) }
-                    )
-                }
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    containerColor = barColor,
+                    contentColor = Color.Black,
+                    indicator = { tabPositions ->
+                        TabRowDefaults.SecondaryIndicator(
+                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                            color = indicatorColor,
+                            height = 3.dp
+                        )
+                    },
+                    divider = {}
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        val isSingleWord = !title.contains(" ")
+
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = {
+                                Text(
+                                    text = title,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 13.sp,
+                                    softWrap = !isSingleWord,
+                                    maxLines = if (isSingleWord) 1 else 2,
+                                )
+                            }
+                        )
+                    }
+
+
             }
 
             when (selectedTabIndex) {
