@@ -14,6 +14,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import kotlin.text.compareTo
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -257,18 +258,27 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun IPBCasteloBrancoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkThemeOverride: Boolean? = null,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
+    val resolvedDarkTheme = darkThemeOverride ?: run {
+        val mode = androidx.appcompat.app.AppCompatDelegate.getDefaultNightMode()
+        when (mode) {
+            androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES -> true
+            androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO -> false
+            else -> isSystemInDarkTheme()
+        }
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (resolvedDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> darkScheme
+        resolvedDarkTheme -> darkScheme
         else -> lightScheme
     }
 
@@ -278,4 +288,3 @@ fun IPBCasteloBrancoTheme(
         content = content
     )
 }
-
