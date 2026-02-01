@@ -28,7 +28,7 @@ fun WorshipHubView(
 ) {
     BaseScreen(
         tabName = "Louvor",
-        logo = painterResource(id = R.drawable.louvor_icon),
+        logoRes = R.drawable.louvor_icon,
         showBackArrow = true,
         onBackClick = onBackClick
     ) { innerPadding ->

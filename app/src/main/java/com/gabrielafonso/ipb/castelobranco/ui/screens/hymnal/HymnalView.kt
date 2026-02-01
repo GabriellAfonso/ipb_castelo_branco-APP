@@ -83,7 +83,7 @@ fun HymnalScreen(
 
     BaseScreen(
         tabName = "Hinário",
-        logo = painterResource(id = R.drawable.sarca_ipb),
+        logoRes = R.drawable.sarca_ipb,
         showBackArrow = true,
         onBackClick = onBackClick
     ) { innerPadding ->

@@ -4,6 +4,7 @@ package com.gabrielafonso.ipb.castelobranco.ui.screens.base
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.PaddingValues
 
@@ -28,8 +29,8 @@ tailrec fun Context.findActivity(): Activity? = when (this) {
 @Composable
 fun BaseScreen(
     tabName: String,
-    logo: Painter = painterResource(id = R.drawable.sarca_ipb),
-    accountImage: Painter = painterResource(id = R.drawable.ic_account),
+    @DrawableRes logoRes: Int = R.drawable.sarca_ipb,
+    @DrawableRes accountImageRes: Int = R.drawable.ic_account,
     showBackArrow: Boolean = false,
     onMenuClick: () -> Unit = {}, // talvez vai ter apenas um menu, definir aqui
     onBackClick: () -> Unit = {},
@@ -37,6 +38,9 @@ fun BaseScreen(
     containerColor: Color = MaterialTheme.colorScheme.background,
     content: @Composable (innerPadding: PaddingValues) -> Unit,
 ) {
+    val logo: Painter = painterResource(id = logoRes)
+    val accountImage: Painter = painterResource(id = accountImageRes)
+
     Scaffold(
         containerColor =  containerColor,
         modifier = Modifier.fillMaxSize(),
