@@ -22,6 +22,16 @@
             android:label="Worship Hub"
             android:theme="@style/Theme.IPBCasteloBranco" />
         <activity
+            android:name=".ui.screens.auth.AuthActivity"
+            android:exported="false"
+            android:label="Authentication"
+            android:theme="@style/Theme.IPBCasteloBranco" />
+        <activity
+            android:name=".ui.screens.settings.SettingsActivity"
+            android:exported="false"
+            android:label="Settings"
+            android:theme="@style/Theme.IPBCasteloBranco" />
+        <activity
             android:name=".ui.screens.monthschedule.MonthScheduleActivity"
             android:exported="false"
             android:label="Month Schedule"

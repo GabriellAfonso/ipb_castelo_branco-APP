@@ -103,4 +103,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
+    implementation (libs.androidx.compose.material.icons.extended)
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
+
 }
