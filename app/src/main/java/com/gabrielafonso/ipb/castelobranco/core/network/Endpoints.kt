@@ -8,11 +8,9 @@ object Endpoints {
     const val SUGGESTED_SONGS_PATH = "${ApiConstants.BASE_PATH}suggested-songs/"
 
     const val HYMNAL_PATH = "${ApiConstants.BASE_PATH}hymnal/"
-    // Schedule generation
+
     const val GENERATE_SCHEDULE_PATH = "${ApiConstants.BASE_PATH}generate-schedule/"
 
-//    // Recursos gerais (mantive nomes anteriores, caso use outras rotas)
-//    const val HYMNAL_PATH = "${ApiConstants.BASE_PATH}hymnal/"
-//    const val MUSIC_PATH = "${ApiConstants.BASE_PATH}music/"
-//    const val SCHEDULE_PATH = "${ApiConstants.BASE_PATH}schedule/"
+    const val AUTH_LOGIN_PATH = "${ApiConstants.BASE_PATH}auth/login/"
+    const val AUTH_REGISTER_PATH = "${ApiConstants.BASE_PATH}auth/register/"
 }

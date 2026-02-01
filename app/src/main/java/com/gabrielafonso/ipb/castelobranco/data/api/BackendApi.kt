@@ -2,7 +2,9 @@
 package com.gabrielafonso.ipb.castelobranco.data.api
 
 import com.gabrielafonso.ipb.castelobranco.core.network.Endpoints
+import com.gabrielafonso.ipb.castelobranco.domain.model.AuthResponse
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -38,4 +40,14 @@ interface BackendApi {
     suspend fun getMonthSchedule(
         @Header("If-None-Match") ifNoneMatch: String? = null
     ): Response<MonthScheduleDto>
+
+    @POST(Endpoints.AUTH_LOGIN_PATH)
+    suspend fun login(
+        @Body request: LoginRequest
+    ): Response<AuthResponse>
+
+    @POST(Endpoints.AUTH_REGISTER_PATH)
+    suspend fun register(
+        @Body request: RegisterRequest
+    ): Response<AuthResponse>
 }
