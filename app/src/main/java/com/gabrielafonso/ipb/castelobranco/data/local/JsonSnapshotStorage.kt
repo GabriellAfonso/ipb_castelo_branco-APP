@@ -2,12 +2,16 @@
 package com.gabrielafonso.ipb.castelobranco.data.local
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class JsonSnapshotStorage(
-    private val appContext: Context
+@Singleton
+class JsonSnapshotStorage @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) {
     private val dirName = "snapshots"
 
@@ -22,7 +26,7 @@ class JsonSnapshotStorage(
         return safe
     }
 
-    private fun dir(): File = File(appContext.filesDir, dirName).apply { mkdirs() }
+    private fun dir(): File = File(context.filesDir, dirName).apply { mkdirs() }
 
     private fun jsonFileForKey(key: String): File =
         File(dir(), "${safeKey(key)}.json")
@@ -46,7 +50,7 @@ class JsonSnapshotStorage(
     }
 
     suspend fun clearAll() = withContext(Dispatchers.IO) {
-        val d = File(appContext.filesDir, dirName)
+        val d = File(context.filesDir, dirName)
         if (d.exists()) d.deleteRecursively()
     }
 
