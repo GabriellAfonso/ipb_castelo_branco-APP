@@ -28,20 +28,20 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginView(
-    viewModel: AuthViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {}
+fun AuthView(
+    viewModel: AuthViewModel,
+    onBackClick: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {}
 ) {
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
 
     BaseScreen(
-        tabName = "Autenticação", // ou painterResource se tiver um logo
+        tabName = "Autenticação",
         showBackArrow = true,
         onBackClick = onBackClick
     ) { innerPadding ->
@@ -56,7 +56,7 @@ fun LoginView(
             OutlinedTextField(
                 value = username.value,
                 onValueChange = { username.value = it },
-                label = { Text("Usuário") },
+                label = { Text("Nome de Usuário") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -80,14 +80,11 @@ fun LoginView(
 
             Button(
                 onClick = {
-                    viewModel.login(username.value, password.value)
-                    //onLoginSuccess()
+                    viewModel.singIn(username.value, password.value)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -97,7 +94,7 @@ fun LoginView(
             }
 
             TextButton(
-                onClick = {},
+                onClick = onNavigateToRegister,
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Text("Ainda não tem uma conta? Registre-se")
@@ -107,9 +104,7 @@ fun LoginView(
                 onClick = { viewModel.signInWithGoogle() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
