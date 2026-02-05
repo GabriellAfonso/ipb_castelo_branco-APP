@@ -3,10 +3,9 @@ package com.gabrielafonso.ipb.castelobranco.data.repository
 import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
 import com.gabrielafonso.ipb.castelobranco.data.api.LoginRequest
 import com.gabrielafonso.ipb.castelobranco.data.api.RegisterRequest
-import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
-import com.gabrielafonso.ipb.castelobranco.domain.model.AuthResponse
+import com.gabrielafonso.ipb.castelobranco.data.local.TokenStorage
+import com.gabrielafonso.ipb.castelobranco.domain.model.AuthTokens
 import com.gabrielafonso.ipb.castelobranco.domain.repository.AuthRepository
-import com.gabrielafonso.ipb.castelobranco.ui.screens.auth.RegisterErrors
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,41 +13,14 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val api: BackendApi,
-    private val jsonStorage: JsonSnapshotStorage
+    private val tokenStorage: TokenStorage
 ) : AuthRepository {
 
-    companion object {
-        private const val KEY_TOKEN = "auth_token"
-    }
-
-    private fun <T> Response<T>.safeBody(): T? = if (isSuccessful) body() else null
-
-    override suspend fun signIn(username: String, password: String): Result<AuthResponse> {
-        return try {
+    override suspend fun signIn(username: String, password: String): Result<AuthTokens> =
+        runCatching {
             val response = api.login(LoginRequest(username, password))
-            handleAuthResponse(response)
-        } catch (e: Exception) {
-            Result.failure(e)
+            handleAuthResponse(response).getOrThrow()
         }
-    }
-
-
-    private suspend fun handleAuthResponse(response: Response<AuthResponse>): Result<AuthResponse> {
-        return if (response.isSuccessful) {
-            val body = response.body()
-            val token = body?.token
-            if (!token.isNullOrBlank()) {
-                jsonStorage.save(KEY_TOKEN, token)
-                Result.success(body)
-            } else {
-                Result.failure(Exception("Token ausente"))
-            }
-        } else {
-            val errorBody = response.errorBody()?.string()
-            Result.failure(Exception(errorBody ?: "HTTP ${response.code()}"))
-        }
-    }
-  
 
     override suspend fun signUp(
         username: String,
@@ -56,8 +28,8 @@ class AuthRepositoryImpl @Inject constructor(
         lastName: String,
         password: String,
         passwordConfirm: String
-    ): Result<AuthResponse> {
-        return try {
+    ): Result<AuthTokens> =
+        runCatching {
             val response = api.register(
                 RegisterRequest(
                     username = username,
@@ -67,18 +39,31 @@ class AuthRepositoryImpl @Inject constructor(
                     passwordConfirm = passwordConfirm
                 )
             )
-            handleAuthResponse(response)
-        } catch (e: Exception) {
-            Result.failure(e)
+            handleAuthResponse(response).getOrThrow()
         }
+
+    private suspend fun handleAuthResponse(response: Response<AuthTokens>): Result<AuthTokens> {
+        if (!response.isSuccessful) {
+            val errorBody = response.errorBody()?.string()
+            return Result.failure(Exception(errorBody ?: "HTTP ${response.code()}"))
+        }
+
+        val body = response.body() ?: return Result.failure(Exception("Resposta vazia"))
+        val access = body.access
+        val refresh = body.refresh
+
+        if (access.isBlank() || refresh.isBlank()) {
+            return Result.failure(Exception("Tokens ausentes"))
+        }
+
+        tokenStorage.save(AuthTokens(access = access, refresh = refresh))
+        return Result.success(body)
     }
 
     override fun getAuthToken(): String? =
-        kotlin.runCatching {
-            kotlinx.coroutines.runBlocking { jsonStorage.loadOrNull(KEY_TOKEN) }
-        }.getOrNull()
+        runCatching { kotlinx.coroutines.runBlocking { tokenStorage.loadOrNull()?.access } }.getOrNull()
 
     override suspend fun signOut() {
-        jsonStorage.save(KEY_TOKEN, "")
+        tokenStorage.clear()
     }
 }
