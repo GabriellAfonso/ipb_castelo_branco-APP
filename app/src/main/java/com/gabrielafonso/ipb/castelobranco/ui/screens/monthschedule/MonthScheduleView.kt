@@ -1,18 +1,12 @@
 // app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/screens/monthschedule/MonthScheduleView.kt
 package com.gabrielafonso.ipb.castelobranco.ui.screens.monthschedule
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,16 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
-import com.gabrielafonso.ipb.castelobranco.domain.model.MonthSchedule
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
 import java.util.Locale
-import androidx.compose.ui.graphics.Color
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.gabrielafonso.ipb.castelobranco.domain.model.MonthSchedule
+import com.gabrielafonso.ipb.castelobranco.domain.model.ScheduleEntry
 
 @Composable
 fun MonthScheduleView(
@@ -47,7 +39,7 @@ fun MonthScheduleView(
     onShare: (String) -> Unit
 ) {
     val monthSchedule by viewModel.monthSchedule.collectAsStateWithLifecycle()
-    val isRefreshing by viewModel.isRefreshingMonthSchedule.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isRefreshingMonthSchedule.collectAsStateWithLifecycle()
 
     val formattedText = monthSchedule?.toWhatsappText().orEmpty()
 
@@ -80,11 +72,30 @@ fun MonthScheduleView(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = formattedText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (isLoading && formattedText.isBlank()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Carregando escala...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = if (formattedText.isBlank()) "Sem escala disponível."
+                            else formattedText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -94,8 +105,8 @@ fun MonthScheduleView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    onClick = { viewModel.refreshMonthSchedule() },
-                    enabled = !isRefreshing,
+                    onClick = { /* TODO: gerar nova escala depois */ },
+                    enabled = false,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -104,17 +115,7 @@ fun MonthScheduleView(
                         disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
                     )
                 ) {
-                    if (isRefreshing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(text = "Gerando...")
-                    } else {
-                        Text(text = "Nova Escala")
-                    }
+                    Text(text = "Nova Escala")
                 }
 
                 Button(
@@ -135,9 +136,8 @@ fun MonthScheduleView(
     }
 }
 
-
 private fun MonthSchedule.toWhatsappText(): String {
-    val monthName = monthPtBr(month).uppercase(Locale("pt", "BR"))
+    val monthName = monthPtBr(month).uppercase(Locale.forLanguageTag("pt-BR"))
 
     val sb = StringBuilder()
     sb.append("ESCALA DE ").append(monthName).append(" ").append(year).append(" - DIRIGENTES E RESPONSÁVEIS\n\n")
@@ -146,32 +146,28 @@ private fun MonthSchedule.toWhatsappText(): String {
 
     val entriesSorted = schedule.entries
         .sortedWith(
-            compareBy<Map.Entry<String, Any?>> { entry ->
-                val t = entry.key.trim().lowercase(Locale("pt", "BR"))
+            compareBy<Map.Entry<String, ScheduleEntry>> { entry ->
+                val t = entry.key.trim().lowercase(Locale.forLanguageTag("pt-BR"))
                 order.indexOfFirst { t.startsWith(it) }.let { if (it == -1) Int.MAX_VALUE else it }
-            }.thenBy { it.key.lowercase(Locale("pt", "BR")) }
+            }.thenBy { it.key.lowercase(Locale.forLanguageTag("pt-BR")) }
         )
 
-    // Mantém seu processamento original, só trocando a ordem dos blocos.
-    // Se `schedule` não for `Map<String, ScheduleEntry>` no seu model, ajuste o tipo acima e aqui.
-    @Suppress("UNCHECKED_CAST")
-    (entriesSorted as List<Map.Entry<String, com.gabrielafonso.ipb.castelobranco.domain.model.ScheduleEntry>>)
-        .forEach { (title, entry) ->
-            sb.append(title)
-            entry.time?.takeIf { it.isNotBlank() }?.let { sb.append(" (").append(it).append(")") }
-            sb.append("\n\n")
+    entriesSorted.forEach { (title, entry) ->
+        sb.append(title)
+        entry.time.takeIf { it.isNotBlank() }?.let { sb.append(" (").append(it).append(")") }
+        sb.append("\n\n")
 
-            entry.items
-                .sortedBy { it.day }
-                .forEach { item ->
-                    sb.append(String.format("%02d", item.day)).append("- ").append(item.member).append("\n")
-                }
+        entry.items
+            .sortedBy { it.day }
+            .forEach { item ->
+                sb.append(String.format("%02d", item.day)).append("- ").append(item.member).append("\n")
+            }
 
-            sb.append("\n")
-        }
+        sb.append("\n")
+    }
 
-    sb.append("*Cafezinho pós culto de Adoração (Ceia) todo 4° Domingo\n\n")
-    sb.append("* Aberto a participação de qualquer irmão.\n")
+    sb.append("\\*Cafezinho pós culto de Adoração (Ceia) todo 4° Domingo\n\n")
+    sb.append("\\* Aberto a participação de qualquer irmão.\n")
     sb.append("DEUS ABENÇOE")
 
     return sb.toString().trim()
@@ -193,17 +189,3 @@ private fun monthPtBr(month: Int): String =
         12 -> "Dezembro"
         else -> "Mês"
     }
-
-private fun Activity.shareText(text: String) {
-    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, text)
-    }
-    startActivity(Intent.createChooser(sendIntent, "Compartilhar"))
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
-}
