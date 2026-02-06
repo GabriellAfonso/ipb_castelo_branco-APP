@@ -1,15 +1,20 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/data/api/SongsApi.kt
 package com.gabrielafonso.ipb.castelobranco.data.api
 
 import com.gabrielafonso.ipb.castelobranco.core.network.Endpoints
 import com.gabrielafonso.ipb.castelobranco.domain.model.AuthTokens
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 interface BackendApi {
+
     @GET(Endpoints.SONGS_BY_SUNDAY_PATH)
     suspend fun getSongsBySunday(
         @Header("If-None-Match") ifNoneMatch: String? = null
@@ -40,6 +45,7 @@ interface BackendApi {
         @Header("If-None-Match") ifNoneMatch: String? = null
     ): Response<MonthScheduleDto>
 
+    // Públicas: sem marcação
     @POST(Endpoints.AUTH_LOGIN_PATH)
     suspend fun login(
         @Body request: LoginRequest
@@ -54,4 +60,16 @@ interface BackendApi {
     suspend fun refresh(
         @Body request: RefreshRequest
     ): Response<AuthTokens>
+
+    // Protegidas: marcar explicitamente
+    @Headers("Requires-Auth: true")
+    @Multipart
+    @POST(Endpoints.ME_PROFILE_PHOTO_PATH)
+    suspend fun uploadProfilePhoto(
+        @Part photo: MultipartBody.Part
+    ): Response<ProfilePhotoResponseDto>
+
+    @Headers("Requires-Auth: true")
+    @DELETE(Endpoints.ME_PROFILE_PHOTO_PATH)
+    suspend fun deleteProfilePhoto(): Response<Unit>
 }
