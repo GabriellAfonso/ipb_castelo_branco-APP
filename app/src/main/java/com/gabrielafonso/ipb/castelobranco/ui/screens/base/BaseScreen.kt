@@ -1,4 +1,3 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/screens/base/BaseScreen.kt
 package com.gabrielafonso.ipb.castelobranco.ui.screens.base
 
 import android.app.Activity
@@ -80,11 +79,11 @@ private class TopBarProfileViewModel(
 fun BaseScreen(
     tabName: String,
     @DrawableRes logoRes: Int = R.drawable.sarca_ipb,
-    @DrawableRes accountImageRes: Int = R.drawable.ic_profile_placeholder,
     showBackArrow: Boolean = false,
     onMenuClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
     onAccountClick: (() -> Unit)? = null,
+    showAccountAction: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.background,
     content: @Composable (innerPadding: PaddingValues) -> Unit,
 ) {
@@ -129,9 +128,13 @@ fun BaseScreen(
     }
 
     val logo: Painter = painterResource(id = logoRes)
-    val accountImage: Painter =
-        if (isLoggedIn && bitmap != null) BitmapPainter(bitmap.asImageBitmap())
-        else painterResource(id = accountImageRes)
+
+    val accountPainter: Painter? = remember(showAccountAction, isLoggedIn, bitmap) {
+        if (!showAccountAction) return@remember null
+        if (!isLoggedIn) return@remember null
+        if (bitmap == null) return@remember null
+        BitmapPainter(bitmap.asImageBitmap())
+    }
 
     val resolvedOnAccountClick: () -> Unit = onAccountClick ?: {
         if (isLoggedIn) {
@@ -148,7 +151,7 @@ fun BaseScreen(
             TopBar(
                 tabName = tabName,
                 logo = logo,
-                accountImage = accountImage,
+                accountImage = accountPainter,
                 showBackArrow = showBackArrow,
                 onMenuClick = onMenuClick,
                 onBackClick = onBackClick,
