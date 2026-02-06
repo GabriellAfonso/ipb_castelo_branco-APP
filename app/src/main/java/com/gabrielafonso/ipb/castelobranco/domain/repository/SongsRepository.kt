@@ -19,4 +19,5 @@ interface SongsRepository {
 
     fun observeSuggestedSongs(): Flow<List<SuggestedSong>>
     suspend fun refreshSuggestedSongs(): Boolean
+    suspend fun refreshSuggestedSongs(fixedByPosition: Map<Int, Int>): Boolean
 }
