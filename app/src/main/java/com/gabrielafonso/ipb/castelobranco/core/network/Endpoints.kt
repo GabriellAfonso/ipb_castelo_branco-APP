@@ -16,4 +16,6 @@ object Endpoints {
 
     const val AUTH_REFRESH_PATH = "${ApiConstants.BASE_PATH}auth/refresh/"
     const val ME_PROFILE_PHOTO_PATH = "${ApiConstants.BASE_PATH}me/profile/photo/"
+
+    const val ME_PROFILE_PATH = "${ApiConstants.BASE_PATH}me/profile/"
 }
