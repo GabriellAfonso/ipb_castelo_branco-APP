@@ -63,17 +63,27 @@ fun WorshipSongsTableView(
         isRefreshingSuggestions = viewModel.isRefreshingSuggestedSongs.collectAsStateWithLifecycle().value
     )
 
+    val fixedByPosition = viewModel.fixedByPosition.collectAsStateWithLifecycle().value
+
     val actions = WorshipSongsActions(
         onBackClick = onBackClick,
         onRefreshSuggestions = viewModel::refreshSuggestedSongs
     )
 
-    WorshipSongsTableScreen(state = state, actions = actions)
+    WorshipSongsTableScreen(
+        state = state,
+        actions = actions,
+        fixedByPosition = fixedByPosition,
+        onToggleFixed = viewModel::toggleFixed
+    )
 }
+
 @Composable
 fun WorshipSongsTableScreen(
     state: WorshipSongsUiState,
     actions: WorshipSongsActions,
+    fixedByPosition: Map<Int, Int>,
+    onToggleFixed: (com.gabrielafonso.ipb.castelobranco.domain.model.SuggestedSong) -> Unit
 ) {
     val tabs = listOf(
         "Ultimos Domingos",
@@ -141,6 +151,8 @@ fun WorshipSongsTableScreen(
                     3 -> SuggestionsTab(
                         suggestedSongs = state.suggestedSongs,
                         isRefreshing = state.isRefreshingSuggestions,
+                        fixedByPosition = fixedByPosition,
+                        onToggleFixed = onToggleFixed,
                         onRefreshClick = actions.onRefreshSuggestions
                     )
                 }
