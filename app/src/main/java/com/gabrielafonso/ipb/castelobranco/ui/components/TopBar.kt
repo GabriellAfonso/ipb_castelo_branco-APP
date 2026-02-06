@@ -1,4 +1,3 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/components/TopBar.kt
 package com.gabrielafonso.ipb.castelobranco.ui.components
 
 import androidx.compose.foundation.Image
@@ -26,7 +25,7 @@ import com.gabrielafonso.ipb.castelobranco.ui.theme.onPrimaryLight
 fun TopBar(
     tabName: String,
     logo: Painter,
-    accountImage: Painter,
+    accountImage: Painter?,
     showBackArrow: Boolean = false,
     onMenuClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
@@ -54,7 +53,11 @@ fun TopBar(
             }
         },
         navigationIcon = { TopBarNavigation(showBackArrow, onMenuClick, onBackClick) },
-        actions = { TopBarActions(onAccountClick, accountImage) }
+        actions = {
+            if (accountImage != null) {
+                TopBarActions(onAccountClick, accountImage)
+            }
+        }
     )
 }
 
