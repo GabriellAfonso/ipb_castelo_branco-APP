@@ -41,13 +41,11 @@ import com.gabrielafonso.ipb.castelobranco.ui.screens.auth.AuthActivity
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.ui.screens.hymnal.HymnalActivity
 import com.gabrielafonso.ipb.castelobranco.ui.screens.monthschedule.MonthScheduleActivity
-import com.gabrielafonso.ipb.castelobranco.ui.screens.profile.ProfileActivity
 import com.gabrielafonso.ipb.castelobranco.ui.screens.settings.SettingsActivity
 import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.WorshipHubActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/screens/main/MainScreen.kt
 
 import androidx.compose.runtime.key
 
@@ -146,7 +144,6 @@ class MainActions(private val context: Context) {
     fun openHymnal() = openActivity(HymnalActivity::class.java)
     fun openAuth() = openActivity(AuthActivity::class.java)
     fun openSettings() = openActivity(SettingsActivity::class.java)
-    fun openProfile() = openActivity(ProfileActivity::class.java)
 
     private fun <T> openActivity(activity: Class<T>) {
         context.startActivity(Intent(context, activity))
@@ -224,21 +221,6 @@ fun DrawerContent(
                     color = textColor
                 )
             }
-        }
-
-        TextButton(
-            onClick = { onItemClick { actions.openProfile() } },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            colors = ButtonDefaults.textButtonColors(contentColor = textColor)
-        ) {
-            Text(
-                "Perfil",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Start,
-                color = textColor
-            )
         }
 
         TextButton(
