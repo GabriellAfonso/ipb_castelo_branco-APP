@@ -1,6 +1,8 @@
+// app/src/main/java/com/gabrielafonso/ipb/castelobranco/data/local/AuthSession.kt
 package com.gabrielafonso.ipb.castelobranco.data.local
 
 import android.util.Base64
+import com.gabrielafonso.ipb.castelobranco.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -12,12 +14,10 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthSession @Inject constructor(
-    private val tokenStorage: TokenStorage
+    private val tokenStorage: TokenStorage,
+    private val profileRepository: ProfileRepository
 ) {
 
-    /**
-     * Use quando realmente precisa saber se o access está válido *agora* (sem refresh).
-     */
     suspend fun hasValidAccessToken(): Boolean {
         val tokens = tokenStorage.loadOrNull() ?: return false
         return isAccessTokenLocallyValid(tokens.access)
@@ -27,7 +27,7 @@ class AuthSession @Inject constructor(
         if (accessToken.isBlank()) return false
 
         val expSeconds = jwtExpSecondsOrNull(accessToken)
-            ?: return true // fallback: existe token, deixa o servidor validar quando precisar
+            ?: return true
 
         val nowSeconds = System.currentTimeMillis() / 1000
         return expSeconds > nowSeconds
@@ -48,7 +48,7 @@ class AuthSession @Inject constructor(
             element["exp"]?.jsonPrimitive?.longOrNull
         }.getOrNull()
     }
-    // \*\*Novo\*\*: isso vira a fonte de verdade do login na UI
+
     val isLoggedInFlow: Flow<Boolean> =
         tokenStorage.tokensFlow.map { tokens ->
             val accessOk = !tokens?.access.isNullOrBlank()
@@ -60,7 +60,9 @@ class AuthSession @Inject constructor(
         val tokens = tokenStorage.loadOrNull()
         return !tokens?.access.isNullOrBlank() && tokens.refresh.isNotBlank()
     }
+
     suspend fun logout() {
         tokenStorage.clear()
+        profileRepository.clearLocalProfilePhoto()
     }
 }
