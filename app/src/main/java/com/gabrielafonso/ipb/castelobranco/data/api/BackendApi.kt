@@ -72,4 +72,11 @@ interface BackendApi {
     @Headers("Requires-Auth: true")
     @DELETE(Endpoints.ME_PROFILE_PHOTO_PATH)
     suspend fun deleteProfilePhoto(): Response<Unit>
+
+
+    @Headers("Requires-Auth: true")
+    @GET(Endpoints.ME_PROFILE_PATH)
+    suspend fun getMeProfile(
+        @Header("If-None-Match") ifNoneMatch: String? = null
+    ): Response<MeProfileDto>
 }
