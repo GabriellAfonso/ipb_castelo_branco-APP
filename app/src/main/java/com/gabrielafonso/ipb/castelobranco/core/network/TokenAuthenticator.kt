@@ -1,6 +1,8 @@
 // app/src/main/java/com/gabrielafonso/ipb/castelobranco/core/network/TokenAuthenticator.kt
 package com.gabrielafonso.ipb.castelobranco.core.network
 
+import com.gabrielafonso.ipb.castelobranco.core.di.ApiBaseUrl
+import com.gabrielafonso.ipb.castelobranco.core.di.AuthLessClient
 import com.gabrielafonso.ipb.castelobranco.data.api.RefreshRequest
 import com.gabrielafonso.ipb.castelobranco.data.local.TokenStorage
 import com.gabrielafonso.ipb.castelobranco.domain.model.AuthTokens
@@ -18,10 +20,10 @@ import javax.inject.Singleton
 
 @Singleton
 class TokenAuthenticator @Inject constructor(
-    private val authlessClient: OkHttpClient,
-    private val baseUrl: String,
+    @AuthLessClient private val authlessClient: OkHttpClient,
+    @ApiBaseUrl private val baseUrl: String,
     private val tokenStorage: TokenStorage,
-    private val json: Json, // \<= vindo do \`SerializationModule\`
+    private val json: Json,
 ) : Authenticator {
 
     private val mediaType = "application/json; charset=utf-8".toMediaType()
@@ -34,32 +36,48 @@ class TokenAuthenticator @Inject constructor(
             val refresh = current.refresh
             if (refresh.isBlank()) return@runBlocking null
 
-            val refreshUrl = baseUrl.trimEnd('/') + "/" + Endpoints.AUTH_REFRESH_PATH.trimStart('/')
+            val refreshUrl =
+                baseUrl.trimEnd('/') + "/" + Endpoints.AUTH_REFRESH_PATH.trimStart('/')
 
             val bodyJson = json.encodeToString(
                 RefreshRequest.serializer(),
                 RefreshRequest(refresh = refresh),
             )
 
-            val request = Request.Builder()
+            val refreshRequest = Request.Builder()
                 .url(refreshUrl)
                 .post(bodyJson.toRequestBody(mediaType))
                 .build()
 
-            val refreshResponse = runCatching { authlessClient.newCall(request).execute() }.getOrNull()
-                ?: return@runBlocking null
+            val refreshResponse = runCatching {
+                authlessClient.newCall(refreshRequest).execute()
+            }.getOrNull() ?: return@runBlocking null
 
-            if (!refreshResponse.isSuccessful) return@runBlocking null
+            refreshResponse.use { rr ->
+                if (!rr.isSuccessful) {
+                    // Refresh inválido/expirado \=\> “deslogar”
+                    if (rr.code == 401 || rr.code == 400) {
+                        tokenStorage.clear()
+                    }
+                    return@runBlocking null
+                }
 
-            val raw = refreshResponse.body?.string().orEmpty()
-            val tokens = runCatching { json.decodeFromString(AuthTokens.serializer(), raw) }.getOrNull()
-                ?: return@runBlocking null
+                val raw = rr.body?.string().orEmpty()
+                val decoded = runCatching {
+                    json.decodeFromString(AuthTokens.serializer(), raw)
+                }.getOrNull() ?: return@runBlocking null
 
-            tokenStorage.save(tokens)
+                // Se seu backend rotaciona refresh, salva; se não vier, mantém o atual
+                val newTokens = decoded.copy(
+                    refresh = decoded.refresh.ifBlank { current.refresh }
+                )
 
-            response.request.newBuilder()
-                .header("Authorization", "Bearer ${tokens.access}")
-                .build()
+                tokenStorage.save(newTokens)
+
+                response.request.newBuilder()
+                    .header("Authorization", "Bearer ${newTokens.access}")
+                    .build()
+            }
         }
     }
 
