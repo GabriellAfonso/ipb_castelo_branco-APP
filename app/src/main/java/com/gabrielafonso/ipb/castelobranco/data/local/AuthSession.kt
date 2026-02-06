@@ -1,7 +1,8 @@
 package com.gabrielafonso.ipb.castelobranco.data.local
 
 import android.util.Base64
-import com.gabrielafonso.ipb.castelobranco.data.local.TokenStorage
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -13,7 +14,11 @@ import javax.inject.Singleton
 class AuthSession @Inject constructor(
     private val tokenStorage: TokenStorage
 ) {
-    suspend fun isLoggedIn(): Boolean {
+
+    /**
+     * Use quando realmente precisa saber se o access está válido *agora* (sem refresh).
+     */
+    suspend fun hasValidAccessToken(): Boolean {
         val tokens = tokenStorage.loadOrNull() ?: return false
         return isAccessTokenLocallyValid(tokens.access)
     }
@@ -43,7 +48,18 @@ class AuthSession @Inject constructor(
             element["exp"]?.jsonPrimitive?.longOrNull
         }.getOrNull()
     }
+    // \*\*Novo\*\*: isso vira a fonte de verdade do login na UI
+    val isLoggedInFlow: Flow<Boolean> =
+        tokenStorage.tokensFlow.map { tokens ->
+            val accessOk = !tokens?.access.isNullOrBlank()
+            val refreshOk = !tokens?.refresh.isNullOrBlank()
+            accessOk && refreshOk
+        }
 
+    suspend fun isLoggedIn(): Boolean {
+        val tokens = tokenStorage.loadOrNull()
+        return !tokens?.access.isNullOrBlank() && tokens.refresh.isNotBlank()
+    }
     suspend fun logout() {
         tokenStorage.clear()
     }
