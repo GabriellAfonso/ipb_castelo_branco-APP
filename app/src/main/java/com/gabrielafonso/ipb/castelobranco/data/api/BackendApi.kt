@@ -12,6 +12,7 @@ import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Query
 
 interface BackendApi {
 
@@ -32,7 +33,8 @@ interface BackendApi {
 
     @GET(Endpoints.SUGGESTED_SONGS_PATH)
     suspend fun getSuggestedSongs(
-        @Header("If-None-Match") ifNoneMatch: String? = null
+        @Header("If-None-Match") ifNoneMatch: String? = null,
+        @Query("fixed") fixed: String? = null
     ): Response<List<SuggestedSongDto>>
 
     @GET(Endpoints.HYMNAL_PATH)
@@ -40,7 +42,7 @@ interface BackendApi {
         @Header("If-None-Match") ifNoneMatch: String?
     ): Response<List<HymnDto>>
 
-    @POST(Endpoints.GENERATE_SCHEDULE_PATH)
+    @GET(Endpoints.CURRENT_SCHEDULE)
     suspend fun getMonthSchedule(
         @Header("If-None-Match") ifNoneMatch: String? = null
     ): Response<MonthScheduleDto>
