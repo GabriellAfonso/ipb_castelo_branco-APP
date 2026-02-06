@@ -1,30 +1,27 @@
+// app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/components/TopBar.kt
 package com.gabrielafonso.ipb.castelobranco.ui.components
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.Text
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.ui.theme.ipbGreen
 import com.gabrielafonso.ipb.castelobranco.ui.theme.onPrimaryLight
 
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
 fun TopBar(
     tabName: String,
@@ -43,7 +40,6 @@ fun TopBar(
             actionIconContentColor = onPrimaryLight
         ),
         title = {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -55,11 +51,9 @@ fun TopBar(
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 TopBarTitle(tabName)
-
-
             }
         },
-        navigationIcon = { TopBarNavigation(showBackArrow, onMenuClick, onBackClick, logo) },
+        navigationIcon = { TopBarNavigation(showBackArrow, onMenuClick, onBackClick) },
         actions = { TopBarActions(onAccountClick, accountImage) }
     )
 }
@@ -78,8 +72,7 @@ private fun TopBarTitle(tabName: String) {
 private fun TopBarNavigation(
     showBackArrow: Boolean,
     onMenuClick: () -> Unit,
-    onBackClick: () -> Unit,
-    logo: Painter
+    onBackClick: () -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (showBackArrow) {
@@ -96,13 +89,19 @@ private fun TopBarNavigation(
                 Icon(Icons.Filled.Menu, contentDescription = "Menu", tint = Color.White)
             }
         }
-
     }
 }
 
 @Composable
 private fun TopBarActions(onAccountClick: () -> Unit, accountImage: Painter) {
     IconButton(onClick = onAccountClick) {
-        Image(painter = accountImage, contentDescription = "Conta", modifier = Modifier.size(32.dp))
+        Image(
+            painter = accountImage,
+            contentDescription = "Conta",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+        )
     }
 }
