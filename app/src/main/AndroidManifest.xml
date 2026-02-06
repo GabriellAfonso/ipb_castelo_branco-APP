@@ -1,57 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET" />
-<!--    tirar   android:usesCleartextTraffic="true" -->
-    <application
-        android:name=".MyApp"
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-
-        android:networkSecurityConfig="@xml/network_security_config"
-        android:theme="@style/Theme.IPBCasteloBranco">
-        <activity
-            android:name=".ui.screens.worshiphub.WorshipHubActivity"
-            android:exported="false"
-            android:label="Worship Hub"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".ui.screens.auth.AuthActivity"
-            android:exported="false"
-            android:label="Authentication"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".ui.screens.settings.SettingsActivity"
-            android:exported="false"
-            android:label="Settings"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".ui.screens.monthschedule.MonthScheduleActivity"
-            android:exported="false"
-            android:label="Month Schedule"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".ui.screens.hymnal.HymnalActivity"
-            android:exported="false"
-            android:label="Hymnal"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".ui.screens.main.MainActivity"
-            android:exported="true"
+        xmlns:tools="http://schemas.android.com/tools">
+        <uses-permission android:name="android.permission.INTERNET" />
+    <!--    tirar   android:usesCleartextTraffic="true" -->
+        <application
+            android:name=".MyApp"
+            android:allowBackup="true"
+            android:dataExtractionRules="@xml/data_extraction_rules"
+            android:fullBackupContent="@xml/backup_rules"
+            android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="true"
+            android:usesCleartextTraffic="true"
+
+            android:networkSecurityConfig="@xml/network_security_config"
             android:theme="@style/Theme.IPBCasteloBranco">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <activity
+                android:name=".ui.screens.worshiphub.WorshipHubActivity"
+                android:exported="false"
+                android:label="Worship Hub"
+                android:theme="@style/Theme.IPBCasteloBranco" />
+            <activity
+                android:name="com.yalantis.ucrop.UCropActivity"
+                android:screenOrientation="portrait"
+                android:theme="@style/uCropCustomTheme" />
+            <activity
+                android:name=".ui.screens.profile.ProfileActivity"
+                android:exported="false"
+                android:label="Profile"
+                android:theme="@style/Theme.IPBCasteloBranco" />
+            <activity
+                android:name=".ui.screens.auth.AuthActivity"
+                android:exported="false"
+                android:label="Authentication"
+                android:theme="@style/Theme.IPBCasteloBranco" />
+            <activity
+                android:name=".ui.screens.settings.SettingsActivity"
+                android:exported="false"
+                android:label="Settings"
+                android:theme="@style/Theme.IPBCasteloBranco" />
+            <activity
+                android:name=".ui.screens.monthschedule.MonthScheduleActivity"
+                android:exported="false"
+                android:label="Month Schedule"
+                android:theme="@style/Theme.IPBCasteloBranco" />
+            <activity
+                android:name=".ui.screens.hymnal.HymnalActivity"
+                android:exported="false"
+                android:label="Hymnal"
+                android:theme="@style/Theme.IPBCasteloBranco" />
+            <activity
+                android:name=".ui.screens.main.MainActivity"
+                android:exported="true"
+                android:label="@string/app_name"
+                android:theme="@style/Theme.IPBCasteloBranco">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+            </activity>
+        </application>
 
-</manifest>
+    </manifest>
