@@ -48,7 +48,7 @@ fun TopBar(
                     contentDescription = "Logo",
                     modifier = Modifier.height(24.dp)
                 )
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(15.dp))
                 TopBarTitle(tabName)
             }
         },
