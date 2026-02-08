@@ -11,4 +11,5 @@ interface ProfileRepository {
     suspend fun downloadAndPersistProfilePhoto(photoUrl: String): Result<File?>
     suspend fun clearLocalProfilePhoto(): Result<Unit>
 
+
 }
