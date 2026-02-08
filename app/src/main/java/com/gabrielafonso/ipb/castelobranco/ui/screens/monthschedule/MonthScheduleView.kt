@@ -45,7 +45,7 @@ fun MonthScheduleView(
 
     BaseScreen(
         tabName = "Escala Mensal",
-        logoRes = R.drawable.calendar_icon,
+        logoRes = R.drawable.ic_schedule,
         showBackArrow = true,
         onBackClick = onBackClick,
     ) { innerPadding ->
