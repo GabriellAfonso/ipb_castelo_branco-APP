@@ -46,6 +46,8 @@ import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.WorshipHubActiv
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.key
 
@@ -163,12 +165,12 @@ fun ButtonGrid(actions: MainActions) {
 
     val buttons = remember {
         listOf(
-            ButtonInfo(R.drawable.louvor_icon, "Louvor", iconColor, actions::openWorshipHub),
-            ButtonInfo(R.drawable.calendar_icon, "Escala", iconColor, actions::openSchedule),
-            ButtonInfo(R.drawable.gallery_icon, "Galeria", iconColor) { println("Galeria clicked") },
-            ButtonInfo(R.drawable.sarca_ipb, "Hinário", iconColor, actions::openHymnal),
-            ButtonInfo(R.drawable.sarca_ipb, "Exemplo", iconColor) { },
-            ButtonInfo(R.drawable.sarca_ipb, "Exemplo", iconColor) { println("Sample 2 clicked") }
+            ButtonInfo(R.drawable.ic_worshiphub, "Min. Louvor", iconColor, actions::openWorshipHub),
+            ButtonInfo(R.drawable.ic_schedule, "Escala", iconColor, actions::openSchedule),
+            ButtonInfo(R.drawable.ic_galery, "Galeria", iconColor) { println("Galeria clicked") },
+            ButtonInfo(R.drawable.ic_sarca_ipb, "Hinário", iconColor, actions::openHymnal),
+            ButtonInfo(R.drawable.ic_in_development, "In Dev", iconColor) { },
+            ButtonInfo(R.drawable.ic_in_development, "In Dev", iconColor) { println("Sample 2 clicked") }
         )
     }
 
@@ -196,6 +198,40 @@ private fun ButtonRow(rowButtons: List<ButtonInfo>) {
 }
 
 @Composable
+private fun DrawerMenuItem(
+    iconRes: Int,
+    label: String,
+    textColor: Color,
+    onClick: () -> Unit,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = ButtonDefaults.textButtonColors(contentColor = textColor)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                tint = textColor
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = label,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                color = textColor
+            )
+        }
+    }
+}
+
+@Composable
 fun DrawerContent(
     actions: MainActions,
     isLoggedIn: Boolean,
@@ -207,51 +243,30 @@ fun DrawerContent(
     Column(modifier = Modifier.padding(16.dp)) {
 
         if (!isLoggedIn) {
-            TextButton(
-                onClick = { onItemClick { actions.openAuth() } },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = textColor)
+            DrawerMenuItem(
+                iconRes = R.drawable.ic_login, // troque pelo seu drawable
+                label = "Entrar",
+                textColor = textColor
             ) {
-                Text(
-                    "Entrar",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    color = textColor
-                )
+                onItemClick { actions.openAuth() }
             }
         }
 
-        TextButton(
-            onClick = { onItemClick { actions.openSettings() } },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            colors = ButtonDefaults.textButtonColors(contentColor = textColor)
+        DrawerMenuItem(
+            iconRes = R.drawable.ic_settings, // troque pelo seu drawable
+            label = "Configurações",
+            textColor = textColor
         ) {
-            Text(
-                "Configurações",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Start,
-                color = textColor
-            )
+            onItemClick { actions.openSettings() }
         }
 
         if (isLoggedIn) {
-            TextButton(
-                onClick = { onItemClick { onLogout() } },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = textColor)
+            DrawerMenuItem(
+                iconRes = R.drawable.ic_logout, // troque pelo seu drawable
+                label = "Logout",
+                textColor = textColor
             ) {
-                Text(
-                    "Logout",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    color = textColor
-                )
+                onItemClick { onLogout() }
             }
         }
     }
