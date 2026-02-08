@@ -6,7 +6,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.gabrielafonso.ipb.castelobranco.ui.theme.IPBCasteloBrancoTheme
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseActivity
-import com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub.views.WorshipHubView
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -38,6 +37,18 @@ class WorshipHubActivity : BaseActivity() {
 @Composable
 fun PreviewWorshipHub() {
     IPBCasteloBrancoTheme {
-        WorshipHubView(onTablesClick = {}, onBackClick = {})
+        WorshipHubView(
+            nav = WorshipHubNav(
+                tables = {},
+                register = {},
+                button3 = {},
+                button4 = {},
+                button5 = {},
+                button6 = {},
+                button7 = {},
+                button8 = {},
+                back = {}
+            )
+        )
     }
 }
