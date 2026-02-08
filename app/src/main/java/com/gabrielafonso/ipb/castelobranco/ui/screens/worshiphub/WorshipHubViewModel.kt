@@ -3,24 +3,36 @@ package com.gabrielafonso.ipb.castelobranco.ui.screens.worshiphub
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gabrielafonso.ipb.castelobranco.domain.model.Song
 import com.gabrielafonso.ipb.castelobranco.domain.model.SuggestedSong
+import com.gabrielafonso.ipb.castelobranco.domain.model.SundayPlayPushItem
 import com.gabrielafonso.ipb.castelobranco.domain.model.SundaySet
 import com.gabrielafonso.ipb.castelobranco.domain.model.TopSong
 import com.gabrielafonso.ipb.castelobranco.domain.model.TopTone
 import com.gabrielafonso.ipb.castelobranco.domain.repository.SongsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class WorshipHubViewModel @Inject constructor(
     private val repository: SongsRepository
 ) : ViewModel() {
+
+    val allSongs: StateFlow<List<Song>> =
+        repository.observeAllSongs()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun refreshAllSongs() {
+        viewModelScope.launch { repository.refreshAllSongs() }
+    }
 
     private val _lastSundays = MutableStateFlow<List<SundaySet>>(emptyList())
     val lastSundays: StateFlow<List<SundaySet>> = _lastSundays.asStateFlow()
@@ -37,7 +49,6 @@ class WorshipHubViewModel @Inject constructor(
     private val _isRefreshingSuggestedSongs = MutableStateFlow(false)
     val isRefreshingSuggestedSongs: StateFlow<Boolean> = _isRefreshingSuggestedSongs.asStateFlow()
 
-    // posição -> playedId
     private val _fixedByPosition = MutableStateFlow<Map<Int, Int>>(emptyMap())
     val fixedByPosition: StateFlow<Map<Int, Int>> = _fixedByPosition.asStateFlow()
 
@@ -45,13 +56,7 @@ class WorshipHubViewModel @Inject constructor(
         viewModelScope.launch { repository.observeSongsBySunday().collect { _lastSundays.value = it } }
         viewModelScope.launch { repository.observeTopSongs().collect { _topSongs.value = it } }
         viewModelScope.launch { repository.observeTopTones().collect { _topTones.value = it } }
-
-        // NÃO apaga os fixos quando a lista atualiza; backend mantém playedId fixos.
-        viewModelScope.launch {
-            repository.observeSuggestedSongs().collect { list ->
-                _suggestedSongs.value = list
-            }
-        }
+        viewModelScope.launch { repository.observeSuggestedSongs().collect { _suggestedSongs.value = it } }
     }
 
     fun toggleFixed(song: SuggestedSong) {
@@ -78,6 +83,29 @@ class WorshipHubViewModel @Inject constructor(
                 minTimeJob.await()
             } finally {
                 _isRefreshingSuggestedSongs.value = false
+            }
+        }
+    }
+
+    sealed class SubmitResult {
+        data object Success : SubmitResult()
+        data class Error(val message: String) : SubmitResult()
+    }
+
+    fun submitSundayPlays(
+        date: String,
+        rows: List<SundayPlayPushItem>,
+        onResult: (SubmitResult) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                repository.pushSundayPlays(date = date, plays = rows)
+                onResult(SubmitResult.Success)
+            } catch (t: Throwable) {
+                val msg =
+                    t.message?.trim().takeIf { !it.isNullOrBlank() }
+                        ?: "Erro inesperado ao enviar."
+                onResult(SubmitResult.Error(msg))
             }
         }
     }
