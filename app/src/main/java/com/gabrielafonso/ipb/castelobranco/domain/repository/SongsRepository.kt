@@ -1,7 +1,8 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/domain/repository/SongsRepository.kt
 package com.gabrielafonso.ipb.castelobranco.domain.repository
 
+import com.gabrielafonso.ipb.castelobranco.domain.model.Song
 import com.gabrielafonso.ipb.castelobranco.domain.model.SuggestedSong
+import com.gabrielafonso.ipb.castelobranco.domain.model.SundayPlayPushItem
 import com.gabrielafonso.ipb.castelobranco.domain.model.SundaySet
 import com.gabrielafonso.ipb.castelobranco.domain.model.TopSong
 import com.gabrielafonso.ipb.castelobranco.domain.model.TopTone
@@ -20,4 +21,13 @@ interface SongsRepository {
     fun observeSuggestedSongs(): Flow<List<SuggestedSong>>
     suspend fun refreshSuggestedSongs(): Boolean
     suspend fun refreshSuggestedSongs(fixedByPosition: Map<Int, Int>): Boolean
+
+    fun observeAllSongs(): Flow<List<Song>>
+    suspend fun refreshAllSongs(): Boolean
+
+    // \- novo: push dos plays de domingo
+    suspend fun pushSundayPlays(
+        date: String,
+        plays: List<SundayPlayPushItem>
+    ): Boolean
 }
