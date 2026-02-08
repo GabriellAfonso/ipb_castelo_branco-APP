@@ -5,22 +5,20 @@ import android.content.Context
 import com.gabrielafonso.ipb.castelobranco.core.di.ApiBaseUrl
 import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
 import com.gabrielafonso.ipb.castelobranco.data.api.MeProfileDto
+import com.gabrielafonso.ipb.castelobranco.data.local.ProfilePhotoBus
 import com.gabrielafonso.ipb.castelobranco.domain.repository.ProfileRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.code
-import kotlin.text.get
-import kotlin.toString
 
 @Singleton
 class ProfileRepositoryImpl @Inject constructor(
@@ -66,6 +64,12 @@ class ProfileRepositoryImpl @Inject constructor(
                 throw Exception(errorBody ?: "HTTP ${response.code()}")
             }
             Unit
+        }.also { result ->
+            if (result.isSuccess) {
+                // \- servidor apagou: garante que a foto local antiga suma e notifica a UI
+                clearLocalProfilePhoto().getOrNull()
+                ProfilePhotoBus.bump()
+            }
         }
 
     override suspend fun downloadAndPersistProfilePhoto(photoUrl: String): Result<File?> =
@@ -80,8 +84,9 @@ class ProfileRepositoryImpl @Inject constructor(
 
                 client.newCall(request).execute().use { response ->
                     if (response.code == 404) {
-                        // "Idealmente": se o servidor diz que não há foto, apaga a foto local antiga
+                        // \- servidor diz que não existe: limpa local e notifica
                         clearLocalProfilePhoto().getOrNull()
+                        ProfilePhotoBus.bump()
                         return@runCatching null
                     }
                     if (!response.isSuccessful) throw Exception("HTTP ${response.code}")
@@ -104,10 +109,13 @@ class ProfileRepositoryImpl @Inject constructor(
                         body.byteStream().use { input -> input.copyTo(output) }
                     }
 
+                    // \- foto local mudou: notifica a UI
+                    ProfilePhotoBus.bump()
                     outFile
                 }
             }
         }
+
     override suspend fun clearLocalProfilePhoto(): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
@@ -120,6 +128,11 @@ class ProfileRepositoryImpl @Inject constructor(
                     }
                 }
                 Unit
+            }.also { result ->
+                if (result.isSuccess) {
+                    // \- foto local mudou: notifica a UI
+                    ProfilePhotoBus.bump()
+                }
             }
         }
 
