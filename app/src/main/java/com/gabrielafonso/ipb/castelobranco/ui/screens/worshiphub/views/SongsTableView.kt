@@ -20,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -98,7 +97,7 @@ fun WorshipSongsTableScreen(
 
     BaseScreen(
         tabName = "Tabelas",
-        logoRes =  R.drawable.louvor_icon,
+        logoRes =  R.drawable.ic_table,
         showBackArrow = true,
         onBackClick = actions.onBackClick
     ) { innerPadding ->
