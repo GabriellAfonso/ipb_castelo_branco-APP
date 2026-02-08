@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.ui.screens.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.ui.screens.main.goToMainAsRoot
 import kotlinx.coroutines.delay
@@ -72,8 +73,10 @@ fun AuthView(
 
     BaseScreen(
         tabName = "Autenticação",
+        logoRes = R.drawable.ic_auth_login,
         showBackArrow = true,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        showAccountAction = false
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -139,18 +142,18 @@ fun AuthView(
                 Text("Ainda não tem uma conta? Registre-se")
             }
 
-            Button(
-                onClick = { viewModel.signInWithGoogle() },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
-            ) {
-                Text("Entrar com Google")
-            }
+//            Button(
+//                onClick = { viewModel.signInWithGoogle() },
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = MaterialTheme.colorScheme.primary,
+//                    contentColor = MaterialTheme.colorScheme.onPrimary
+//                ),
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 12.dp)
+//            ) {
+//                Text("Entrar com Google")
+//            }
         }
     }
 }
