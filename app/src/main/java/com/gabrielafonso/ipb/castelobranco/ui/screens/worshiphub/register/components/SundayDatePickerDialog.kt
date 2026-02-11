@@ -9,7 +9,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
+import java.time.ZoneOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -18,8 +18,9 @@ fun SundayDatePickerDialog(
     onDismiss: () -> Unit,
     onConfirm: (LocalDate) -> Unit
 ) {
+    // Também ancorar o initial millis em UTC evita “shift” no dia inicial
     val initialMillis = initialDate
-        ?.atStartOfDay(ZoneId.systemDefault())
+        ?.atStartOfDay(ZoneOffset.UTC)
         ?.toInstant()
         ?.toEpochMilli()
 
@@ -32,7 +33,7 @@ fun SundayDatePickerDialog(
                 onClick = {
                     val millis = pickerState.selectedDateMillis ?: return@TextButton
                     val date = Instant.ofEpochMilli(millis)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(ZoneOffset.UTC)
                         .toLocalDate()
                     onConfirm(date)
                 }
