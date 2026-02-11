@@ -47,6 +47,8 @@ class ProfileViewModel @Inject constructor(
     val isMember: StateFlow<Boolean?> = _isMember.asStateFlow()
 
     init {
+        refreshLocalPhotoPathAndBump()
+
         refreshFromServer()
     }
 
