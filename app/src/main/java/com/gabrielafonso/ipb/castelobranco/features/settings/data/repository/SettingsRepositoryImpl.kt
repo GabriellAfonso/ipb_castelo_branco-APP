@@ -10,6 +10,22 @@ import javax.inject.Singleton
 class SettingsRepositoryImpl @Inject constructor(
     private val themePreferences: ThemePreferences
 ) : SettingsRepository {
-    override val darkModeFlow: Flow<Boolean?> = themePreferences.darkModeFlow
-    override suspend fun setDarkMode(value: Boolean) = themePreferences.setDarkMode(value)
+
+    override val themeModeFlow: Flow<Int> = themePreferences.themeModeFlow
+
+    override suspend fun setThemeMode(mode: Int) {
+        themePreferences.setThemeMode(mode)
+    }
+
+    override suspend fun setFollowSystem() {
+        themePreferences.setFollowSystem()
+    }
+
+    override suspend fun setLightMode() {
+        themePreferences.setLightMode()
+    }
+
+    override suspend fun setDarkMode() {
+        themePreferences.setDarkMode()
+    }
 }

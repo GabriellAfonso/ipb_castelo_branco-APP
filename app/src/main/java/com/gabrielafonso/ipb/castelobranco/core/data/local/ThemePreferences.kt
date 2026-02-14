@@ -1,27 +1,41 @@
 package com.gabrielafonso.ipb.castelobranco.core.data.local
 
-import android.content.Context
-import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.datastore.preferences.core.intPreferencesKey
+import com.gabrielafonso.ipb.castelobranco.core.di.SettingsPrefs
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-private val Context.settingsDataStore by preferencesDataStore(name = "settings")
-
 class ThemePreferences @Inject constructor(
-    @param: ApplicationContext private val context: Context
+    @param: SettingsPrefs private val dataStore: DataStore<Preferences>
 ) {
-    private val darkModeKey = booleanPreferencesKey("dark_mode")
 
-    val darkModeFlow: Flow<Boolean?> = context.settingsDataStore.data
-        .map { prefs -> if (prefs.contains(darkModeKey)) prefs[darkModeKey] else null }
+    companion object {
+        const val MODE_FOLLOW_SYSTEM: Int = 0
+        const val MODE_LIGHT: Int = 1
+        const val MODE_DARK: Int = 2
+    }
 
-    suspend fun setDarkMode(value: Boolean) {
-        context.settingsDataStore.edit { prefs ->
-            prefs[darkModeKey] = value
+    private val themeModeKey = intPreferencesKey("theme_mode")
+
+    val themeModeFlow: Flow<Int> =
+        dataStore.data.map { prefs ->
+            prefs[themeModeKey] ?: MODE_FOLLOW_SYSTEM
+        }
+
+    suspend fun setThemeMode(mode: Int) {
+        require(mode in MODE_FOLLOW_SYSTEM..MODE_DARK) {
+            "Invalid theme mode: $mode"
+        }
+        dataStore.edit { prefs ->
+            prefs[themeModeKey] = mode
         }
     }
+
+    suspend fun setFollowSystem() = setThemeMode(MODE_FOLLOW_SYSTEM)
+    suspend fun setLightMode() = setThemeMode(MODE_LIGHT)
+    suspend fun setDarkMode() = setThemeMode(MODE_DARK)
 }

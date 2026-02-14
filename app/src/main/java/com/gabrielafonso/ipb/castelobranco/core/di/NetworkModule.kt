@@ -146,10 +146,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideSongsTableApi(
-        @AuthLessRetrofit retrofit: Retrofit
+        @AuthedRetrofit retrofit: Retrofit
     ): SongsTableApi =
         retrofit.create(SongsTableApi::class.java)
-
+// colocar como authless dps que criar um repository pro register
 
 
     @Provides

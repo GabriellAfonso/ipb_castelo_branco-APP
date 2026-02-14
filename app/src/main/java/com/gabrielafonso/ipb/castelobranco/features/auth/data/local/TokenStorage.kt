@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.gabrielafonso.ipb.castelobranco.core.di.AuthPrefs
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.AuthTokens
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 
 @Singleton
 class TokenStorage @Inject constructor(
-    private val dataStore: DataStore<Preferences>,
+    @param: AuthPrefs private val dataStore: DataStore<Preferences>,
     private val json: Json
 ) {
     private object Keys {
