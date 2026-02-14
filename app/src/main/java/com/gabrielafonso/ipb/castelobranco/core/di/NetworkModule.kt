@@ -4,8 +4,7 @@ package com.gabrielafonso.ipb.castelobranco.core.di
 import com.gabrielafonso.ipb.castelobranco.BuildConfig
 import com.gabrielafonso.ipb.castelobranco.core.network.AuthInterceptor
 import com.gabrielafonso.ipb.castelobranco.core.network.TokenAuthenticator
-import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
-import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.core.data.local.JsonSnapshotStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,10 +20,27 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import android.content.Context
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.api.AuthApi
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.api.HymnalApi
+import com.gabrielafonso.ipb.castelobranco.features.profile.data.api.ProfileApi
+import com.gabrielafonso.ipb.castelobranco.features.schedule.data.api.ScheduleApi
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.api.SongsTableApi
+
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+annotation class AuthLessRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AuthedRetrofit
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class AuthLessClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Client
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -42,7 +58,7 @@ object NetworkModule {
     @Provides
     @Singleton
     @AuthLessClient
-    fun provideAuthlessOkHttpClient(): OkHttpClient =
+    fun provideAuthLessOkHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
@@ -55,6 +71,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Client
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
         tokenAuthenticator: TokenAuthenticator,
@@ -71,11 +88,13 @@ object NetworkModule {
             .readTimeout(30, TimeUnit.SECONDS)
             .build()
 
+
     @Provides
     @Singleton
-    fun provideRetrofit(
+    @AuthedRetrofit
+    fun provideAuthedRetrofit(
         json: Json,
-        client: OkHttpClient
+        @Client client: OkHttpClient
     ): Retrofit =
         Retrofit.Builder()
             .baseUrl(BuildConfig.API_BASE_URL)
@@ -83,12 +102,55 @@ object NetworkModule {
             .client(client)
             .build()
 
-
+    @Provides
+    @Singleton
+    @AuthLessRetrofit
+    fun provideAuthLessRetrofit(
+        json: Json,
+        @AuthLessClient client: OkHttpClient
+    ): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.API_BASE_URL)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .client(client)
+            .build()
 
     @Provides
     @Singleton
-    fun provideBackendApi(retrofit: Retrofit): BackendApi =
-        retrofit.create(BackendApi::class.java)
+    fun provideProfileApi(
+        @AuthedRetrofit retrofit: Retrofit
+    ): ProfileApi =
+        retrofit.create(ProfileApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAuthApi(
+        @AuthLessRetrofit retrofit: Retrofit
+    ): AuthApi =
+        retrofit.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideScheduleApi(
+        @AuthLessRetrofit retrofit: Retrofit
+    ): ScheduleApi =
+        retrofit.create(ScheduleApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideHymnalApi(
+        @AuthLessRetrofit retrofit: Retrofit
+    ): HymnalApi =
+        retrofit.create(HymnalApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSongsTableApi(
+        @AuthLessRetrofit retrofit: Retrofit
+    ): SongsTableApi =
+        retrofit.create(SongsTableApi::class.java)
+
+
 
     @Provides
     @Singleton

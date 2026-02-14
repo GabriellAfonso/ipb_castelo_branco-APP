@@ -3,7 +3,7 @@ package com.gabrielafonso.ipb.castelobranco
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
-import com.gabrielafonso.ipb.castelobranco.data.local.ThemePreferences
+import com.gabrielafonso.ipb.castelobranco.core.data.local.ThemePreferences
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

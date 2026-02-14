@@ -1,5 +1,5 @@
 // app/src/main/java/com/gabrielafonso/ipb/castelobranco/data/local/JsonSnapshotStorage.kt
-package com.gabrielafonso.ipb.castelobranco.data.local
+package com.gabrielafonso.ipb.castelobranco.core.data.local
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext

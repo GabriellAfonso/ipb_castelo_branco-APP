@@ -2,7 +2,7 @@
 package com.gabrielafonso.ipb.castelobranco.core.data.repository.base
 
 import android.util.Log
-import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.core.data.local.JsonSnapshotStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

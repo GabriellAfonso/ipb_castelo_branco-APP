@@ -2,14 +2,14 @@ package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.repo
 
 import com.gabrielafonso.ipb.castelobranco.core.data.repository.base.BaseListSnapshotRepository
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.AllSongDto
-import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.RegisterSundayPlayItemDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.RegisterSundayPlaysRequestDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SongsBySundayDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SuggestedSongDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.TopSongDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.TopToneDto
-import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.core.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.api.SongsTableApi
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SuggestedSong
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundayPlayPushItem
@@ -25,7 +25,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import javax.inject.Inject
 
 class SongsRepositoryImpl @Inject constructor(
-    private val api: BackendApi,
+    private val api: SongsTableApi,
     private val jsonStorage: JsonSnapshotStorage
 ) : SongsRepository {
 

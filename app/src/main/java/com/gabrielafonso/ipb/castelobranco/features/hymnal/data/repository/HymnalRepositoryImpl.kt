@@ -1,8 +1,8 @@
 package com.gabrielafonso.ipb.castelobranco.features.hymnal.data.repository
 
 import com.gabrielafonso.ipb.castelobranco.core.data.repository.base.BaseListSnapshotRepository
-import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
-import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.core.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.api.HymnalApi
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.HymnLyric
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.HymnLyricType
@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class HymnalRepositoryImpl @Inject constructor(
-    private val api: BackendApi,
+    private val api: HymnalApi,
     private val jsonStorage: JsonSnapshotStorage
 ) : HymnalRepository {
 

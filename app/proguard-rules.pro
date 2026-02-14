@@ -22,10 +22,10 @@
 
 # 1. Manter todas as classes de dados da API (DTOs)
 # Isso impede que o R8 renomeie os campos que precisam virar JSON
--keep class com.gabrielafonso.ipb.castelobranco.data.api.** { *; }
+-keep class com.gabrielafonso.ipb.castelobranco.features.**.data.dto.** { *; }
 
-# 2. Manter a interface da API (para o Retrofit ler os métodos corretamente)
--keep interface com.gabrielafonso.ipb.castelobranco.data.api.BackendApi { *; }
+## 2. Manter a interface da API (para o Retrofit ler os métodos corretamente)
+#-keep interface com.gabrielafonso.ipb.castelobranco.data.api.BackendApi { *; }
 
 # 3. Regras essenciais para o Kotlinx Serialization funcionar
 -keepattributes *Annotation*, InnerClasses
@@ -35,4 +35,4 @@
 }
 
 # CONSERVAR OS MODELS (Importante: AuthTokens está aqui!)
--keep class com.gabrielafonso.ipb.castelobranco.domain.model.** { *; }
+-keep class com.gabrielafonso.ipb.castelobranco.features.**.domain.model.** { *; }

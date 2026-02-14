@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.data.local
+package com.gabrielafonso.ipb.castelobranco.core.data.local
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -12,7 +12,7 @@ import javax.inject.Inject
 private val Context.settingsDataStore by preferencesDataStore(name = "settings")
 
 class ThemePreferences @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param: ApplicationContext private val context: Context
 ) {
     private val darkModeKey = booleanPreferencesKey("dark_mode")
 

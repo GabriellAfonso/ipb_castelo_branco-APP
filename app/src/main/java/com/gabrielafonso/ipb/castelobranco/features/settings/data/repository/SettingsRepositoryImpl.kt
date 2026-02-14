@@ -1,6 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.settings.data.repository
 
-import com.gabrielafonso.ipb.castelobranco.data.local.ThemePreferences
+import com.gabrielafonso.ipb.castelobranco.core.data.local.ThemePreferences
 import com.gabrielafonso.ipb.castelobranco.features.settings.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

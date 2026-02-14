@@ -1,6 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.auth.data.repository
 
-import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.api.AuthApi
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.AuthTokens
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.dto.LoginRequest
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.dto.RegisterRequest
@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
-    private val api: BackendApi,
+    private val api: AuthApi,
     private val tokenStorage: TokenStorage
 ) : AuthRepository {
 

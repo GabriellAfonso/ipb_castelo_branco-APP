@@ -1,9 +1,10 @@
 package com.gabrielafonso.ipb.castelobranco.features.schedule.data.repository
 
 import com.gabrielafonso.ipb.castelobranco.core.data.repository.base.BaseSingleSnapshotRepository
-import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
+
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.dto.MonthScheduleDto
-import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.core.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.features.schedule.data.api.ScheduleApi
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.ScheduleEntry
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.ScheduleItem
@@ -13,7 +14,7 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class ScheduleRepositoryImpl @Inject constructor(
-    private val api: BackendApi,
+    private val api: ScheduleApi,
     private val jsonStorage: JsonSnapshotStorage
 ) : ScheduleRepository {
 

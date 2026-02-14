@@ -3,6 +3,7 @@ package com.gabrielafonso.ipb.castelobranco.core.network
 
 import com.gabrielafonso.ipb.castelobranco.core.di.ApiBaseUrl
 import com.gabrielafonso.ipb.castelobranco.core.di.AuthLessClient
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.api.AuthEndpoins
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.dto.RefreshRequest
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.TokenStorage
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.AuthTokens
@@ -55,7 +56,7 @@ class TokenAuthenticator @Inject constructor(
                 val refresh = current.refresh
                 if (refresh.isBlank()) return@runBlocking null
 
-                val refreshUrl = baseUrl.trimEnd('/') + "/" + Endpoints.AUTH_REFRESH_PATH.trimStart('/')
+                val refreshUrl = baseUrl.trimEnd('/') + "/" + AuthEndpoins.AUTH_REFRESH_PATH.trimStart('/')
 
                 val bodyJson = json.encodeToString(
                     RefreshRequest.serializer(),

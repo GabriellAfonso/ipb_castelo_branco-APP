@@ -2,9 +2,9 @@ package com.gabrielafonso.ipb.castelobranco.features.profile.data.repository
 
 import android.content.Context
 import com.gabrielafonso.ipb.castelobranco.core.di.ApiBaseUrl
-import com.gabrielafonso.ipb.castelobranco.data.api.BackendApi
+import com.gabrielafonso.ipb.castelobranco.core.data.local.JsonSnapshotStorage
+import com.gabrielafonso.ipb.castelobranco.features.profile.data.api.ProfileApi
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.dto.MeProfileDto
-import com.gabrielafonso.ipb.castelobranco.data.local.JsonSnapshotStorage
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.local.ProfilePhotoBus
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.local.ProfilePhotoCacheStorage
 import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
@@ -14,8 +14,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
@@ -24,12 +22,10 @@ import javax.inject.Singleton
 
 @Singleton
 class ProfileRepositoryImpl @Inject constructor(
-    private val api: BackendApi,
-    private val client: OkHttpClient,
+    private val api: ProfileApi,
     @ApplicationContext private val context: Context,
     @ApiBaseUrl private val baseUrl: String,
     private val photoCache: ProfilePhotoCacheStorage,
-    // ---- ADICIONAR ----
     private val jsonStorage: JsonSnapshotStorage,
     private val json: Json,
 ) : ProfileRepository {
@@ -103,7 +99,6 @@ class ProfileRepositoryImpl @Inject constructor(
             Unit
         }.also { result ->
             if (result.isSuccess) {
-                // servidor apagou: garante que a foto local antiga suma e notifica a UI
                 clearLocalProfilePhoto().getOrNull()
                 ProfilePhotoBus.bump()
             }
@@ -114,76 +109,68 @@ class ProfileRepositoryImpl @Inject constructor(
             runCatching {
                 val absoluteUrl = toAbsoluteUrl(photoUrl)
 
-                // 1) Se a URL mudou, invalida o ETag (senão você pode receber 304 pra outra imagem)
                 val lastUrl = photoCache.loadLastUrlOrNull()
                 if (lastUrl != null && lastUrl != absoluteUrl) {
                     photoCache.clearETag()
                 }
                 photoCache.saveLastUrl(absoluteUrl)
 
-                // 2) Carrega ETag anterior (se tiver) e monta request condicional
                 val lastETag = photoCache.loadETagOrNull()
 
-                val requestBuilder = Request.Builder()
-                    .url(absoluteUrl)
-                    .get()
+                val response = api.downloadFile(
+                    absoluteUrl = absoluteUrl,
+                    ifNoneMatch = lastETag
+                )
 
-                if (!lastETag.isNullOrBlank()) {
-                    requestBuilder.header("If-None-Match", lastETag)
-                }
-
-                val request = requestBuilder.build()
-
-                client.newCall(request).execute().use { response ->
-                    // Caso servidor diga que não existe mais
-                    if (response.code == 404) {
-                        clearLocalProfilePhoto().getOrNull()
-                        photoCache.clearAll()
-                        ProfilePhotoBus.bump()
-                        return@runCatching null
-                    }
-
-                    // Se não mudou, não baixa nada: usa o arquivo local atual
-                    if (response.code == 304) {
-                        val dir = File(context.filesDir, "profile")
-                        val localFile = dir.listFiles()
-                            ?.asSequence()
-                            ?.filter { it.isFile && it.name.startsWith("profile_photo.") && it.length() > 0L }
-                            ?.maxByOrNull { it.lastModified() }
-
-                        return@runCatching localFile
-                    }
-
-                    if (!response.isSuccessful) throw Exception("HTTP ${response.code}")
-
-                    val body = response.body ?: throw Exception("Corpo de resposta vazio")
-
-                    val contentType = body.contentType()?.toString().orEmpty()
-                    val ext = when {
-                        contentType.contains("png", ignoreCase = true) -> "png"
-                        contentType.contains("webp", ignoreCase = true) -> "webp"
-                        contentType.contains("jpeg", ignoreCase = true) ||
-                                contentType.contains("jpg", ignoreCase = true) -> "jpg"
-
-                        else -> "jpg"
-                    }
-
-                    val dir = File(context.filesDir, "profile").apply { mkdirs() }
-                    val outFile = File(dir, "profile_photo.$ext")
-
-                    FileOutputStream(outFile).use { output ->
-                        body.byteStream().use { input -> input.copyTo(output) }
-                    }
-
-                    // 3) Salva ETag novo se vier no header
-                    val newETag = response.header("ETag")?.trim()
-                    if (!newETag.isNullOrBlank()) {
-                        photoCache.saveETag(newETag)
-                    }
-
+                if (response.code() == 404) {
+                    clearLocalProfilePhoto().getOrNull()
+                    photoCache.clearAll()
                     ProfilePhotoBus.bump()
-                    outFile
+                    return@runCatching null
                 }
+
+                if (response.code() == 304) {
+                    val dir = File(context.filesDir, "profile")
+                    val localFile = dir.listFiles()
+                        ?.asSequence()
+                        ?.filter { it.isFile && it.name.startsWith("profile_photo.") && it.length() > 0L }
+                        ?.maxByOrNull { it.lastModified() }
+
+                    return@runCatching localFile
+                }
+
+                if (!response.isSuccessful) {
+                    val err = response.errorBody()?.string()?.trim().orEmpty()
+                    throw Exception(err.ifBlank { "HTTP ${response.code()}" })
+                }
+
+                val body = response.body() ?: throw Exception("Corpo de resposta vazio")
+
+                val contentType = body.contentType()?.toString().orEmpty()
+                val ext = when {
+                    contentType.contains("png", ignoreCase = true) -> "png"
+                    contentType.contains("webp", ignoreCase = true) -> "webp"
+                    contentType.contains("jpeg", ignoreCase = true) ||
+                            contentType.contains("jpg", ignoreCase = true) -> "jpg"
+                    else -> "jpg"
+                }
+
+                val dir = File(context.filesDir, "profile").apply { mkdirs() }
+                val outFile = File(dir, "profile_photo.$ext")
+
+                body.byteStream().use { input ->
+                    FileOutputStream(outFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                val newETag = response.headers()["ETag"]?.trim()
+                if (!newETag.isNullOrBlank()) {
+                    photoCache.saveETag(newETag)
+                }
+
+                ProfilePhotoBus.bump()
+                outFile
             }
         }
 
@@ -199,9 +186,7 @@ class ProfileRepositoryImpl @Inject constructor(
                     }
                 }
 
-                // limpa metadados do cache também
                 photoCache.clearAll()
-
                 Unit
             }.also { result ->
                 if (result.isSuccess) {
