@@ -1,4 +1,3 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/core/di/DataStoreModule.kt
 package com.gabrielafonso.ipb.castelobranco.core.di
 
 import android.content.Context

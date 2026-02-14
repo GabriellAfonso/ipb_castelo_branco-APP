@@ -1,4 +1,3 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/core/di/SerializationModule.kt
 package com.gabrielafonso.ipb.castelobranco.core.di
 
 import dagger.Module

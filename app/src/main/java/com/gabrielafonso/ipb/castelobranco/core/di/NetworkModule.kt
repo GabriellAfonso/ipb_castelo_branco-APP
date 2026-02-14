@@ -1,4 +1,3 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/core/di/NetworkModule.kt
 package com.gabrielafonso.ipb.castelobranco.core.di
 
 import com.gabrielafonso.ipb.castelobranco.BuildConfig

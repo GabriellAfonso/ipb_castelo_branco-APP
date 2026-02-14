@@ -1,4 +1,3 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/data/repository/base/BaseSingleSnapshotRepository.kt
 package com.gabrielafonso.ipb.castelobranco.core.data.repository.base
 
 import android.util.Log
