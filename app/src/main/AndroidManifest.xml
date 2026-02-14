@@ -17,7 +17,7 @@
             android:networkSecurityConfig="@xml/network_security_config"
             android:theme="@style/Theme.IPBCasteloBranco">
             <activity
-                android:name=".ui.screens.worshiphub.WorshipHubActivity"
+                android:name=".features.worshiphub.entry.WorshipHubActivity"
                 android:exported="false"
                 android:screenOrientation="portrait"
                 android:label="Worship Hub"
@@ -27,37 +27,37 @@
                 android:screenOrientation="portrait"
                 android:theme="@style/uCropCustomTheme" />
             <activity
-                android:name=".ui.screens.profile.ProfileActivity"
+                android:name=".features.profile.entry.ProfileActivity"
                 android:exported="false"
                 android:screenOrientation="portrait"
                 android:label="Profile"
                 android:theme="@style/Theme.IPBCasteloBranco" />
             <activity
-                android:name=".ui.screens.auth.AuthActivity"
+                android:name=".features.auth.entry.AuthActivity"
                 android:exported="false"
                 android:screenOrientation="portrait"
                 android:label="Authentication"
                 android:theme="@style/Theme.IPBCasteloBranco" />
             <activity
-                android:name=".ui.screens.settings.SettingsActivity"
+                android:name=".features.settings.entry.SettingsActivity"
                 android:exported="false"
                 android:screenOrientation="portrait"
                 android:label="Settings"
                 android:theme="@style/Theme.IPBCasteloBranco" />
             <activity
-                android:name=".ui.screens.monthschedule.MonthScheduleActivity"
+                android:name=".features.schedule.entry.ScheduleActivity"
                 android:exported="false"
                 android:screenOrientation="portrait"
                 android:label="Month Schedule"
                 android:theme="@style/Theme.IPBCasteloBranco" />
             <activity
-                android:name=".ui.screens.hymnal.HymnalActivity"
+                android:name=".features.hymnal.entry.HymnalActivity"
                 android:exported="false"
                 android:screenOrientation="portrait"
                 android:label="Hymnal"
                 android:theme="@style/Theme.IPBCasteloBranco" />
             <activity
-                android:name=".ui.screens.main.MainActivity"
+                android:name=".features.main.entry.MainActivity"
                 android:exported="true"
                 android:screenOrientation="portrait"
                 android:theme="@style/Theme.IPBCasteloBranco">

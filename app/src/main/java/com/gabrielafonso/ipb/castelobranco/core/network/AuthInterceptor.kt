@@ -1,6 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.core.network
 
-import com.gabrielafonso.ipb.castelobranco.data.local.TokenStorage
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.TokenStorage
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response

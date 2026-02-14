@@ -3,9 +3,9 @@ package com.gabrielafonso.ipb.castelobranco.core.network
 
 import com.gabrielafonso.ipb.castelobranco.core.di.ApiBaseUrl
 import com.gabrielafonso.ipb.castelobranco.core.di.AuthLessClient
-import com.gabrielafonso.ipb.castelobranco.data.api.RefreshRequest
-import com.gabrielafonso.ipb.castelobranco.data.local.TokenStorage
-import com.gabrielafonso.ipb.castelobranco.domain.model.AuthTokens
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.dto.RefreshRequest
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.TokenStorage
+import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.AuthTokens
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
