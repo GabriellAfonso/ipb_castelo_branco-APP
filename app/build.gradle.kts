@@ -14,7 +14,7 @@ plugins {
 
 extensions.configure<ApplicationExtension> {
     namespace = "com.gabrielafonso.ipb.castelobranco"
-    compileSdk = 36   // use 35/36 apenas se já estiver instalado no SDK Manager
+    compileSdk = 36
 
 
     defaultConfig {
@@ -22,7 +22,7 @@ extensions.configure<ApplicationExtension> {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "0.4.3"
+        versionName = "0.4.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
