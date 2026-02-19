@@ -6,6 +6,14 @@ import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.MonthS
 import kotlinx.coroutines.flow.Flow
 
 interface ScheduleRepository {
+    // Agora expõe como Flow, mas a implementação entregará um StateFlow
     fun observeMonthSchedule(): Flow<SnapshotState<MonthSchedule>>
+
+    // Novo: Para pegar o valor síncrono no initialValue da ViewModel
+    fun getCurrentSnapshot(): SnapshotState<MonthSchedule>
+
+    // Novo: Para o "aquecimento" no boot do app
+    suspend fun preload()
+
     suspend fun refreshMonthSchedule(): RefreshResult
 }

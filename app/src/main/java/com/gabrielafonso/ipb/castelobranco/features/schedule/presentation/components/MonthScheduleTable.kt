@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.logTime
 
 @Immutable
 data class ScheduleRowUi(
@@ -36,11 +37,16 @@ data class ScheduleSectionUi(
 
 @Composable
 fun MonthScheduleTable(
-    sections: List<ScheduleSectionUi>,
+    sections: List<ScheduleSectionUi>?,
     modifier: Modifier = Modifier
 ) {
+    // Se for null, estamos no primeiro carregamento do cache.
+    // Retornamos vazio para não mostrar o texto de "Sem escala" antes da hora.
+    if (sections == null) return
+
     if (sections.isEmpty()) {
         EmptyScheduleState(modifier = modifier.fillMaxWidth())
+        logTime("EmptyScheduleState", "EmptyScheduleState exibido")
         return
     }
 
@@ -48,9 +54,11 @@ fun MonthScheduleTable(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp) // reduzido de 12.dp
     ) {
+        logTime("schedule", "Vai carregar a schedule")
         sections.forEach { section ->
             SectionCard(section = section)
         }
+        logTime("schedule", "carregou a schedule")
     }
 }
 
@@ -165,5 +173,6 @@ private fun EmptyScheduleState(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
     }
 }

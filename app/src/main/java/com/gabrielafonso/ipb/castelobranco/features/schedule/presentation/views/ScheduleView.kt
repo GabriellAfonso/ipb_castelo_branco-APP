@@ -1,12 +1,14 @@
 package com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.views
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -16,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -24,24 +25,24 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
-import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.logTime
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.formatter.MonthScheduleWhatsappFormatter
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
+import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.ScheduleEntry
 import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.components.MonthScheduleTable
 import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.components.ScheduleRowUi
 import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.components.ScheduleSectionUi
+import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.viewmodel.ScheduleUiState
 import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.viewmodel.ScheduleViewModel
 import java.util.Locale
 
-data class MonthScheduleUiState(
-    val monthScheduleState: SnapshotState<MonthSchedule> = SnapshotState.Loading,
-    val isLoading: Boolean = false
-)
+// Removi o data class MonthScheduleUiState antigo, pois agora usamos o ScheduleUiState do ViewModel
 
 data class MonthScheduleActions(
     val onShare: (String) -> Unit,
-    val onGenerateNewSchedule: () -> Unit = {}
+    val onGenerateNewSchedule: () -> Unit = {},
+    val onRefresh: () -> Unit = {}
 )
 
 @Composable
@@ -50,36 +51,25 @@ fun MonthScheduleView(
     onBackClick: () -> Unit,
     onShare: (String) -> Unit
 ) {
-    val monthScheduleState by viewModel.monthScheduleState.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isRefreshingMonthSchedule.collectAsStateWithLifecycle()
-
-    val state = MonthScheduleUiState(
-        monthScheduleState = monthScheduleState,
-        isLoading = isLoading
-    )
-
-    val actions = MonthScheduleActions(
-        onShare = onShare,
-        onGenerateNewSchedule = { /* TODO: gerar nova escala depois */ }
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     MonthScheduleScreen(
-        state = state,
-        actions = actions,
+        uiState = uiState,
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refreshMonthSchedule() },
+        onShare = onShare,
         onBackClick = onBackClick
     )
 }
-
 @Composable
 fun MonthScheduleScreen(
-    state: MonthScheduleUiState,
-    actions: MonthScheduleActions,
-    onBackClick: () -> Unit,
-    viewModel: ScheduleViewModel = hiltViewModel()
+    uiState: ScheduleUiState,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+    onShare: (String) -> Unit,
+    onBackClick: () -> Unit
 ) {
-    val canViewSchedule by viewModel.canViewSchedule.collectAsStateWithLifecycle()
-    val cachedMonthSchedule by viewModel.cachedMonthSchedule.collectAsStateWithLifecycle()
-
     BaseScreen(
         tabName = "Escala",
         logoRes = R.drawable.ic_schedule,
@@ -87,149 +77,122 @@ fun MonthScheduleScreen(
         onBackClick = onBackClick,
     ) { innerPadding ->
 
-        if (!canViewSchedule) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Acesso negado",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = "Escala disponível apenas para membros.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-            return@BaseScreen
-        }
-
-        val monthScheduleFromSnapshot = (state.monthScheduleState as? SnapshotState.Data)?.value
-        val monthSchedule = cachedMonthSchedule ?: monthScheduleFromSnapshot
-
-        val sections = remember(monthSchedule) {
-            monthSchedule?.toSectionsUi().orEmpty()
-        }
-
-        Column(
+        // O segredo está em tratar cada estado separadamente
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Título do mês no topo (novo)
-            monthSchedule?.let { s ->
-                Text(
-                    text = "Escala de ${MonthScheduleWhatsappFormatter.monthPtBr(s.month)}",
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (state.isLoading && monthSchedule == null) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "Carregando escala...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    MonthScheduleTable(sections = sections)
+            when (uiState) {
+                is ScheduleUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-            }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = actions.onGenerateNewSchedule,
-                    enabled = false,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                is ScheduleUiState.Empty -> {
+                    Text(
+                        text = "Nenhuma escala encontrada.",
+                        modifier = Modifier.align(Alignment.Center)
                     )
-                ) {
-                    Text(text = "Nova Escala")
                 }
 
-                Button(
-                    onClick = {
-                        val s = monthSchedule ?: return@Button
-                        val text = MonthScheduleWhatsappFormatter.format(
-                            schedule = s,
-                            locale = Locale.forLanguageTag("pt-BR")
-                        )
-                        actions.onShare(text)
-                    },
-                    enabled = monthSchedule != null,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                is ScheduleUiState.Success -> {
+                    ScheduleContent(
+                        sections = uiState.sections,
+                        monthSchedule = uiState.data,
+                        onShare = onShare
                     )
-                ) {
-                    Text(text = "Compartilhar")
                 }
             }
+
+            // Se estiver atualizando (swipe to refresh), você pode mostrar um indicador extra aqui
         }
     }
 }
 
-private fun MonthSchedule.toSectionsUi(): List<ScheduleSectionUi> {
-    val order = listOf("terça", "terca", "quinta", "domingo")
-    val locale = Locale.forLanguageTag("pt-BR")
-
-    return schedule.entries
-        .sortedWith(
-            compareBy<Map.Entry<String, com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.ScheduleEntry>> { entry ->
-                val t = entry.key.trim().lowercase(locale)
-                order.indexOfFirst { t.startsWith(it) }
-                    .let { if (it == -1) Int.MAX_VALUE else it }
-            }.thenBy { it.key.lowercase(locale) }
+@Composable
+private fun ScheduleContent(
+    sections: List<ScheduleSectionUi>,
+    monthSchedule: MonthSchedule,
+    onShare: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        // 1. TÍTULO FIXO (Fora do scroll)
+        Text(
+            text = "Escala de ${MonthScheduleWhatsappFormatter.monthPtBr(monthSchedule.month)}",
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
-        .map { (title, entry) ->
+
+        // 2. ÁREA ROLÁVEL (Apenas a tabela)
+        Box(
+            modifier = Modifier
+                .weight(1f) // Ocupa todo o espaço entre o título e os botões
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            MonthScheduleTable(sections = sections)
+        }
+
+        // 3. RODAPÉ FIXO (Fora do scroll)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(
+                onClick = { /* Lógica de nova escala */ },
+                enabled = false,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Nova Escala")
+            }
+
+            Button(
+                onClick = {
+                    val text = MonthScheduleWhatsappFormatter.format(
+                        schedule = monthSchedule,
+                        locale = Locale.forLanguageTag("pt-BR")
+                    )
+                    onShare(text)
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Compartilhar")
+            }
+        }
+    }
+}
+// Mantenho esta função aqui, pois o seu ViewModel a importa deste pacote.
+// DICA: No futuro, mova isso para um arquivo "ScheduleUiMapper.kt" para limpar a View.
+private val SORT_ORDER = listOf("terça", "terca", "quinta", "domingo")
+private val PT_BR_LOCALE = Locale.forLanguageTag("pt-BR")
+
+fun MonthSchedule.toSectionsUi(): List<ScheduleSectionUi> {
+    return schedule.entries
+        .map { entry ->
+            val titleLower = entry.key.trim().lowercase(PT_BR_LOCALE)
+            val weight = SORT_ORDER.indexOfFirst { titleLower.startsWith(it) }
+                .let { if (it == -1) Int.MAX_VALUE else it }
+            weight to entry
+        }
+        .sortedWith(
+            compareBy<Pair<Int, Map.Entry<String, ScheduleEntry>>> { it.first }
+                .thenBy { it.second.key.lowercase(PT_BR_LOCALE) }
+        )
+        .map { (weight, entry) ->
+            val scheduleEntry = entry.value
             ScheduleSectionUi(
-                title = title,
-                time = entry.time,
-                rows = entry.items
+                title = entry.key,
+                time = scheduleEntry.time,
+                rows = scheduleEntry.items
                     .sortedBy { it.day }
                     .map { item ->
-                        ScheduleRowUi(
-                            day = item.day,
-                            member = item.member
-                        )
+                        ScheduleRowUi(day = item.day, member = item.member)
                     }
             )
         }

@@ -8,7 +8,9 @@ import com.gabrielafonso.ipb.castelobranco.features.schedule.data.dto.MonthSched
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.mapper.MonthScheduleMapper
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class MonthScheduleSnapshotRepository @Inject constructor(
     cache: SnapshotCache<MonthScheduleDto>,
     fetcher: SnapshotFetcher<MonthScheduleDto>,

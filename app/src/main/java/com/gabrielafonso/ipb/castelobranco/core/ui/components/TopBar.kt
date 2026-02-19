@@ -16,6 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage // Importante: certifique-se de ter adicionado a lib
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.ui.theme.ipbGreen
 import com.gabrielafonso.ipb.castelobranco.core.ui.theme.onPrimaryLight
@@ -25,7 +26,7 @@ import com.gabrielafonso.ipb.castelobranco.core.ui.theme.onPrimaryLight
 fun TopBar(
     tabName: String,
     logo: Painter,
-    accountImage: Painter?,
+    accountImageModel: Any?, // Alterado para Any? para suportar o Coil
     showBackArrow: Boolean = false,
     onMenuClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
@@ -54,8 +55,8 @@ fun TopBar(
         },
         navigationIcon = { TopBarNavigation(showBackArrow, onMenuClick, onBackClick) },
         actions = {
-            if (accountImage != null) {
-                TopBarActions(onAccountClick, accountImage)
+            if (accountImageModel != null) {
+                TopBarActions(onAccountClick, accountImageModel)
             }
         }
     )
@@ -96,12 +97,14 @@ private fun TopBarNavigation(
 }
 
 @Composable
-private fun TopBarActions(onAccountClick: () -> Unit, accountImage: Painter) {
+private fun TopBarActions(onAccountClick: () -> Unit, accountModel: Any?) {
     IconButton(onClick = onAccountClick) {
-        Image(
-            painter = accountImage,
+        AsyncImage(
+            model = accountModel,
             contentDescription = "Conta",
             contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.ic_profile_placeholder),
+            error = painterResource(R.drawable.ic_profile_placeholder),
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)

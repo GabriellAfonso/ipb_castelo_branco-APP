@@ -1,13 +1,13 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/screens/base/BaseScreen.kt
 package com.gabrielafonso.ipb.castelobranco.core.ui.base
 
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.graphics.BitmapFactory
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -17,8 +17,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -28,9 +26,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gabrielafonso.ipb.castelobranco.R
+
+import com.gabrielafonso.ipb.castelobranco.core.ui.components.TopBar
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.local.ProfilePhotoBus
-import com.gabrielafonso.ipb.castelobranco.core.ui.components.TopBar
 import com.gabrielafonso.ipb.castelobranco.features.profile.entry.ProfileActivity
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -57,7 +56,6 @@ interface AuthSessionEntryPoint {
 private class TopBarProfileViewModel(
     private val authSession: AuthSession
 ) : ViewModel() {
-
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
@@ -91,7 +89,6 @@ fun BaseScreen(
     content: @Composable (innerPadding: PaddingValues) -> Unit,
 ) {
     val context = LocalContext.current
-
     val activity = context.findActivity() as? ComponentActivity
         ?: error("ComponentActivity não encontrada")
 
@@ -112,41 +109,35 @@ fun BaseScreen(
         }
     )
 
-    val isLoggedIn = topBarVm.isLoggedIn.collectAsStateWithLifecycle().value
-    val profilePhotoVersion = topBarVm.profilePhotoVersion.collectAsStateWithLifecycle().value
+    val isLoggedIn by topBarVm.isLoggedIn.collectAsStateWithLifecycle()
+    val profilePhotoVersion by topBarVm.profilePhotoVersion.collectAsStateWithLifecycle()
+    val globalPhotoVersion by ProfilePhotoBus.version.collectAsStateWithLifecycle()
 
-    val globalPhotoVersion = ProfilePhotoBus.version.collectAsStateWithLifecycle().value
     LaunchedEffect(globalPhotoVersion) {
         if (isLoggedIn) topBarVm.bumpPhotoVersion()
     }
 
+    // Resolvemos apenas o arquivo. O Coil fará o decode em background.
     val photoFile: File? = remember(isLoggedIn, profilePhotoVersion) {
         if (!isLoggedIn) return@remember null
-
         val dir = File(context.filesDir, "profile")
         if (!dir.exists()) return@remember null
 
         dir.listFiles()
             ?.asSequence()
+            // Apenas metadados rápidos, sem decodificar pixels aqui
             ?.filter { it.isFile && it.name.startsWith("profile_photo.") && it.length() > 0L }
             ?.maxByOrNull { it.lastModified() }
     }
 
-    val bitmap = remember(photoFile?.absolutePath, photoFile?.lastModified(), profilePhotoVersion) {
-        photoFile?.absolutePath?.let { BitmapFactory.decodeFile(it) }
-    }
-
     val logo: Painter = painterResource(id = logoRes)
-    val placeholderPainter: Painter = painterResource(id = R.drawable.ic_profile_placeholder)
 
-    val accountPainter: Painter? =
-        if (!showAccountAction) {
-            null
-        } else if (isLoggedIn && bitmap != null) {
-            BitmapPainter(bitmap.asImageBitmap())
-        } else {
-            placeholderPainter
-        }
+    // O modelo que passamos para o Coil: Se não houver arquivo, usa o placeholder do drawable
+    val accountImageModel: Any? = remember(showAccountAction, isLoggedIn, photoFile) {
+        if (!showAccountAction) null
+        else if (isLoggedIn && photoFile != null) photoFile
+        else R.drawable.ic_profile_placeholder
+    }
 
     val resolvedOnAccountClick: () -> Unit = onAccountClick ?: {
         if (isLoggedIn) {
@@ -161,7 +152,7 @@ fun BaseScreen(
             TopBar(
                 tabName = tabName,
                 logo = logo,
-                accountImage = accountPainter,
+                accountImageModel = accountImageModel,
                 showBackArrow = showBackArrow,
                 onMenuClick = onMenuClick,
                 onBackClick = onBackClick,

@@ -16,8 +16,6 @@ class WorshipHubActivity : BaseActivity() {
 
     override fun onPreCreate(savedInstanceState: Bundle?) {
         super.onPreCreate(savedInstanceState)
-        // Inicialize ViewModel, leia extras da intent, registre receivers, etc.
-        // ex: val id = intent?.getStringExtra("EXTRA_ID")
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
