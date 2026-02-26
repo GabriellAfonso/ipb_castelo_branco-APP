@@ -6,9 +6,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.gabrielafonso.ipb.castelobranco.core.ui.theme.IPBCasteloBrancoTheme
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseActivity
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.views.WorshipHubNav
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.navigation.WorshipHubNavGraph
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.views.WorshipHubView
+
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,22 +33,22 @@ class WorshipHubActivity : BaseActivity() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewWorshipHub() {
-    IPBCasteloBrancoTheme {
-        WorshipHubView(
-            nav = WorshipHubNav(
-                tables = {},
-                register = {},
-                button3 = {},
-                button4 = {},
-                button5 = {},
-                button6 = {},
-                button7 = {},
-                button8 = {},
-                back = {}
-            )
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewWorshipHub() {
+//    IPBCasteloBrancoTheme {
+//        WorshipHubView(
+//            nav = WorshipHubNav(
+//                tables = {},
+//                register = {},
+//                button3 = {},
+//                button4 = {},
+//                button5 = {},
+//                button6 = {},
+//                button7 = {},
+//                button8 = {},
+//                back = {}
+//            )
+//        )
+//    }
+//}

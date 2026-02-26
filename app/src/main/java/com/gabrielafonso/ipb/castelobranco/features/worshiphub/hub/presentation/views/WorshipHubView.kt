@@ -16,19 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.ui.components.CustomButton
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.navigation.WorshipHubNav
 
-@Stable
-data class WorshipHubNav(
-    val tables: () -> Unit,
-    val register: () -> Unit,
-    val button3: () -> Unit,
-    val button4: () -> Unit,
-    val button5: () -> Unit,
-    val button6: () -> Unit,
-    val button7: () -> Unit,
-    val button8: () -> Unit,
-    val back: () -> Unit
-)
 
 private data class WorshipHubButtonInfo(
     val iconRes: Int,
