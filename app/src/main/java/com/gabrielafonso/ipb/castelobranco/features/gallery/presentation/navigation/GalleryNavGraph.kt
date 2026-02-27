@@ -9,24 +9,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryViewModel
+import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.AlbumScreen
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.GalleryView
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.navigation.WorshipHubNav
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.navigation.WorshipHubRoutes
-
+import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.PhotoScreen
 
 @Stable
 data class GalleryNav(
-    val Gallery: () -> Unit,
-    val Album: () -> Unit,
-    val Photo: () -> Unit,
-    val back: () -> Unit
+    val back: () -> Unit,
+    val toAlbum: (Long) -> Unit,
+    val toPhoto: (Long, Int) -> Unit
 )
 
 object GalleryRoutes {
     const val Gallery = "GalleryMain"
-    const val Album = "GalleryAlbum"
-    const val Photo = "GalleryPhoto"
-
+    fun Album(albumId: Long) = "GalleryAlbum/$albumId"
+    fun Photo(albumId: Long, photoIndex: Int) = "GalleryPhoto/$albumId/$photoIndex"
 }
 
 @Composable
@@ -34,42 +31,46 @@ fun GalleryNavGraph(
     navController: NavHostController,
     onFinish: () -> Unit,
     viewModel: GalleryViewModel = hiltViewModel()
-
 ) {
     fun popOrFinish() {
         val popped = navController.popBackStack()
         if (!popped) onFinish()
     }
-    val nav =
-        GalleryNav(
-            Gallery = { navController.navigate(GalleryRoutes.Gallery) },
-            Album = { navController.navigate(GalleryRoutes.Album) },
-            Photo = { navController.navigate(GalleryRoutes.Photo) },
-            back = { popOrFinish() }
+    val nav = GalleryNav(
+        back = { popOrFinish() },
+        toAlbum = { albumId -> navController.navigate(GalleryRoutes.Album(albumId)) },
+        toPhoto = { albumId, photoIndex -> navController.navigate(GalleryRoutes.Photo(albumId, photoIndex)) }
     )
 
     NavHost(navController = navController, startDestination = GalleryRoutes.Gallery) {
 
         composable(GalleryRoutes.Gallery) {
+            val viewModel = viewModel
             GalleryView(
                 nav = nav,
                 viewModel = viewModel,
-                onBackClick = {
-                    val popped = navController.popBackStack()
-                    if (!popped) onFinish()
-                }
+                onBackClick = { popOrFinish() }
             )
         }
-        composable(GalleryRoutes.Album) {
-
+        composable(
+            "GalleryAlbum/{albumId}",
+            arguments = listOf(navArgument("albumId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val viewModel = viewModel
+            val albumId = backStackEntry.arguments?.getLong("albumId") ?: 0L
+            AlbumScreen(albumId, viewModel, nav)
         }
-        composable(GalleryRoutes.Photo) {
-
+        composable(
+            "GalleryPhoto/{albumId}/{photoIndex}",
+            arguments = listOf(
+                navArgument("albumId") { type = NavType.LongType },
+                navArgument("photoIndex") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val viewModel = viewModel
+            val albumId = backStackEntry.arguments?.getLong("albumId") ?: 0L
+            val photoIndex = backStackEntry.arguments?.getInt("photoIndex") ?: 0
+            PhotoScreen(albumId, photoIndex, viewModel, nav)
         }
-
-
-
-
     }
-
 }

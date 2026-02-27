@@ -1,5 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository
 
+import com.gabrielafonso.ipb.castelobranco.features.gallery.data.repository.Album
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 
@@ -32,6 +33,8 @@ interface GalleryRepository {
     fun downloadAllPhotos(): Flow<DownloadProgress>
     suspend fun getAllLocalPhotos(): List<File>
     suspend fun clearAllPhotos()
+    suspend fun getLocalAlbums(): List<Album>
+    suspend fun getThumbnailForAlbum(albumId: Long): File?
 }
 
 data class DownloadProgress(

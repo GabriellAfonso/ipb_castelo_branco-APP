@@ -8,12 +8,14 @@ import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.Ga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flowOn
+
+data class Album(val id: Long, val name: String)
 
 @Singleton
 class GalleryRepositoryImpl @Inject constructor(
@@ -46,7 +48,10 @@ class GalleryRepositoryImpl @Inject constructor(
         emit(DownloadProgress(downloaded, total))
 
         for (photo in photos) {
-            if (!storage.exists(photo.albumId, photo.id)) {
+            val albumId = photo.albumId
+            val photoId = photo.id
+
+            if (!storage.exists(albumId, photoId)) {
                 val response = api.downloadFile(photo.imageUrl)
 
                 if (!response.isSuccessful) {
@@ -57,11 +62,12 @@ class GalleryRepositoryImpl @Inject constructor(
                     ?: throw Exception("ResponseBody nulo para imagem ${photo.id}")
 
                 storage.save(
-                    albumId = photo.albumId,
-                    photoId = photo.id,
+                    albumId = albumId,
+                    photoId = photoId,
                     ext = photo.fileExtension(),
                     input = body.byteStream()
                 )
+                storage.savePhotoMetadata(albumId, photoId, photo)
             }
 
             downloaded++
@@ -92,4 +98,12 @@ class GalleryRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             storage.clearAll()
         }
+
+    override suspend fun getLocalAlbums(): List<Album> = withContext(Dispatchers.IO) {
+        storage.listAlbums().map { Album(it.first, it.second) }
+    }
+
+   override suspend fun getThumbnailForAlbum(albumId: Long): File? = withContext(Dispatchers.IO) {
+        storage.getThumbnailFile(albumId)
+    }
 }
