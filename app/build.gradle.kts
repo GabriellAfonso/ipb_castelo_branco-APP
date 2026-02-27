@@ -29,12 +29,12 @@ extensions.configure<ApplicationExtension> {
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.100:8000/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://gabrielafonso.com.br/ipbcb/\"")
             isMinifyEnabled = false
         }
 
         release {
-            buildConfigField("String", "API_BASE_URL", "\"https://gabrielafonso.com.br/api/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://gabrielafonso.com.br/ipbcb/\"")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

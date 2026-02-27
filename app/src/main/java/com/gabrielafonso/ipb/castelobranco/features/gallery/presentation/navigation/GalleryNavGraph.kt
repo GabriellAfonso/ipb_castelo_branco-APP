@@ -33,6 +33,7 @@ object GalleryRoutes {
 fun GalleryNavGraph(
     navController: NavHostController,
     onFinish: () -> Unit,
+    viewModel: GalleryViewModel = hiltViewModel()
 
 ) {
     fun popOrFinish() {
@@ -50,7 +51,6 @@ fun GalleryNavGraph(
     NavHost(navController = navController, startDestination = GalleryRoutes.Gallery) {
 
         composable(GalleryRoutes.Gallery) {
-             val viewModel: GalleryViewModel = hiltViewModel()
             GalleryView(
                 nav = nav,
                 viewModel = viewModel,

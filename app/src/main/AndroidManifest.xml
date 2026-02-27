@@ -23,6 +23,12 @@
                 android:label="Worship Hub"
                 android:theme="@style/Theme.IPBCasteloBranco" />
             <activity
+                android:name=".features.gallery.entry.GalleryActivity"
+                android:exported="false"
+                android:screenOrientation="portrait"
+                android:label="Gallery"
+                android:theme="@style/Theme.IPBCasteloBranco" />
+            <activity
                 android:name="com.yalantis.ucrop.UCropActivity"
                 android:screenOrientation="portrait"
                 android:theme="@style/uCropCustomTheme" />

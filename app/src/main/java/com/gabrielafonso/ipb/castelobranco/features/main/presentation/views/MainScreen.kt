@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.key
+import com.gabrielafonso.ipb.castelobranco.features.gallery.entry.GalleryActivity
 import com.gabrielafonso.ipb.castelobranco.features.main.entry.goToMainAsRoot
 import com.gabrielafonso.ipb.castelobranco.features.main.presentation.viewmodel.MainViewModel
 
@@ -148,6 +149,7 @@ class MainActions(private val context: Context) {
     fun openHymnal() = openActivity(HymnalActivity::class.java)
     fun openAuth() = openActivity(AuthActivity::class.java)
     fun openSettings() = openActivity(SettingsActivity::class.java)
+    fun openGallery() = openActivity(GalleryActivity::class.java)
 
     private fun <T> openActivity(activity: Class<T>) {
         context.startActivity(Intent(context, activity))
@@ -169,10 +171,14 @@ fun ButtonGrid(actions: MainActions) {
         listOf(
             ButtonInfo(R.drawable.ic_worshiphub, "Min. Louvor", iconColor, actions::openWorshipHub),
             ButtonInfo(R.drawable.ic_schedule, "Escala", iconColor, actions::openSchedule),
-            ButtonInfo(R.drawable.ic_galery, "Galeria", iconColor) { println("Galeria clicked") },
+            ButtonInfo(R.drawable.ic_galery, "Galeria", iconColor, actions::openGallery),
             ButtonInfo(R.drawable.ic_sarca_ipb, "Hinário", iconColor, actions::openHymnal),
             ButtonInfo(R.drawable.ic_in_development, "In Dev", iconColor) { },
-            ButtonInfo(R.drawable.ic_in_development, "In Dev", iconColor) { println("Sample 2 clicked") }
+            ButtonInfo(
+                R.drawable.ic_in_development,
+                "In Dev",
+                iconColor
+            ) { println("Sample 2 clicked") }
         )
     }
 
