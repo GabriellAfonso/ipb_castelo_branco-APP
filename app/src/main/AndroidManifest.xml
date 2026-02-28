@@ -34,6 +34,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.IPBCasteloBranco" />
         <activity
+            android:name=".features.admin.entry.AdminActivity"
+            android:exported="false"
+            android:label="Admin panel"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.IPBCasteloBranco" />
+        <activity
             android:name=".features.gallery.entry.GalleryActivity"
             android:exported="false"
             android:label="Gallery"

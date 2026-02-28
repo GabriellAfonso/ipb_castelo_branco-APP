@@ -9,13 +9,12 @@ import androidx.navigation.compose.composable
 import com.gabrielafonso.ipb.castelobranco.core.ui.components.InDevelopmentScreen
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.views.WorshipHubView
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.register.presentation.views.MusicRegistrationView
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.views.WorshipSongsTableView
 
 @Stable
 data class WorshipHubNav(
     val tables: () -> Unit,
-    val register: () -> Unit,
+    val songs: () -> Unit,
     val button3: () -> Unit,
     val button4: () -> Unit,
     val button5: () -> Unit,
@@ -28,7 +27,7 @@ data class WorshipHubNav(
 object WorshipHubRoutes {
     const val Hub = "WorshipMain"
     const val Tables = "WorshipTables"
-    const val Register = "register"
+    const val Songs = "songs"
     const val Button3 = "button_3"
     const val Button4 = "button_4"
     const val Button5 = "button_5"
@@ -50,7 +49,7 @@ fun WorshipHubNavGraph(
     val nav =
         WorshipHubNav(
             tables = { navController.navigate(WorshipHubRoutes.Tables) },
-            register = { navController.navigate(WorshipHubRoutes.Register) },
+            songs = { navController.navigate(WorshipHubRoutes.Songs) },
             button3 = { navController.navigate(WorshipHubRoutes.Button3) },
             button4 = { navController.navigate(WorshipHubRoutes.Button4) },
             button5 = { navController.navigate(WorshipHubRoutes.Button5) },
@@ -80,8 +79,7 @@ fun WorshipHubNavGraph(
             )
         }
 
-        composable(WorshipHubRoutes.Register) { MusicRegistrationView(onBack = ::popOrFinish) }
-        composable(WorshipHubRoutes.Button3) { InDevelopmentScreen(onBack = ::popOrFinish) }
+        composable(WorshipHubRoutes.Songs) { InDevelopmentScreen(onBack = ::popOrFinish) }
         composable(WorshipHubRoutes.Button4) { InDevelopmentScreen(onBack = ::popOrFinish) }
         composable(WorshipHubRoutes.Button5) { InDevelopmentScreen(onBack = ::popOrFinish) }
         composable(WorshipHubRoutes.Button6) { InDevelopmentScreen(onBack = ::popOrFinish) }

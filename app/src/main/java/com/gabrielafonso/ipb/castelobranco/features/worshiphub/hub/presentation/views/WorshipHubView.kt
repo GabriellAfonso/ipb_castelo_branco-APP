@@ -66,7 +66,7 @@ private fun WorshipHubButtonGrid(
     val buttons = remember(actions) {
         listOf(
             WorshipHubButtonInfo(R.drawable.ic_table, "Tabelas", actions.tables),
-            WorshipHubButtonInfo(R.drawable.ic_register, "Registrar", actions.register),
+            WorshipHubButtonInfo(R.drawable.ic_songs, "Musicas", actions.songs),
             WorshipHubButtonInfo(R.drawable.ic_chord_chart, "Cifras", actions.button3),
             WorshipHubButtonInfo(R.drawable.ic_lyrics, "Letras", actions.button4),
             WorshipHubButtonInfo(R.drawable.ic_in_development, "In Dev", actions.button5),

@@ -1,8 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.api
 
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.AllSongDto
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.register.data.dto.RegisterSundayPlaysRequestDto
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.register.data.dto.RegisterSundayPlaysResponseDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SongsBySundayDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SuggestedSongDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.TopSongDto

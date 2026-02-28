@@ -41,6 +41,7 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.gabrielafonso.ipb.castelobranco.core.ui.components.HighlightSundaySchedule
+import com.gabrielafonso.ipb.castelobranco.features.admin.entry.AdminActivity
 
 
 /**
@@ -123,7 +124,6 @@ fun MainScreen(
     }
 }
 
-//@Composable
 private fun buildHighlightPages(
     nextSection: ScheduleSectionUi?
 ): List<@Composable () -> Unit> = buildList {
@@ -198,7 +198,7 @@ fun DrawerContent(
                 label = "Painel Admin",
                 textColor = textColor // Destaque para admin
             ) {
-                onItemClick { /* ações de admin */ }
+                onItemClick { actions.openAdminPanel() }
             }
         }
 
@@ -300,6 +300,7 @@ class MainActions(private val context: Context) {
     fun openAuth() = openActivity(AuthActivity::class.java)
     fun openSettings() = openActivity(SettingsActivity::class.java)
     fun openGallery() = openActivity(GalleryActivity::class.java)
+    fun openAdminPanel() = openActivity(AdminActivity::class.java)
 
     private fun <T> openActivity(activity: Class<T>) {
         context.startActivity(Intent(context, activity))
