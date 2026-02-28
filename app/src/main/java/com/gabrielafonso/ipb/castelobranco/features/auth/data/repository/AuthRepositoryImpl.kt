@@ -55,9 +55,13 @@ class AuthRepositoryImpl @Inject constructor(
         runCatching {
             val response = call()
 
-            if (!response.isSuccessful) {
-                throw Exception("HTTP ${response.code()}")
-            }
+           if (!response.isSuccessful) {
+            // Pega o JSON de erro do servidor (ex: {"detail": "..."})
+            val errorBody = response.errorBody()?.string()
+
+            // Se houver um corpo de erro, lança ele, senão lança o código HTTP
+            throw Exception(errorBody ?: "HTTP ${response.code()}")
+        }
 
             val tokens = response.body()
                 ?: throw Exception("Resposta vazia")

@@ -33,7 +33,7 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideScheduleApi(
-        @AuthLessRetrofit retrofit: Retrofit
+       @AuthedRetrofit retrofit: Retrofit
     ): ScheduleApi = retrofit.create(ScheduleApi::class.java)
 
     @Provides
