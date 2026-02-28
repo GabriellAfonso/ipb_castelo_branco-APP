@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 sealed interface ScheduleUiState {
@@ -41,6 +42,39 @@ class ScheduleViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = mapSnapshotToUiState(repository.getCurrentSnapshot())
         )
+    val nextSection: StateFlow<ScheduleSectionUi?> = uiState
+        .map { state ->
+            if (state is ScheduleUiState.Success) {
+                findNextSection(state.sections)
+            } else null
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
+
+    private fun findNextSection(sections: List<ScheduleSectionUi>): ScheduleSectionUi? {
+        // Dias que existem: TUESDAY=3, THURSDAY=5, SUNDAY=1
+        // Calendar.DAY_OF_WEEK: Dom=1, Seg=2, Ter=3, Qua=4, Qui=5, Sex=6, Sab=7
+        val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+
+        // Para cada dia da semana, qual é o próximo culto?
+        // Ex: Seg(2)->Ter(3), Ter(3)->Qui(5), Qua(4)->Qui(5), Qui(5)->Dom(1), Sex(6)->Dom(1), Sab(7)->Dom(1), Dom(1)->Ter(3)
+        val nextMeetingKeyword = when (today) {
+            Calendar.MONDAY -> "Terça"
+            Calendar.TUESDAY -> "Quinta"  // Após a terça, próximo é quinta
+            Calendar.WEDNESDAY -> "Quinta"
+            Calendar.THURSDAY -> "Domingo" // Após quinta, próximo é domingo
+            Calendar.FRIDAY, Calendar.SATURDAY -> "Domingo"
+            Calendar.SUNDAY -> "Terça"   // Após domingo, próximo é terça
+            else -> "Terça"
+        }
+
+        return sections.firstOrNull { section ->
+            section.title.contains(nextMeetingKeyword, ignoreCase = true)
+        }
+    }
 
     init {
         logTime("ScheduleViewModel", "ViewModel criada e conectada ao fluxo reativo")
@@ -81,6 +115,7 @@ class ScheduleViewModel @Inject constructor(
                     ScheduleUiState.Empty
                 }
             }
+
             is SnapshotState.Loading -> ScheduleUiState.Loading
 
             else -> ScheduleUiState.Empty

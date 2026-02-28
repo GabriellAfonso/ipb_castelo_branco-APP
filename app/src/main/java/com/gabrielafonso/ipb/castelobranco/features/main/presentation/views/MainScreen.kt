@@ -14,11 +14,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.core.ui.components.CustomButton
 import com.gabrielafonso.ipb.castelobranco.core.ui.components.Highlight
+import com.gabrielafonso.ipb.castelobranco.core.ui.components.HighlightAniversariantes
+import com.gabrielafonso.ipb.castelobranco.core.ui.components.HighlightEscalaIndisponivel
+import com.gabrielafonso.ipb.castelobranco.core.ui.components.HighlightEventos
 import com.gabrielafonso.ipb.castelobranco.features.auth.entry.AuthActivity
 import com.gabrielafonso.ipb.castelobranco.features.gallery.entry.GalleryActivity
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.entry.HymnalActivity
@@ -26,10 +31,18 @@ import com.gabrielafonso.ipb.castelobranco.features.main.entry.goToMainAsRoot
 import com.gabrielafonso.ipb.castelobranco.features.main.presentation.viewmodel.MainViewModel
 import com.gabrielafonso.ipb.castelobranco.features.profile.presentation.viewmodel.ProfileViewModel
 import com.gabrielafonso.ipb.castelobranco.features.schedule.entry.ScheduleActivity
+import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.components.ScheduleSectionUi
+import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.components.SectionCard
+import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.viewmodel.ScheduleUiState
+import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.viewmodel.ScheduleViewModel
 import com.gabrielafonso.ipb.castelobranco.features.settings.entry.SettingsActivity
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.entry.WorshipHubActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.background
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+
 
 /**
  * Agrupador de permissões e estado de autenticação
@@ -42,15 +55,16 @@ data class UserAuthState(
 @Composable
 fun MainView(
     viewModel: MainViewModel = hiltViewModel(),
-    profileViewModel: ProfileViewModel = hiltViewModel()
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    scheduleViewModel: ScheduleViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val actions = remember(context) { MainActions(context) }
-    
+
     val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
     val isAdmin by profileViewModel.isAdmin.collectAsStateWithLifecycle()
+    val nextSection by scheduleViewModel.nextSection.collectAsStateWithLifecycle()
 
-    // Agrupa os estados
     val authState = UserAuthState(
         isLoggedIn = isLoggedIn,
         isAdmin = isAdmin ?: false
@@ -69,6 +83,7 @@ fun MainView(
     MainScreen(
         actions = actions,
         authState = authState,
+        nextSection = nextSection,
         onLogout = viewModel::logout
     )
 }
@@ -77,6 +92,7 @@ fun MainView(
 fun MainScreen(
     actions: MainActions,
     authState: UserAuthState,
+    nextSection: ScheduleSectionUi?,
     onLogout: () -> Unit
 ) {
     NavigationDrawer(
@@ -96,7 +112,11 @@ fun MainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(60.dp))
-                Highlight()
+
+                Highlight(
+                    pages = buildHighlightPages(nextSection)
+                )
+
                 Spacer(modifier = Modifier.height(60.dp))
                 ButtonGrid(actions = actions)
             }
@@ -104,6 +124,111 @@ fun MainScreen(
     }
 }
 
+@Composable
+private fun buildHighlightPages(
+    nextSection: ScheduleSectionUi?
+): List<@Composable () -> Unit> = buildList {
+    add { HighlightAniversariantes() }
+    if (nextSection != null) {
+        //TODO fazer um schedule section só pro highlight pra tirar essa gambiarra
+        add {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(0.dp),
+                contentAlignment = Alignment.TopStart
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Header com título e horário
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = nextSection.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (nextSection.time.isNotBlank()) {
+                            Text(
+                                text = nextSection.time,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+
+                    // Header da tabela
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceDim)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "Dia",
+                            modifier = Modifier.weight(0.25f),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Text(
+                            text = "Responsável",
+                            modifier = Modifier.weight(0.75f),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+
+                    // Linhas da escala — roláveis para não cortar nenhum nome
+                    val rows = nextSection.rows.sortedBy { it.day }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        itemsIndexed(rows) { index, row ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = String.format(java.util.Locale.getDefault(), "%02d", row.day),
+                                    modifier = Modifier.weight(0.25f),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = row.member,
+                                    modifier = Modifier.weight(0.75f),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            if (index != rows.lastIndex) {
+                                HorizontalDivider(
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        add { HighlightEscalaIndisponivel() }
+    }
+
+    add { HighlightEventos() }
+}
 @Composable
 fun NavigationDrawer(
     actions: MainActions,

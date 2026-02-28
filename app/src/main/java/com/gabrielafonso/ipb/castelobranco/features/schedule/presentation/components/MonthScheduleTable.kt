@@ -63,7 +63,7 @@ fun MonthScheduleTable(
 }
 
 @Composable
-private fun SectionCard(section: ScheduleSectionUi) {
+fun SectionCard(section: ScheduleSectionUi) {
     val container = MaterialTheme.colorScheme.surfaceContainerHighest
     val headerBg = MaterialTheme.colorScheme.surfaceDim
     val shape = RoundedCornerShape(8.dp) // reduzido de 12.dp
