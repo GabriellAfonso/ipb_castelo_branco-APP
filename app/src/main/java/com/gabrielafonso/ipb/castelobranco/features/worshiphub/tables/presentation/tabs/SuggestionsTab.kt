@@ -60,8 +60,14 @@ fun SuggestionsTab(
 
         val lines = suggestedSongs
             .sortedBy { it.position }
-            .joinToString(separator = "\n\n") { song ->
-                "${song.title}(${song.tone})"
+            .joinToString(separator = "\n") { song ->
+                val formattedArtist = if (song.artist.length > 8) {
+                    "${song.artist.take(8)}."
+                } else {
+                    song.artist
+                }
+
+                "${song.title}(${song.tone}) ($formattedArtist)"
             }
 
         return if (lines.isBlank()) header else "$header\n\n$lines"
