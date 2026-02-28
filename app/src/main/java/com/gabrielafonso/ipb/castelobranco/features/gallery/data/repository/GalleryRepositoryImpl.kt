@@ -17,6 +17,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.update
 
 data class Album(val id: Long, val name: String)
 
@@ -26,109 +27,83 @@ class GalleryRepositoryImpl @Inject constructor(
     private val storage: GalleryPhotoStorage,
 ) : GalleryRepository {
 
-    // 1. ESTADOS QUENTES: Moram aqui no Singleton e são alimentados pelo preload
     private val _albumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val albumsFlow: StateFlow<List<Album>> = _albumsFlow.asStateFlow()
 
-    /**
-     * Chamado pelo MainViewModel. Lê o disco e popula os Flows acima.
-     */
+    private val _thumbnailsFlow = MutableStateFlow<Map<Long, File?>>(emptyMap())
+    override val thumbnailsFlow: StateFlow<Map<Long, File?>> = _thumbnailsFlow.asStateFlow()
+
+    // Cache de fotos: Map de AlbumId para Lista de Arquivos
+    private val _photosFlow = MutableStateFlow<Map<Long, List<File>>>(emptyMap())
+    override val photosFlow: StateFlow<Map<Long, List<File>>> = _photosFlow.asStateFlow()
+
     override suspend fun preload() = withContext(Dispatchers.IO) {
-        // Carrega álbuns
-        val albums = storage.listAlbums().map { Album(it.first, it.second) }
-        _albumsFlow.value = albums
+        val rawAlbums = storage.listAlbums()
+        _albumsFlow.value = rawAlbums.map { Album(it.first, it.second) }
+        _thumbnailsFlow.value = rawAlbums.associate { (id, _) ->
+            id to storage.getThumbnailFile(id)
+        }
+        // Não carregamos as fotos aqui para manter o preload leve
+    }
+
+    override suspend fun getLocalPhotos(albumId: Long): List<File> = withContext(Dispatchers.IO) {
+        // Se já estiver no cache, retorna direto
+        _photosFlow.value[albumId]?.let { return@withContext it }
+
+        // Se não, busca no storage e salva no cache
+        val photos = storage.listPhotos(albumId)
+        _photosFlow.update { it + (albumId to photos) }
+        photos
     }
 
     override fun downloadAlbum(albumId: Long): Flow<DownloadProgress> = flow {
         val photos = api.getAlbumPhotos(albumId)
         emitAll(processDownload(photos))
+        // Limpa o cache desse álbum para forçar recarga após download
+        _photosFlow.update { it - albumId }
     }
 
     override fun downloadAllPhotos(): Flow<DownloadProgress> = flow {
-        val photos = api.getAllPhotos().body()
-            ?: throw Exception("Lista de fotos vazia")
+        val photos = api.getAllPhotos().body() ?: throw Exception("Lista de fotos vazia")
         emitAll(processDownload(photos))
-        // IMPORTANTE: Atualiza o Flow assim que o download acaba
+        _photosFlow.value = emptyMap() // Reseta cache de fotos
         preload()
     }
 
-    /**
-     * Lógica centralizada para processar o download de uma lista de fotos
-     */
     private fun processDownload(photos: List<GalleryPhotoDto>): Flow<DownloadProgress> = flow {
-        if (photos.isEmpty()) {
-            emit(DownloadProgress(0, 0))
-            return@flow
-        }
+        if (photos.isEmpty()) { emit(DownloadProgress(0, 0)); return@flow }
         val total = photos.size
         var downloaded = 0
-
         emit(DownloadProgress(downloaded, total))
 
         for (photo in photos) {
-            val albumId = photo.albumId
-            val photoId = photo.id
-            val photoName = photo.name
-
-            if (!storage.exists(albumId, photoId)) {
+            if (!storage.exists(photo.albumId, photo.id)) {
                 val response = api.downloadFile(photo.imageUrl)
-
-                if (!response.isSuccessful) {
-                    throw Exception("Erro ao baixar imagem ${photo.id} (HTTP ${response.code()})")
+                if (response.isSuccessful) {
+                    val body = response.body() ?: throw Exception("Body nulo")
+                    storage.save(photo.albumId, photo.id, photo.fileExtension(), body.byteStream())
+                    storage.savePhotoMetadata(photo.albumId, photo.id, photo)
                 }
-
-                val body = response.body()
-                    ?: throw Exception("ResponseBody nulo para imagem ${photo.id}")
-
-                storage.save(
-                    albumId = albumId,
-                    photoId = photoId,
-                    ext = photo.fileExtension(),
-                    input = body.byteStream()
-                )
-                storage.savePhotoMetadata(albumId, photoId, photo)
             }
-
             downloaded++
             emit(DownloadProgress(downloaded, total))
         }
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun getLocalPhotos(
-        albumId: Long
-    ): List<File> =
-        withContext(Dispatchers.IO) {
-            storage.listPhotos(albumId)
-        }
-
-    override suspend fun clearAlbum(
-        albumId: Long
-    ) =
-        withContext(Dispatchers.IO) {
-            storage.clearAlbum(albumId)
-        }
-
-    override suspend fun getAllLocalPhotos(): List<File> =
-        withContext(Dispatchers.IO) {
-            storage.listAllPhotos()
-        }
-
-    override suspend fun clearAllPhotos() =
-        withContext(Dispatchers.IO) {
-            storage.clearAll()
-            preload()
-        }
-
-    override suspend fun getLocalAlbums(): List<Album> = withContext(Dispatchers.IO) {
-        storage.listAlbums().map { Album(it.first, it.second) }
+    override suspend fun clearAlbum(albumId: Long) = withContext(Dispatchers.IO) {
+        storage.clearAlbum(albumId)
+        _photosFlow.update { it - albumId } // Remove do cache
     }
 
-    override suspend fun getThumbnailForAlbum(albumId: Long): File? = withContext(Dispatchers.IO) {
-        storage.getThumbnailFile(albumId)
+    override suspend fun clearAllPhotos() = withContext(Dispatchers.IO) {
+        storage.clearAll()
+        _photosFlow.value = emptyMap() // Limpa todo o cache
+        preload()
     }
 
-    override suspend fun getPhotoName(albumId: Long, photoId: Long): String? =
-        withContext(Dispatchers.IO) {
-            storage.getPhotoName(albumId, photoId)
-        }
+    // Métodos delegados (mantidos)
+    override suspend fun getAllLocalPhotos(): List<File> = withContext(Dispatchers.IO) { storage.listAllPhotos() }
+    override suspend fun getLocalAlbums(): List<Album> = withContext(Dispatchers.IO) { storage.listAlbums().map { Album(it.first, it.second) } }
+    override suspend fun getThumbnailForAlbum(albumId: Long): File? = withContext(Dispatchers.IO) { storage.getThumbnailFile(albumId) }
+    override suspend fun getPhotoName(albumId: Long, photoId: Long): String? = withContext(Dispatchers.IO) { storage.getPhotoName(albumId, photoId) }
 }

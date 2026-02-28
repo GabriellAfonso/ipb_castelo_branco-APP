@@ -33,21 +33,16 @@ class GalleryViewModel @Inject constructor(
 
     val albums = repository.albumsFlow
 
-    private val thumbnails = mutableMapOf<Long, MutableStateFlow<File?>>()
+    val thumbnails = repository.thumbnailsFlow
+    val cachedPhotos = repository.photosFlow
 
-    init {
-
+    suspend fun getLocalPhotos(albumId: Long): List<File> {
+        return repository.getLocalPhotos(albumId)
     }
 
-    fun getAlbumThumbnail(albumId: Long): StateFlow<File?> {
-        return thumbnails.getOrPut(albumId) {
-            val flow = MutableStateFlow<File?>(null)
-            viewModelScope.launch {
-                flow.value = repository.getThumbnailForAlbum(albumId)
-            }
-            flow
-        }.asStateFlow()
-    }
+    fun getThumbnailForAlbum(albumId: Long): File? {
+    return thumbnails.value[albumId]
+}
 
     fun downloadAllPhotos() {
         if (_downloadState.value.isDownloading) return
@@ -62,7 +57,9 @@ class GalleryViewModel @Inject constructor(
                     )
                 }
             }
+        repository.preload()
         }
+
     }
 
 
@@ -78,7 +75,5 @@ class GalleryViewModel @Inject constructor(
         return repository.getPhotoName(albumId, photoId) ?: "Foto"
     }
 
-    suspend fun getLocalPhotos(albumId: Long): List<File> {
-        return repository.getLocalPhotos(albumId)
-    }
+
 }

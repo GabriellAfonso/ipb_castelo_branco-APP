@@ -7,33 +7,13 @@ import java.io.File
 
 interface GalleryRepository {
     val albumsFlow: StateFlow<List<Album>>
+    val thumbnailsFlow: StateFlow<Map<Long, File?>>
+    val photosFlow: StateFlow<Map<Long, List<File>>> // O novo cache de fotos
 
-    // Chamado no MainViewModel para ler as pastas e popular o albumsFlow
     suspend fun preload()
-    /**
-     * Baixa todas as fotos de um álbum.
-     *
-     * @param albumId id do álbum
-     * @return Flow de progresso (0..100)
-     */
-    fun downloadAlbum(
-        albumId: Long,
-    ): Flow<DownloadProgress>
-
-    /**
-     * Retorna todas as fotos locais de um álbum (offline)
-     */
-    suspend fun getLocalPhotos(
-        albumId: Long,
-    ): List<File>
-
-    /**
-     * Remove todas as fotos locais de um álbum
-     */
-    suspend fun clearAlbum(
-        albumId: Long,
-    )
-
+    fun downloadAlbum(albumId: Long): Flow<DownloadProgress>
+    suspend fun getLocalPhotos(albumId: Long): List<File>
+    suspend fun clearAlbum(albumId: Long)
     fun downloadAllPhotos(): Flow<DownloadProgress>
     suspend fun getAllLocalPhotos(): List<File>
     suspend fun clearAllPhotos()
@@ -41,7 +21,6 @@ interface GalleryRepository {
     suspend fun getThumbnailForAlbum(albumId: Long): File?
     suspend fun getPhotoName(albumId: Long, photoId: Long): String?
 }
-
 data class DownloadProgress(
     val downloaded: Int,
     val total: Int

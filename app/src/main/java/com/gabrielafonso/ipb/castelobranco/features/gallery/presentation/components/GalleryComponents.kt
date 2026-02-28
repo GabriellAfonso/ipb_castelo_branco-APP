@@ -30,7 +30,9 @@ fun AlbumItem(
     viewModel: GalleryViewModel,
     onClick: () -> Unit
 ) {
-    val thumbnail by viewModel.getAlbumThumbnail(album.id).collectAsState()
+
+    val thumbnails by viewModel.thumbnails.collectAsState()
+    val thumbFile = thumbnails[album.id]
 
     Card(
         modifier = Modifier
@@ -42,9 +44,9 @@ fun AlbumItem(
         Box(
             modifier = Modifier.fillMaxSize()  // Preenche todo o card
         ) {
-            if (thumbnail != null) {
+            if (thumbFile != null) {
                 AsyncImage(
-                    model = thumbnail,
+                    model = thumbFile,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,  // Crop para preencher sem distorção
                     modifier = Modifier.fillMaxSize()  // Imagem preenche todo o Box/Card

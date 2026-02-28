@@ -34,6 +34,7 @@ import coil.compose.AsyncImage
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.gallery.data.repository.Album
+import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.components.AlbumItem
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.navigation.GalleryNav
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryViewModel
 
