@@ -45,7 +45,7 @@ object MonthScheduleWhatsappFormatter {
         }
 
         sb.append("\\*Cafezinho pós culto de Adoração (Ceia) todo 4° Domingo\n\n")
-        sb.append("\\* Aberto a participação de qualquer irmão.\n")
+        sb.append("\\* Aberto a participação de qualquer irmão.\n\n")
         sb.append("DEUS ABENÇOE")
 
         return sb.toString().trim()

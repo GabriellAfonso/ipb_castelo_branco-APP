@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleItem
 
+private val SORT_ORDER = listOf("terça", "terca", "quinta", "domingo")
+private val PT_BR = java.util.Locale.forLanguageTag("pt-BR")
+
 @Composable
 fun ScheduleEditorTable(
     items: List<EditableScheduleItem>,
@@ -33,11 +36,17 @@ fun ScheduleEditorTable(
         .mapIndexed { index, item -> index to item }
         .groupBy { (_, item) -> item.scheduleTypeName }
 
+    val sortedGroups = grouped.entries.sortedBy { (typeName, _) ->
+        val lower = typeName.trim().lowercase(PT_BR)
+        SORT_ORDER.indexOfFirst { lower.startsWith(it) }
+            .let { if (it == -1) Int.MAX_VALUE else it }
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        grouped.forEach { (typeName, indexedItems) ->
+        sortedGroups.forEach { (typeName, indexedItems) ->
             ScheduleEditorSection(
                 typeName = typeName,
                 indexedItems = indexedItems,

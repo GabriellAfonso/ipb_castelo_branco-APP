@@ -24,19 +24,20 @@ import javax.inject.Inject
 class AdminScheduleViewModel @Inject constructor(
     private val repository: AdminScheduleRepository
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(AdminScheduleUiState())
     val uiState: StateFlow<AdminScheduleUiState> = _uiState.asStateFlow()
 
     fun onEvent(event: AdminScheduleEvent) {
         when (event) {
-            AdminScheduleEvent.LoadMembers                  -> loadMembers()
-            is AdminScheduleEvent.MonthChanged              -> changeMonth(event.year, event.month)
-            is AdminScheduleEvent.MemberQueryChanged        -> updateMemberQuery(event.itemIndex, event.query)
-            is AdminScheduleEvent.MemberSelected            -> selectMember(event.itemIndex, event.member)
-            AdminScheduleEvent.GenerateSchedule             -> generateSchedule()
-            AdminScheduleEvent.SaveSchedule                 -> saveSchedule()
-            AdminScheduleEvent.SnackbarShown                -> _uiState.update { it.copy(snackbarMessage = null) }
+            AdminScheduleEvent.LoadMembers -> loadMembers()
+            is AdminScheduleEvent.MonthChanged -> changeMonth(event.year, event.month)
+            is AdminScheduleEvent.MemberQueryChanged -> updateMemberQuery(
+                event.itemIndex, event.query
+            )
+            is AdminScheduleEvent.MemberSelected -> selectMember(event.itemIndex, event.member)
+            AdminScheduleEvent.GenerateSchedule -> generateSchedule()
+            AdminScheduleEvent.SaveSchedule -> saveSchedule()
+            AdminScheduleEvent.SnackbarShown -> _uiState.update { it.copy(snackbarMessage = null) }
         }
     }
 
@@ -49,7 +50,12 @@ class AdminScheduleViewModel @Inject constructor(
                     _uiState.update { it.copy(members = members, isLoadingMembers = false) }
                 }
                 .onFailure {
-                    _uiState.update { it.copy(isLoadingMembers = false, snackbarMessage = "Falha ao carregar membros.") }
+                    _uiState.update {
+                        it.copy(
+                            isLoadingMembers = false,
+                            snackbarMessage = "Falha ao carregar membros."
+                        )
+                    }
                 }
         }
     }
@@ -69,7 +75,10 @@ class AdminScheduleViewModel @Inject constructor(
     private fun selectMember(index: Int, member: Member) {
         _uiState.update { state ->
             state.copy(items = state.items.mapIndexed { i, item ->
-                if (i == index) item.copy(selectedMember = member, memberQuery = member.name) else item
+                if (i == index) item.copy(
+                    selectedMember = member,
+                    memberQuery = member.name
+                ) else item
             })
         }
     }
@@ -79,11 +88,16 @@ class AdminScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isGenerating = true) }
             repository.generateSchedule(year = state.year, month = state.month)
-                .onSuccess { dto ->
-                    _uiState.update { it.copy(isGenerating = false, items = dto.toEditableItems()) }
+                .onSuccess { items ->
+                    _uiState.update { it.copy(isGenerating = false, items = items) }
                 }
                 .onFailure {
-                    _uiState.update { it.copy(isGenerating = false, snackbarMessage = "Falha ao gerar escala.") }
+                    _uiState.update {
+                        it.copy(
+                            isGenerating = false,
+                            snackbarMessage = "Falha ao gerar escala."
+                        )
+                    }
                 }
         }
     }
@@ -93,32 +107,28 @@ class AdminScheduleViewModel @Inject constructor(
         if (!state.canSave) return
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            val dto = state.toMonthScheduleDto()
-            repository.saveSchedule(year = state.year, month = state.month, schedule = dto)
+            repository.saveSchedule(year = state.year, month = state.month, items = state.items)
                 .onSuccess {
-                    _uiState.update { it.copy(isSaving = false, snackbarMessage = "Escala salva com sucesso.") }
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false,
+                            snackbarMessage = "Escala salva com sucesso."
+                        )
+                    }
                 }
-                .onFailure {
-                    _uiState.update { it.copy(isSaving = false, snackbarMessage = "Falha ao salvar escala.") }
+                .onFailure { error ->
+                    val message = error.message ?: "Falha ao salvar escala."
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false,
+                            snackbarMessage = message
+                        )
+                    }
                 }
         }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
-
-    private fun MonthScheduleDto.toEditableItems(): List<EditableScheduleItem> =
-        schedule.flatMap { (typeName, entry) ->
-            entry.items.map { item ->
-                EditableScheduleItem(
-                    date = item.date ?: "",
-                    day = item.day,
-                    scheduleTypeName = typeName,
-                    selectedMember = Member(item.member.id, item.member.name),
-                    memberQuery = item.member.name
-                )
-            }
-        }.sortedWith(compareBy({ it.scheduleTypeName }, { it.day }))
-
     private fun AdminScheduleUiState.toMonthScheduleDto(): MonthScheduleDto {
         val grouped = items.groupBy { it.scheduleTypeName }
         return MonthScheduleDto(
