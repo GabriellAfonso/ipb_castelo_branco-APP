@@ -4,12 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SuggestedSong
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundayPlayPushItem
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundaySet
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopSong
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopTone
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay

@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.components.ColumnAlignment
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.components.Header
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.components.TableColumn

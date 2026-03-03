@@ -2,8 +2,8 @@ package com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.mappe
 
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationUiState
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundayPlayPushItem
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
 import java.time.LocalDate
 
 object SundayPlaysMapper {

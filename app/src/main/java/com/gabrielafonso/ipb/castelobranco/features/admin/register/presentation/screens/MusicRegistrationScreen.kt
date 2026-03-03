@@ -42,6 +42,7 @@ import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationUiState
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.RegistrationType
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.viewmodel.MusicRegistrationViewModel
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 
 private val Green = Color(0xFF0F6B5C)
 private val Orange = Color(0xFFF2A300)
@@ -56,7 +57,7 @@ data class MusicRegistrationScreenActions(
 data class SundayRegistrationActions(
     val onOpenDatePicker: () -> Unit,
     val onSongQueryChange: (position: Int, query: String) -> Unit,
-    val onSongSelect: (position: Int, song: com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song) -> Unit,
+    val onSongSelect: (position: Int, song: Song) -> Unit,
     val onToneChange: (position: Int, tone: String) -> Unit,
     val onAddRow: () -> Unit,
     val onRemoveRow: (position: Int) -> Unit,

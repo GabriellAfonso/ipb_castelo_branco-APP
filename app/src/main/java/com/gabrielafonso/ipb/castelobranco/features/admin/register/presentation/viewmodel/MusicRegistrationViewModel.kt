@@ -12,7 +12,7 @@ import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.util.SongLabelFormatter
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model
+package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model
 
 data class SundayPlayPushItem(
     val songId: Int,

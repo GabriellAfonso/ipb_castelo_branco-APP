@@ -1,6 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.repository
 
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundayPlayPushItem
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
 
 interface WorshipRegisterRepository {
     suspend fun pushSundayPlays(

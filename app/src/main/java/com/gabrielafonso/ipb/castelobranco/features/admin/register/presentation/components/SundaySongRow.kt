@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.constants.NATURAL_TONES
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.util.SongLabelFormatter
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -3,7 +3,7 @@ package com.gabrielafonso.ipb.castelobranco.features.admin.register.data.reposit
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.data.api.WorshipRegisterApi
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.data.mapper.RegisterSundayPlaysRequestMapper
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.repository.WorshipRegisterRepository
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundayPlayPushItem
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
 import javax.inject.Inject
 import javax.inject.Singleton
 

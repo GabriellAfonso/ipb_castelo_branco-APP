@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model
+package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model
 
 data class SundaySet(
     val date: String, // manter "dd/MM/yyyy" por enquanto

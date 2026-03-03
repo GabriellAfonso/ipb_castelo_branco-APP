@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundaySet
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.components.Header
 
 import androidx.compose.foundation.background
@@ -25,7 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundaySetItem
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySetItem
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.components.ColumnAlignment
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.components.TableColumn
 

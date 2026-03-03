@@ -2,11 +2,11 @@ package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.re
 
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SuggestedSong
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundaySet
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopSong
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopTone
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
 import kotlinx.coroutines.flow.Flow
 
 interface SongsRepository {

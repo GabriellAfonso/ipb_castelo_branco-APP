@@ -1,7 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.validation
 
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 
 object MusicRegistrationValidator {
 

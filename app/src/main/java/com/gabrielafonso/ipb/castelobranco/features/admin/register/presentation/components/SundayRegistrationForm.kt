@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.Song
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 
 @Composable
 fun SundayRegistrationForm(

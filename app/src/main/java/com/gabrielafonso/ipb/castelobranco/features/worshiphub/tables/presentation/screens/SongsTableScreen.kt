@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SuggestedSong
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundaySet
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopSong
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopTone
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.LastSundaysTab

@@ -2,7 +2,7 @@ package com.gabrielafonso.ipb.castelobranco.features.admin.register.data.mapper
 
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.data.dto.RegisterSundayPlayItemDto
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.data.dto.RegisterSundayPlaysRequestDto
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundayPlayPushItem
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
 import javax.inject.Inject
 
 class RegisterSundayPlaysRequestMapper @Inject constructor() {

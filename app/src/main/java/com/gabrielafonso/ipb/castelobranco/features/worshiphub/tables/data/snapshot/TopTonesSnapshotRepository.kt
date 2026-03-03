@@ -6,7 +6,7 @@ import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.TopToneDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapper.TopTonesMapper
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.TopTone
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
 import javax.inject.Inject
 
 class TopTonesSnapshotRepository @Inject constructor(

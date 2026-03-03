@@ -1,8 +1,8 @@
 package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapper
 
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SongsBySundayDto
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundaySet
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SundaySetItem
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySetItem
 import javax.inject.Inject
 
 class SongsBySundayMapper @Inject constructor() {

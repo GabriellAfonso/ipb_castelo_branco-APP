@@ -1,7 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapper
 
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SuggestedSongDto
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.model.SuggestedSong
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
 import javax.inject.Inject
 
 class SuggestedSongsMapper @Inject constructor() {
