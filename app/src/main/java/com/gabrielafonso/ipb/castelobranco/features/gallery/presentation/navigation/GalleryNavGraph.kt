@@ -11,11 +11,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryViewModel
-import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.AlbumScreen
-import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.AlbumView
-import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.GalleryView
-import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.PhotoScreen
-import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.views.PhotoView
+import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.screens.AlbumScreen
+import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.screens.GalleryScreen
+import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.screens.PhotoScreen
 
 @Stable
 data class GalleryNav(
@@ -51,7 +49,7 @@ fun GalleryNavGraph(
     NavHost(navController = navController, startDestination = GalleryRoutes.Gallery) {
 
         composable(GalleryRoutes.Gallery) {
-            GalleryView(nav = nav, viewModel = viewModel, albums = albums)
+            GalleryScreen(nav = nav, viewModel = viewModel, albums = albums)
         }
 
         composable(
@@ -59,7 +57,7 @@ fun GalleryNavGraph(
             arguments = listOf(navArgument("albumId") { type = NavType.LongType })
         ) { backStackEntry ->
             val albumId = backStackEntry.arguments?.getLong("albumId") ?: 0L
-            AlbumView(albumId = albumId, viewModel = viewModel, nav = nav)
+            AlbumScreen(albumId = albumId, viewModel = viewModel, nav = nav)
         }
 
         composable(
@@ -71,7 +69,7 @@ fun GalleryNavGraph(
         ) { backStackEntry ->
             val albumId = backStackEntry.arguments?.getLong("albumId") ?: 0L
             val photoIndex = backStackEntry.arguments?.getInt("photoIndex") ?: 0
-            PhotoView(albumId = albumId, photoIndex = photoIndex, viewModel = viewModel, nav = nav)
+            PhotoScreen(albumId = albumId, photoIndex = photoIndex, viewModel = viewModel, nav = nav)
         }
     }
 }

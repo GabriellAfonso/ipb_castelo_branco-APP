@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.repository.HymnalRepository
-import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.views.HymnalUiState
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.screens.HymnalUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

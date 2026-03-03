@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseActivity
-import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.views.MonthScheduleView
+import com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.screens.MonthScheduleScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,7 +25,7 @@ class ScheduleActivity : BaseActivity() {
 
     @Composable
     override fun ScreenContent() {
-        MonthScheduleView(
+        MonthScheduleScreen(
             onBackClick = { finish() },
             onShare = { text -> shareText(text) }
         )

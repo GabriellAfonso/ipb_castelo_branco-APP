@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseActivity
-import com.gabrielafonso.ipb.castelobranco.features.main.presentation.views.MainView
+import com.gabrielafonso.ipb.castelobranco.features.main.presentation.screens.MainView
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

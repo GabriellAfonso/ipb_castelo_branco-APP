@@ -8,8 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
-import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.views.HymnDetailView
-import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.views.HymnalView
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.screens.HymnDetailScreen
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.screens.HymnalScreen
 
 
 object HymnalRoutes {
@@ -28,7 +28,7 @@ fun HymnalNavGraph(
 ) {
     NavHost(navController = navController, startDestination = HymnalRoutes.List) {
         composable(HymnalRoutes.List) {
-            HymnalView(
+            HymnalScreen(
                 viewModel = viewModel,
                 onHymnClick = { hymnId ->
                     navController.navigate(HymnalRoutes.detailRoute(hymnId))
@@ -46,7 +46,7 @@ fun HymnalNavGraph(
         ) { backStackEntry ->
             val hymnId = backStackEntry.arguments?.getString(HymnalRoutes.ArgHymnId).orEmpty()
 
-            HymnDetailView(
+            HymnDetailScreen(
                 hymnId = hymnId,
                 onBack = {
                     val popped = navController.popBackStack()

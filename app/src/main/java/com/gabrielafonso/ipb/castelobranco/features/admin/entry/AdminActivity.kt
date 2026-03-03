@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseActivity
-import com.gabrielafonso.ipb.castelobranco.features.admin.presentation.navigation.AdminNavGraph
+import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.navigation.AdminNavGraph
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

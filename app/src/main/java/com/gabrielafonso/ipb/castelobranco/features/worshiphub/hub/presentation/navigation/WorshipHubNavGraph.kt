@@ -7,9 +7,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.gabrielafonso.ipb.castelobranco.core.ui.components.InDevelopmentScreen
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.views.WorshipHubView
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.screens.WorshipHubScreen
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.views.WorshipSongsTableView
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.screens.WorshipSongsTableScreen
 
 @Stable
 data class WorshipHubNav(
@@ -66,14 +66,14 @@ fun WorshipHubNavGraph(
 
         composable(WorshipHubRoutes.Hub) {
 
-            WorshipHubView(
+            WorshipHubScreen(
                 nav = nav
             )
         }
 
         composable(WorshipHubRoutes.Tables) {
             val viewModel: SongsTableViewModel = hiltViewModel()
-            WorshipSongsTableView(
+            WorshipSongsTableScreen(
                 onBackClick = { popOrFinish() },
                 viewModel = viewModel
             )

@@ -60,9 +60,9 @@ fun SuggestionsTab(
 
         val lines = suggestedSongs
             .sortedBy { it.position }
-            .joinToString(separator = "\n") { song ->
-                val formattedArtist = if (song.artist.length > 8) {
-                    "${song.artist.take(8)}."
+            .joinToString(separator = "\n\n") { song ->
+                val formattedArtist = if (song.artist.length > 5) {
+                    "${song.artist.take(5)}."
                 } else {
                     song.artist
                 }

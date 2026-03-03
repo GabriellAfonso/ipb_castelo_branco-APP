@@ -79,7 +79,5 @@ class AuthRepositoryImpl @Inject constructor(
 
             tokenStorage.save(tokens)
             tokens
-        }.onFailure { e ->
-            Log.e("GoogleSignIn", "Falha no authenticate: ${e::class.simpleName} - ${e.message}", e)
         }
 }

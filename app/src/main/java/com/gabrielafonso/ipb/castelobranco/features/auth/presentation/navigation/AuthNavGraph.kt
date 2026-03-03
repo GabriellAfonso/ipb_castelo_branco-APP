@@ -6,8 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.AuthViewModel
-import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.views.AuthView
-import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.views.RegisterView
+import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens.AuthScreen
+import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens.RegisterScreen
 
 object AuthRoutes {
     const val AUTH = "AuthView"
@@ -22,7 +22,7 @@ fun AuthNavGraph(
 ) {
     NavHost(navController = navController, startDestination = AuthRoutes.AUTH) {
         composable(AuthRoutes.AUTH) {
-            AuthView(
+            AuthScreen(
                 viewModel = viewModel,
                 onBackClick = {
                     val popped = navController.popBackStack()
@@ -34,7 +34,7 @@ fun AuthNavGraph(
             )
         }
         composable(AuthRoutes.REGISTER) {
-            RegisterView(
+            RegisterScreen(
                 viewModel = viewModel,
                 onBackClick = {
                     navController.popBackStack()

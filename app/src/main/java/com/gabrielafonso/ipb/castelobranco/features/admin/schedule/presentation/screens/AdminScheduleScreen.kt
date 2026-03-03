@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.views
+package com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -44,7 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
-import com.gabrielafonso.ipb.castelobranco.features.admin.presentation.navigation.AdminNav
+import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.navigation.AdminNav
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.components.ScheduleEditorTable
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleEvent
@@ -70,7 +70,7 @@ data class AdminScheduleActions(
 // ── Entry point ───────────────────────────────────────────────────────────────
 
 @Composable
-fun AdminScheduleView(
+fun AdminScheduleScreen(
     nav: AdminNav,
     onShare: (String) -> Unit,
     viewModel: AdminScheduleViewModel = hiltViewModel()
@@ -108,7 +108,7 @@ fun AdminScheduleView(
         onShare = onShare,
     )
 
-    AdminScheduleScreen(
+    AdminScheduleContent(
         state = state,
         actions = actions,
         snackbarHostState = snackbarHostState,
@@ -119,7 +119,7 @@ fun AdminScheduleView(
 // ── Stateless screen ──────────────────────────────────────────────────────────
 
 @Composable
-fun AdminScheduleScreen(
+fun AdminScheduleContent(
     state: AdminScheduleUiState,
     actions: AdminScheduleActions,
     snackbarHostState: SnackbarHostState,
@@ -404,7 +404,7 @@ private fun AdminScheduleUiState.toWhatsappText(): String {
     }
 
     sb.append("*Cafezinho pós culto de Adoração (Ceia) todo 4° Domingo\n\n")
-    sb.append("* Aberto a participação de qualquer irmão.\n")
+    sb.append("* Aberto a participação de qualquer irmão.\n\n")
     sb.append("DEUS ABENÇOE")
 
     return sb.toString().trim()

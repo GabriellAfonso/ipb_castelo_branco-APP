@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.MusicSongFormState
-import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.views.MusicSongRegistrationActions
+import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.screens.MusicSongRegistrationActions
 
 private val Green = Color(0xFF0F6B5C)
 
