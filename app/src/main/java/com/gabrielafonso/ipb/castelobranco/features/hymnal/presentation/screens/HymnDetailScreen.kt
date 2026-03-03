@@ -47,7 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.HymnLyric
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.HymnLyricType
-import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
 import kotlin.math.roundToInt
 

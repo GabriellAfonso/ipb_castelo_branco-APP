@@ -1,7 +1,6 @@
 // app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/screens/auth/AuthView.kt
 package com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens
 
-import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,9 +36,8 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.gabrielafonso.ipb.castelobranco.BuildConfig
 import com.gabrielafonso.ipb.castelobranco.R
-import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.AuthViewModel
-import com.gabrielafonso.ipb.castelobranco.features.main.entry.goToMainAsRoot
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.delay
@@ -52,7 +50,8 @@ import androidx.credentials.CustomCredential
 fun AuthScreen(
     viewModel: AuthViewModel,
     onBackClick: () -> Unit = {},
-    onNavigateToRegister: () -> Unit = {}
+    onNavigateToRegister: () -> Unit = {},
+    onAuthSuccess: () -> Unit = {},
 ) {
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
@@ -72,10 +71,7 @@ fun AuthScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
-                is AuthViewModel.AuthEvent.LoginSuccess -> {
-                    val msg = "Logado com Sucesso"
-                    (context as? Activity)?.goToMainAsRoot(message = msg)
-                }
+                is AuthViewModel.AuthEvent.LoginSuccess -> onAuthSuccess()
 
                 else -> {}
             }

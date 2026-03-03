@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
-import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.navigation.AdminNav
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.components.ScheduleEditorTable

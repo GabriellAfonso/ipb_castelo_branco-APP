@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gabrielafonso.ipb.castelobranco.R
-import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.navigation.AdminNav
 
 data class AdminAction(

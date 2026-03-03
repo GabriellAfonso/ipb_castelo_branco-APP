@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.theme
+package com.gabrielafonso.ipb.castelobranco.core.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily

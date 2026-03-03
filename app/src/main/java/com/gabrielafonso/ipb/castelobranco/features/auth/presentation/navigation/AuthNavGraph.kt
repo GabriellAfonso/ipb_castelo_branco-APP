@@ -1,44 +1,47 @@
 package com.gabrielafonso.ipb.castelobranco.features.auth.presentation.navigation
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.AuthViewModel
+import androidx.navigation.navigation
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens.AuthScreen
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens.RegisterScreen
+import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.AuthViewModel
 
 object AuthRoutes {
     const val AUTH = "AuthView"
     const val REGISTER = "RegisterView"
 }
 
-@Composable
-fun AuthNavGraph(
+fun NavGraphBuilder.authGraph(
     navController: NavHostController,
-    onFinish: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    onAuthSuccess: () -> Unit,
 ) {
-    NavHost(navController = navController, startDestination = AuthRoutes.AUTH) {
-        composable(AuthRoutes.AUTH) {
+    navigation(
+        route            = AppRoutes.AUTH_GRAPH,
+        startDestination = AuthRoutes.AUTH,
+    ) {
+        composable(AuthRoutes.AUTH) { entry ->
+            val graphEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.AUTH_GRAPH) }
+            val viewModel: AuthViewModel = hiltViewModel(graphEntry)
             AuthScreen(
-                viewModel = viewModel,
-                onBackClick = {
-                    val popped = navController.popBackStack()
-                    if (!popped) onFinish()
-                },
-                onNavigateToRegister = {
-                    navController.navigate(AuthRoutes.REGISTER)
-                }
+                viewModel            = viewModel,
+                onBackClick          = { navController.popBackStack() },
+                onNavigateToRegister = { navController.navigate(AuthRoutes.REGISTER) },
+                onAuthSuccess        = onAuthSuccess,
             )
         }
-        composable(AuthRoutes.REGISTER) {
+
+        composable(AuthRoutes.REGISTER) { entry ->
+            val graphEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.AUTH_GRAPH) }
+            val viewModel: AuthViewModel = hiltViewModel(graphEntry)
             RegisterScreen(
-                viewModel = viewModel,
-                onBackClick = {
-                    navController.popBackStack()
-                },
+                viewModel     = viewModel,
+                onBackClick   = { navController.popBackStack() },
+                onAuthSuccess = onAuthSuccess,
             )
         }
     }

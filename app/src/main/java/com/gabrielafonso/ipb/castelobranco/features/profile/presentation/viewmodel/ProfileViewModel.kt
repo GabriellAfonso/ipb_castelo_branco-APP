@@ -100,7 +100,7 @@ class ProfileViewModel @Inject constructor(
             return
         }
 
-        repository.downloadAndPersistProfilePhoto(url).getOrThrow()
+        repository.downloadAndPersistProfilePhoto(url)
         refreshLocalPhotoPathAndBump()
     }
 

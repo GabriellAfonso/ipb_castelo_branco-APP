@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.components
+package com.gabrielafonso.ipb.castelobranco.core.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -18,8 +18,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage // Importante: certifique-se de ter adicionado a lib
 import com.gabrielafonso.ipb.castelobranco.R
-import com.gabrielafonso.ipb.castelobranco.core.ui.theme.ipbGreen
-import com.gabrielafonso.ipb.castelobranco.core.ui.theme.onPrimaryLight
+import com.gabrielafonso.ipb.castelobranco.core.presentation.theme.ipbGreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.theme.onPrimaryLight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.theme
+package com.gabrielafonso.ipb.castelobranco.core.presentation.theme
 import androidx.compose.ui.graphics.Color
 
 val ipbGreen = Color(0xFF045A48)

@@ -27,7 +27,7 @@ class SongsTableViewModel @Inject constructor(
     val allSongs: StateFlow<List<Song>> = _allSongs.asStateFlow()
 
     fun refreshAllSongs() {
-        viewModelScope.launch { repository.refreshAllSongs() }
+        viewModelScope.launch { runCatching { repository.refreshAllSongs() } }
     }
 
     private val _lastSundays = MutableStateFlow<List<SundaySet>>(emptyList())
@@ -50,7 +50,7 @@ class SongsTableViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.refreshSongsBySunday()
+            runCatching { repository.refreshSongsBySunday() }
         }
         viewModelScope.launch {
             repository.observeSongsBySunday().collect { state ->
@@ -101,6 +101,8 @@ class SongsTableViewModel @Inject constructor(
 
                 refreshJob.await()
                 minTimeJob.await()
+            } catch (_: Exception) {
+                // network errors are non-fatal; the observer will surface cached data
             } finally {
                 _isRefreshingSuggestedSongs.value = false
             }

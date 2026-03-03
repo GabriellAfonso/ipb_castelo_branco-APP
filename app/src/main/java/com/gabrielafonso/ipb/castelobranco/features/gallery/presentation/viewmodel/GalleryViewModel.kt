@@ -48,18 +48,23 @@ class GalleryViewModel @Inject constructor(
         if (_downloadState.value.isDownloading) return
 
         viewModelScope.launch {
-            repository.downloadAllPhotos().collect { progress ->
+            try {
+                repository.downloadAllPhotos().collect { progress ->
+                    _downloadState.update {
+                        it.copy(
+                            isDownloading = progress.downloaded < progress.total,
+                            downloaded = progress.downloaded,
+                            total = progress.total
+                        )
+                    }
+                }
+                repository.preload()
+            } catch (e: Exception) {
                 _downloadState.update {
-                    it.copy(
-                        isDownloading = progress.downloaded < progress.total,
-                        downloaded = progress.downloaded,
-                        total = progress.total
-                    )
+                    it.copy(isDownloading = false, error = e.message ?: "Erro ao baixar fotos")
                 }
             }
-        repository.preload()
         }
-
     }
 
 

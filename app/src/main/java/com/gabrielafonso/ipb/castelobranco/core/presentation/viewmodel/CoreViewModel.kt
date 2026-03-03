@@ -1,8 +1,7 @@
-package com.gabrielafonso.ipb.castelobranco.features.main.presentation.viewmodel
+package com.gabrielafonso.ipb.castelobranco.core.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
@@ -26,20 +25,20 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class CoreViewModel @Inject constructor(
     private val songsRepository: SongsRepository,
     private val hymnalRepository: HymnalRepository,
     private val scheduleRepository: ScheduleRepository,
     private val galleryRepository: GalleryRepository,
     private val authSession: AuthSession,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
-    sealed interface MainEvent {
-        data object LogoutSuccess : MainEvent
+    sealed interface CoreEvent {
+        data object LogoutSuccess : CoreEvent
     }
 
-    private val _events = Channel<MainEvent>(capacity = Channel.Factory.BUFFERED)
+    private val _events = Channel<CoreEvent>(capacity = Channel.Factory.BUFFERED)
     val events = _events.receiveAsFlow()
 
     private val _isPreloading = MutableStateFlow(false)
@@ -103,7 +102,7 @@ class MainViewModel @Inject constructor(
                 async { songsRepository.refreshTopTones() },
                 async { songsRepository.refreshSuggestedSongs() },
                 async { hymnalRepository.refreshHymnal() },
-                async { scheduleRepository.refreshMonthSchedule() }
+                async { scheduleRepository.refreshMonthSchedule() },
             )
 
             jobs.forEach { deferred ->
@@ -141,7 +140,7 @@ class MainViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             authSession.logout()
-            _events.trySend(MainEvent.LogoutSuccess)
+            _events.trySend(CoreEvent.LogoutSuccess)
         }
     }
 }

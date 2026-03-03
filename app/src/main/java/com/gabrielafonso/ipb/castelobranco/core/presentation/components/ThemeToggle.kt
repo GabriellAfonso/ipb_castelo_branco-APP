@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.components
+package com.gabrielafonso.ipb.castelobranco.core.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

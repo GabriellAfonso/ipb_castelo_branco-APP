@@ -1,15 +1,17 @@
 package com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.gabrielafonso.ipb.castelobranco.core.ui.components.InDevelopmentScreen
+import androidx.navigation.navigation
+import com.gabrielafonso.ipb.castelobranco.core.presentation.components.InDevelopmentScreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.screens.WorshipHubScreen
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.screens.WorshipSongsTableScreen
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
 
 @Stable
 data class WorshipHubNav(
@@ -21,13 +23,13 @@ data class WorshipHubNav(
     val button6: () -> Unit,
     val button7: () -> Unit,
     val button8: () -> Unit,
-    val back: () -> Unit
+    val back: () -> Unit,
 )
 
 object WorshipHubRoutes {
-    const val Hub = "WorshipMain"
-    const val Tables = "WorshipTables"
-    const val Songs = "songs"
+    const val Hub     = "WorshipMain"
+    const val Tables  = "WorshipTables"
+    const val Songs   = "songs"
     const val Button3 = "button_3"
     const val Button4 = "button_4"
     const val Button5 = "button_5"
@@ -36,54 +38,41 @@ object WorshipHubRoutes {
     const val Button8 = "button_8"
 }
 
-@Composable
-fun WorshipHubNavGraph(
-    navController: NavHostController,
-    onFinish: () -> Unit,
-) {
-    fun popOrFinish() {
-        val popped = navController.popBackStack()
-        if (!popped) onFinish()
-    }
-
-    val nav =
-        WorshipHubNav(
-            tables = { navController.navigate(WorshipHubRoutes.Tables) },
-            songs = { navController.navigate(WorshipHubRoutes.Songs) },
-            button3 = { navController.navigate(WorshipHubRoutes.Button3) },
-            button4 = { navController.navigate(WorshipHubRoutes.Button4) },
-            button5 = { navController.navigate(WorshipHubRoutes.Button5) },
-            button6 = { navController.navigate(WorshipHubRoutes.Button6) },
-            button7 = { navController.navigate(WorshipHubRoutes.Button7) },
-            button8 = { navController.navigate(WorshipHubRoutes.Button8) },
-            back = { popOrFinish() }
-        )
-
-    NavHost(
-        navController = navController,
-        startDestination = WorshipHubRoutes.Hub
+fun NavGraphBuilder.worshipHubGraph(navController: NavHostController) {
+    navigation(
+        route            = AppRoutes.WORSHIP_HUB_GRAPH,
+        startDestination = WorshipHubRoutes.Hub,
     ) {
-
         composable(WorshipHubRoutes.Hub) {
-
-            WorshipHubScreen(
-                nav = nav
-            )
+            val nav = remember {
+                WorshipHubNav(
+                    tables  = { navController.navigate(WorshipHubRoutes.Tables) },
+                    songs   = { navController.navigate(WorshipHubRoutes.Songs) },
+                    button3 = { navController.navigate(WorshipHubRoutes.Button3) },
+                    button4 = { navController.navigate(WorshipHubRoutes.Button4) },
+                    button5 = { navController.navigate(WorshipHubRoutes.Button5) },
+                    button6 = { navController.navigate(WorshipHubRoutes.Button6) },
+                    button7 = { navController.navigate(WorshipHubRoutes.Button7) },
+                    button8 = { navController.navigate(WorshipHubRoutes.Button8) },
+                    back    = { navController.popBackStack() },
+                )
+            }
+            WorshipHubScreen(nav = nav)
         }
 
         composable(WorshipHubRoutes.Tables) {
             val viewModel: SongsTableViewModel = hiltViewModel()
             WorshipSongsTableScreen(
-                onBackClick = { popOrFinish() },
-                viewModel = viewModel
+                onBackClick = { navController.popBackStack() },
+                viewModel   = viewModel,
             )
         }
 
-        composable(WorshipHubRoutes.Songs) { InDevelopmentScreen(onBack = ::popOrFinish) }
-        composable(WorshipHubRoutes.Button4) { InDevelopmentScreen(onBack = ::popOrFinish) }
-        composable(WorshipHubRoutes.Button5) { InDevelopmentScreen(onBack = ::popOrFinish) }
-        composable(WorshipHubRoutes.Button6) { InDevelopmentScreen(onBack = ::popOrFinish) }
-        composable(WorshipHubRoutes.Button7) { InDevelopmentScreen(onBack = ::popOrFinish) }
-        composable(WorshipHubRoutes.Button8) { InDevelopmentScreen(onBack = ::popOrFinish) }
+        composable(WorshipHubRoutes.Songs)   { InDevelopmentScreen(onBack = { navController.popBackStack() }) }
+        composable(WorshipHubRoutes.Button4) { InDevelopmentScreen(onBack = { navController.popBackStack() }) }
+        composable(WorshipHubRoutes.Button5) { InDevelopmentScreen(onBack = { navController.popBackStack() }) }
+        composable(WorshipHubRoutes.Button6) { InDevelopmentScreen(onBack = { navController.popBackStack() }) }
+        composable(WorshipHubRoutes.Button7) { InDevelopmentScreen(onBack = { navController.popBackStack() }) }
+        composable(WorshipHubRoutes.Button8) { InDevelopmentScreen(onBack = { navController.popBackStack() }) }
     }
 }

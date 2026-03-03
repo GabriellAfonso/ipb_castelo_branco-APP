@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.theme
+package com.gabrielafonso.ipb.castelobranco.core.presentation.theme
 
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate

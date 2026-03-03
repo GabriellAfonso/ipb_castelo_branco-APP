@@ -1,5 +1,32 @@
 # CLAUDE.md — IPB Castelo Branco (Android)
 
+## Git Workflow
+
+When asked to commit:
+
+1. Run `git diff --staged` (or `git diff` if nothing staged) to analyze changes
+2. Generate a commit message following this format:
+
+```
+type(scope): short imperative description
+
+* changed X in Y
+* applied Z to W
+* removed/fixed/added ...
+```
+
+**Types:** `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`
+
+3. Run `git add -A && git commit -m "..."`
+4. **Do NOT push.** The push is always done manually by the user.
+
+**Rules:**
+
+- Subject line: max 72 chars, no period at end
+- Bullet points: only if there are 2+ meaningful changes
+- Never run `git push`
+- **All commit messages must be in English, no exceptions**
+
 ## Overview
 
 Android app for the Igreja Presbiteriana de Castelo Branco (local church). Consumes a Django REST API located at `../backend` relative to the workspace root. Features include a photo gallery, worship song tracking, monthly schedule, and more.
@@ -65,19 +92,19 @@ core/
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| `auth` | User authentication |
-| `gallery` | Church photo gallery |
-| `hymnal` | Hymnal / songs |
-| `schedule` | Monthly schedule |
+| Feature          | Description                          |
+| ---------------- | ------------------------------------ |
+| `auth`           | User authentication                  |
+| `gallery`        | Church photo gallery                 |
+| `hymnal`         | Hymnal / songs                       |
+| `schedule`       | Monthly schedule                     |
 | `admin/register` | Register songs played during worship |
-| `admin/schedule` | Admin schedule management |
-| `admin/panel` | Admin panel |
-| `profile` | User profile |
-| `settings` | App settings |
-| `worshiphub` | Worship hub / service tables |
-| `main` | Root screen / main navigation |
+| `admin/schedule` | Admin schedule management            |
+| `admin/panel`    | Admin panel                          |
+| `profile`        | User profile                         |
+| `settings`       | App settings                         |
+| `worshiphub`     | Worship hub / service tables         |
+| `main`           | Root screen / main navigation        |
 
 ## Backend (Django)
 

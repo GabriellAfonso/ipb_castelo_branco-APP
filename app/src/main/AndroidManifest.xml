@@ -28,65 +28,17 @@
         </provider>
 
         <activity
-            android:name=".features.worshiphub.hub.entry.WorshipHubActivity"
-            android:exported="false"
-            android:label="Worship Hub"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".features.admin.entry.AdminActivity"
-            android:exported="false"
-            android:label="Admin panel"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".features.gallery.entry.GalleryActivity"
-            android:exported="false"
-            android:label="Gallery"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/uCropCustomTheme" />
+
         <activity
-            android:name=".features.profile.entry.ProfileActivity"
-            android:exported="false"
-            android:label="Profile"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".features.auth.entry.AuthActivity"
-            android:exported="false"
-            android:label="Authentication"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".features.settings.entry.SettingsActivity"
-            android:exported="false"
-            android:label="Settings"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".features.schedule.entry.ScheduleActivity"
-            android:exported="false"
-            android:label="Month Schedule"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".features.hymnal.entry.HymnalActivity"
-            android:exported="false"
-            android:label="Hymnal"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.IPBCasteloBranco" />
-        <activity
-            android:name=".features.main.entry.MainActivity"
+            android:name=".core.presentation.CoreActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.IPBCasteloBranco">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -1,6 +1,5 @@
 package com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens
 
-import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.AuthViewModel
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.RegisterErrors
-import com.gabrielafonso.ipb.castelobranco.features.main.entry.goToMainAsRoot
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
@@ -45,6 +43,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun RegisterScreen(
     viewModel: AuthViewModel,
     onBackClick: () -> Unit = {},
+    onAuthSuccess: () -> Unit = {},
 ) {
     val username = remember { mutableStateOf("") }
     val firstName = remember { mutableStateOf("") }
@@ -66,10 +65,7 @@ fun RegisterScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
-                is AuthViewModel.AuthEvent.RegisterSuccess -> {
-                    val msg = "Conta criada com sucesso"
-                    (context as? Activity)?.goToMainAsRoot(message = msg)
-                }
+                is AuthViewModel.AuthEvent.RegisterSuccess -> onAuthSuccess()
                 else -> {}
             }
         }

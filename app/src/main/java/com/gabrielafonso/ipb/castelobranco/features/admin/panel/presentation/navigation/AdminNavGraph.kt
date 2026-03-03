@@ -1,11 +1,12 @@
 package com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.navigation
 
 import android.content.Intent
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.screens.AdminScreen
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.screens.MusicRegistrationScreen
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.screens.AdminScheduleScreen
@@ -18,41 +19,34 @@ data class AdminNav(
 )
 
 object AdminRoutes {
-    const val ADMIN = "AdminMain"
+    const val ADMIN    = "AdminMain"
     const val REGISTER = "AdminRegister"
     const val SCHEDULE = "AdminSchedule"
 }
 
-@Composable
-fun AdminNavGraph(
-    navController: NavHostController,
-    onFinish: () -> Unit,
-) {
-    fun popOrFinish() {
-        if (!navController.popBackStack()) onFinish()
-    }
-
-    val nav = AdminNav(
-        back = { popOrFinish() },
+fun NavGraphBuilder.adminGraph(navController: NavHostController) {
+    fun nav() = AdminNav(
+        back     = { navController.popBackStack() },
         register = { navController.navigate(AdminRoutes.REGISTER) },
         schedule = { navController.navigate(AdminRoutes.SCHEDULE) },
     )
 
-    NavHost(navController = navController, startDestination = AdminRoutes.ADMIN) {
-
+    navigation(
+        route            = AppRoutes.ADMIN_GRAPH,
+        startDestination = AdminRoutes.ADMIN,
+    ) {
         composable(AdminRoutes.ADMIN) {
-            AdminScreen(nav = nav)
+            AdminScreen(nav = nav())
         }
 
         composable(AdminRoutes.REGISTER) {
-            MusicRegistrationScreen(nav)
+            MusicRegistrationScreen(nav())
         }
 
         composable(AdminRoutes.SCHEDULE) {
             AdminScheduleScreen(
-                nav = nav,
+                nav     = nav(),
                 onShare = { text ->
-                    // mesmo Intent que você já usa no schedule normal
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, text)
@@ -60,7 +54,7 @@ fun AdminNavGraph(
                     navController.context.startActivity(
                         Intent.createChooser(intent, "Compartilhar escala")
                     )
-                }
+                },
             )
         }
     }

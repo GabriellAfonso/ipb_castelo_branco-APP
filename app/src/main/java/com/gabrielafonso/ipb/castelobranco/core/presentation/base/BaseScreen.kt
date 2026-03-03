@@ -1,9 +1,8 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.base
+package com.gabrielafonso.ipb.castelobranco.core.presentation.base
 
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.getValue
@@ -26,11 +25,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gabrielafonso.ipb.castelobranco.R
 
-import com.gabrielafonso.ipb.castelobranco.core.ui.components.TopBar
+import com.gabrielafonso.ipb.castelobranco.core.presentation.components.TopBar
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.LocalAppNavigator
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.AuthSession
-import com.gabrielafonso.ipb.castelobranco.features.auth.entry.AuthActivity
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.local.ProfilePhotoBus
-import com.gabrielafonso.ipb.castelobranco.features.profile.entry.ProfileActivity
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -139,12 +137,10 @@ fun BaseScreen(
         else R.drawable.ic_profile_placeholder
     }
 
+    val appNavigator = LocalAppNavigator.current
     val resolvedOnAccountClick: () -> Unit = onAccountClick ?: {
-        if (isLoggedIn) {
-            activity.startActivity(Intent(activity, ProfileActivity::class.java))
-        } else {
-            activity.startActivity(Intent(activity, AuthActivity::class.java))
-        }
+        if (isLoggedIn) appNavigator.navigateToProfile()
+        else appNavigator.navigateToAuth()
     }
 
     Scaffold(

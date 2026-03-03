@@ -28,7 +28,7 @@ import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.mod
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
-import com.gabrielafonso.ipb.castelobranco.core.ui.base.BaseScreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.LastSundaysTab
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.SuggestionsTab

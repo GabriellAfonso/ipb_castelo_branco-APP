@@ -1,11 +1,11 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.base
+package com.gabrielafonso.ipb.castelobranco.core.presentation.base
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import com.gabrielafonso.ipb.castelobranco.core.ui.theme.IPBCasteloBrancoTheme
+import com.gabrielafonso.ipb.castelobranco.core.presentation.theme.IPBCasteloBrancoTheme
 
 
 abstract class BaseActivity : ComponentActivity() {

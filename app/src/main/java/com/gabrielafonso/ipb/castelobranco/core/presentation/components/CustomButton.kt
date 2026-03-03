@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.core.ui.components
+package com.gabrielafonso.ipb.castelobranco.core.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.gabrielafonso.ipb.castelobranco.core.ui.theme.ipbGreen
+import com.gabrielafonso.ipb.castelobranco.core.presentation.theme.ipbGreen
 
 private val ButtonCornerRadius = 16.dp
 private val ButtonContentPadding = 8.dp
