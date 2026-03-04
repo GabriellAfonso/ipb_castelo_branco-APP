@@ -6,6 +6,7 @@ import com.gabrielafonso.ipb.castelobranco.core.domain.auth.AuthEventBus
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.AuthSession
+import com.gabrielafonso.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
 import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -23,6 +24,7 @@ class CoreViewModel @Inject constructor(
     private val authSession: AuthSession,
     private val profileRepository: ProfileRepository,
     private val authEventBus: AuthEventBus,
+    private val logoutUseCase: LogoutUseCase,
 ) : ViewModel() {
 
     sealed interface CoreEvent {
@@ -102,7 +104,7 @@ class CoreViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             profileRepository.clearLocalProfilePhoto()
-            authSession.logout()
+            logoutUseCase()
             _events.trySend(CoreEvent.LogoutSuccess)
         }
     }

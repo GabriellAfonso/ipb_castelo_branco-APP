@@ -28,7 +28,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +43,7 @@ import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.viewmode
 
 data class HymnalUiState(
     val hymns: List<Hymn> = emptyList(),
+    val filteredHymns: List<Hymn> = emptyList(),
     val query: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
@@ -97,16 +97,7 @@ fun HymnalContent(
         ) {
 //            Spacer(modifier = Modifier.height(12.dp))
 
-            // calcular filtro uma vez por composição (evita múltiplos .filter)
-            val filteredHymns = remember(state.hymns, state.query) {
-                val q = state.query.trim()
-                if (q.isBlank()) state.hymns
-                else state.hymns.filter { hymn ->
-                    hymn.number.contains(q, true) ||
-                            hymn.title.contains(q, true) ||
-                            hymn.lyrics.any { it.text.contains(q, true) }
-                }
-            }
+            val filteredHymns = state.filteredHymns
 
             SearchCard(
                 query = state.query,

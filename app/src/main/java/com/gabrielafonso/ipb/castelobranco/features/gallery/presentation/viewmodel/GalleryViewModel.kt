@@ -3,14 +3,12 @@ package com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.viewmo
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
+import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.usecase.DownloadAllPhotosUseCase
 import com.gabrielafonso.ipb.castelobranco.core.domain.error.toAppError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -25,7 +23,8 @@ data class GalleryDownloadState(
 
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
-    private val repository: GalleryRepository
+    private val repository: GalleryRepository,
+    private val downloadAllPhotosUseCase: DownloadAllPhotosUseCase,
 ) : ViewModel() {
 
     private val _downloadState =
@@ -42,15 +41,15 @@ class GalleryViewModel @Inject constructor(
     }
 
     fun getThumbnailForAlbum(albumId: Long): File? {
-    return thumbnails.value[albumId]
-}
+        return thumbnails.value[albumId]
+    }
 
     fun downloadAllPhotos() {
         if (_downloadState.value.isDownloading) return
 
         viewModelScope.launch {
             try {
-                repository.downloadAllPhotos().collect { progress ->
+                downloadAllPhotosUseCase.downloadProgress().collect { progress ->
                     _downloadState.update {
                         it.copy(
                             isDownloading = progress.downloaded < progress.total,
@@ -59,7 +58,7 @@ class GalleryViewModel @Inject constructor(
                         )
                     }
                 }
-                repository.preload()
+                downloadAllPhotosUseCase.preload()
             } catch (e: Exception) {
                 val appError = e.toAppError()
                 _downloadState.update {
@@ -68,7 +67,6 @@ class GalleryViewModel @Inject constructor(
             }
         }
     }
-
 
     fun clearGallery() {
         viewModelScope.launch {
@@ -81,6 +79,4 @@ class GalleryViewModel @Inject constructor(
         Log.d("TAG", "getPhotoName: $albumId - $photoId")
         return repository.getPhotoName(albumId, photoId) ?: "Foto"
     }
-
-
 }

@@ -3,10 +3,10 @@ package com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielafonso.ipb.castelobranco.core.domain.auth.AuthEventBus
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.mapper.AuthErrorMapper
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.RegisterErrors
-import com.gabrielafonso.ipb.castelobranco.features.auth.domain.repository.AuthRepository
+import com.gabrielafonso.ipb.castelobranco.features.auth.domain.usecase.LoginUseCase
+import com.gabrielafonso.ipb.castelobranco.features.auth.domain.usecase.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,9 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository,
-    private val authEventBus: AuthEventBus,
-    private val authErrorMapper: AuthErrorMapper
+    private val loginUseCase: LoginUseCase,
+    private val registerUseCase: RegisterUseCase,
+    private val authErrorMapper: AuthErrorMapper,
 ) : ViewModel() {
 
     companion object {
@@ -53,16 +53,16 @@ class AuthViewModel @Inject constructor(
     fun singIn(username: String, password: String) {
         viewModelScope.launch {
             _loginError.value = null
-            repository.signIn(username, password)
-                .onSuccess { authResponse ->
-                    Log.d(TAG, "Login sucesso: $authResponse")
-                    authEventBus.emit(AuthEventBus.Event.LoginSuccess)
+            when (val result = loginUseCase.withCredentials(username, password)) {
+                LoginUseCase.Result.Success -> {
+                    Log.d(TAG, "Login sucesso")
                     _events.tryEmit(AuthEvent.LoginSuccess)
-                }.onFailure { throwable ->
-                    val raw = throwable.message ?: "Erro ao fazer login"
-                    _loginError.value = authErrorMapper.parseLoginError(raw)
-                    Log.e(TAG, "Falha no login", throwable)
                 }
+                is LoginUseCase.Result.Failure -> {
+                    _loginError.value = authErrorMapper.parseLoginError(result.rawMessage)
+                    Log.e(TAG, "Falha no login")
+                }
+            }
         }
     }
 
@@ -70,14 +70,13 @@ class AuthViewModel @Inject constructor(
         Log.d("GoogleSignIn", "signInWithGoogle chamado")
         viewModelScope.launch {
             _loginError.value = null
-            repository.signInWithGoogle(idToken)
-                .onSuccess {
-                    authEventBus.emit(AuthEventBus.Event.LoginSuccess)
-                    _events.tryEmit(AuthEvent.LoginSuccess)
-                }.onFailure { throwable ->
-                    _loginError.value = throwable.message ?: "Erro ao entrar com Google"
-                    Log.e(TAG, "Falha no login com Google", throwable)
+            when (val result = loginUseCase.withGoogle(idToken)) {
+                LoginUseCase.Result.Success -> _events.tryEmit(AuthEvent.LoginSuccess)
+                is LoginUseCase.Result.Failure -> {
+                    _loginError.value = result.rawMessage
+                    Log.e(TAG, "Falha no login com Google")
                 }
+            }
         }
     }
 
@@ -86,20 +85,20 @@ class AuthViewModel @Inject constructor(
         firstName: String,
         lastName: String,
         password: String,
-        passwordConfirm: String
+        passwordConfirm: String,
     ) {
         viewModelScope.launch {
             _registerErrors.value = RegisterErrors()
-            repository.signUp(username, firstName, lastName, password, passwordConfirm)
-                .onSuccess { authResponse ->
-                    Log.d(TAG, "Registro sucesso: $authResponse")
-                    authEventBus.emit(AuthEventBus.Event.LoginSuccess)
+            when (val result = registerUseCase(username, firstName, lastName, password, passwordConfirm)) {
+                RegisterUseCase.Result.Success -> {
+                    Log.d(TAG, "Registro sucesso")
                     _events.tryEmit(AuthEvent.RegisterSuccess)
-                }.onFailure { throwable ->
-                    val message = throwable.message ?: "Erro ao registrar"
-                    _registerErrors.value = authErrorMapper.parseRegisterError(message)
-                    Log.e(TAG, "Falha no registro", throwable)
                 }
+                is RegisterUseCase.Result.Failure -> {
+                    _registerErrors.value = authErrorMapper.parseRegisterError(result.rawMessage)
+                    Log.e(TAG, "Falha no registro")
+                }
+            }
         }
     }
 

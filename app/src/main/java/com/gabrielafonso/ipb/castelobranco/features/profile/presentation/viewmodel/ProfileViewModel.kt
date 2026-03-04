@@ -6,14 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
-import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
+import com.gabrielafonso.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
+import com.gabrielafonso.ipb.castelobranco.features.profile.domain.usecase.UploadProfilePhotoUseCase
 import com.gabrielafonso.ipb.castelobranco.features.profile.presentation.state.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -21,8 +21,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val repository: ProfileRepository,
-    @ApplicationContext private val context: Context
+    private val fetchProfileUseCase: FetchProfileUseCase,
+    private val uploadProfilePhotoUseCase: UploadProfilePhotoUseCase,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -40,48 +41,37 @@ class ProfileViewModel @Inject constructor(
 
     private fun observeProfile() {
         viewModelScope.launch {
-            repository.observeMeProfile()
-                .collect { state ->
-                    when (state) {
-
-                        is SnapshotState.Data -> {
-                            val profile = state.value
-
-                            _uiState.update {
-                                it.copy(
-                                    userName = profile.name.trim().ifBlank { "Usuário" },
-                                    profileActive = profile.active,
-                                    isMember = profile.isMember,
-                                    isAdmin = profile.isAdmin,
-                                    photoUrl = profile.photoUrl
-                                )
-                            }
-
-                            handleProfilePhoto(profile.photoUrl)
+            fetchProfileUseCase.observe().collect { state ->
+                when (state) {
+                    is SnapshotState.Data -> {
+                        val profile = state.value
+                        _uiState.update {
+                            it.copy(
+                                userName = profile.name.trim().ifBlank { "Usuário" },
+                                profileActive = profile.active,
+                                isMember = profile.isMember,
+                                isAdmin = profile.isAdmin,
+                                photoUrl = profile.photoUrl
+                            )
                         }
-
-                        SnapshotState.Loading -> {
-                            // opcional: nada ou loading
+                        if (!profile.photoUrl.isNullOrBlank()) {
+                            fetchProfileUseCase.downloadAndPersistPhoto(profile.photoUrl)
                         }
+                        refreshLocalPhotoPathAndBump()
+                    }
 
-                        is SnapshotState.Error -> {
-                            _uiState.update {
-                                it.copy(error = state.throwable.message ?: "Erro ao carregar perfil")
-                            }
+                    SnapshotState.Loading -> {
+                        // opcional: nada ou loading
+                    }
+
+                    is SnapshotState.Error -> {
+                        _uiState.update {
+                            it.copy(error = state.throwable.message ?: "Erro ao carregar perfil")
                         }
                     }
                 }
+            }
         }
-    }
-
-    private suspend fun handleProfilePhoto(url: String?) {
-        if (url.isNullOrBlank()) {
-            refreshLocalPhotoPathAndBump()
-            return
-        }
-
-        repository.downloadAndPersistProfilePhoto(url)
-        refreshLocalPhotoPathAndBump()
     }
 
     private fun refreshLocalPhotoPathAndBump() {
@@ -101,7 +91,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(error = null) }
             try {
-                when (repository.refreshMeProfile()) {
+                when (fetchProfileUseCase.refresh()) {
                     is RefreshResult.Error -> {
                         _uiState.update { it.copy(error = "Falha ao atualizar perfil") }
                         refreshLocalPhotoPathAndBump()
@@ -120,30 +110,13 @@ class ProfileViewModel @Inject constructor(
             if (_uiState.value.isUploading) return@launch
             _uiState.update { it.copy(isUploading = true, error = null) }
 
-            try {
-                repository.uploadProfilePhoto(bytes, fileName).getOrThrow()
-
-                when (repository.refreshMeProfile()) {
-                    is RefreshResult.Error ->
-                        error("Falha ao atualizar perfil")
-                    else -> Unit
-                }
-
-                val profile = repository.observeMeProfile()
-                    .first { it is SnapshotState.Data }
-                    .let { (it as SnapshotState.Data).value }
-
-                val url = profile.photoUrl?.trim()
-                if (!url.isNullOrBlank()) {
-                    repository.downloadAndPersistProfilePhoto(url).getOrThrow()
-                    refreshLocalPhotoPathAndBump()
-                }
-
-            } catch (t: Throwable) {
-                _uiState.update { it.copy(error = t.message ?: "Falha ao enviar imagem") }
-            } finally {
-                _uiState.update { it.copy(isUploading = false) }
+            when (val result = uploadProfilePhotoUseCase(bytes, fileName)) {
+                UploadProfilePhotoUseCase.Result.Success -> refreshLocalPhotoPathAndBump()
+                is UploadProfilePhotoUseCase.Result.Failure ->
+                    _uiState.update { it.copy(error = result.message) }
             }
+
+            _uiState.update { it.copy(isUploading = false) }
         }
     }
 }
