@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco.features.schedule.data.mapper
+package com.gabrielafonso.ipb.castelobranco.features.schedule.presentation.mapper
 
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.ScheduleEntry
