@@ -13,8 +13,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,24 +26,29 @@ class SongsTableViewModel @Inject constructor(
     private val repository: SongsRepository
 ) : ViewModel() {
 
-    private val _allSongs = MutableStateFlow<List<Song>>(emptyList())
-    val allSongs: StateFlow<List<Song>> = _allSongs.asStateFlow()
+    val allSongs: StateFlow<List<Song>> = repository.observeAllSongs()
+        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun refreshAllSongs() {
         viewModelScope.launch { runCatching { repository.refreshAllSongs() } }
     }
 
-    private val _lastSundays = MutableStateFlow<List<SundaySet>>(emptyList())
-    val lastSundays: StateFlow<List<SundaySet>> = _lastSundays.asStateFlow()
+    val lastSundays: StateFlow<List<SundaySet>> = repository.observeSongsBySunday()
+        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val _topSongs = MutableStateFlow<List<TopSong>>(emptyList())
-    val topSongs: StateFlow<List<TopSong>> = _topSongs.asStateFlow()
+    val topSongs: StateFlow<List<TopSong>> = repository.observeTopSongs()
+        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val _topTones = MutableStateFlow<List<TopTone>>(emptyList())
-    val topTones: StateFlow<List<TopTone>> = _topTones.asStateFlow()
+    val topTones: StateFlow<List<TopTone>> = repository.observeTopTones()
+        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val _suggestedSongs = MutableStateFlow<List<SuggestedSong>>(emptyList())
-    val suggestedSongs: StateFlow<List<SuggestedSong>> = _suggestedSongs.asStateFlow()
+    val suggestedSongs: StateFlow<List<SuggestedSong>> = repository.observeSuggestedSongs()
+        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _isRefreshingSuggestedSongs = MutableStateFlow(false)
     val isRefreshingSuggestedSongs: StateFlow<Boolean> = _isRefreshingSuggestedSongs.asStateFlow()
@@ -51,31 +59,6 @@ class SongsTableViewModel @Inject constructor(
     fun initialize() {
         viewModelScope.launch {
             runCatching { repository.refreshSongsBySunday() }
-        }
-        viewModelScope.launch {
-            repository.observeSongsBySunday().collect { state ->
-                if (state is SnapshotState.Data) _lastSundays.value = state.value
-            }
-        }
-        viewModelScope.launch {
-            repository.observeTopSongs().collect { state ->
-                if (state is SnapshotState.Data) _topSongs.value = state.value
-            }
-        }
-        viewModelScope.launch {
-            repository.observeTopTones().collect { state ->
-                if (state is SnapshotState.Data) _topTones.value = state.value
-            }
-        }
-        viewModelScope.launch {
-            repository.observeSuggestedSongs().collect { state ->
-                if (state is SnapshotState.Data) _suggestedSongs.value = state.value
-            }
-        }
-        viewModelScope.launch {
-            repository.observeAllSongs().collect { state ->
-                if (state is SnapshotState.Data) _allSongs.value = state.value
-            }
         }
     }
 

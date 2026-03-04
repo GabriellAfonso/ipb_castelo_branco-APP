@@ -9,9 +9,11 @@ import com.gabrielafonso.ipb.castelobranco.features.settings.domain.repository.S
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class SettingsUiState(
@@ -25,27 +27,25 @@ class SettingsViewModel @Inject constructor(
     private val galleryRepository: GalleryRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
-    val uiState: StateFlow<SettingsUiState> = _uiState
-
-    private val _events = MutableSharedFlow<Unit>()
-    val events = _events.asSharedFlow()
-
-    init {
-        viewModelScope.launch {
-            repository.themeModeFlow.collect { mode ->
-                val dark: Boolean? = when (mode) {
+    val uiState: StateFlow<SettingsUiState> = repository.themeModeFlow
+        .map { mode ->
+            SettingsUiState(
+                themeMode = mode,
+                darkMode = when (mode) {
                     ThemeMode.FOLLOW_SYSTEM -> null
                     ThemeMode.DARK -> true
                     ThemeMode.LIGHT -> false
                 }
-                _uiState.value = _uiState.value.copy(
-                    themeMode = mode,
-                    darkMode = dark
-                )
-            }
+            )
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = SettingsUiState()
+        )
+
+    private val _events = MutableSharedFlow<Unit>()
+    val events = _events.asSharedFlow()
 
     fun clearGallery() {
         viewModelScope.launch {
@@ -55,7 +55,7 @@ class SettingsViewModel @Inject constructor(
 
     fun toggleDarkMode() {
         viewModelScope.launch {
-            val currentMode = _uiState.value.themeMode
+            val currentMode = uiState.value.themeMode
 
             val isCurrentlyDark: Boolean = when (currentMode) {
                 ThemeMode.DARK -> true
