@@ -47,13 +47,13 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
 
-    val isUploading by viewModel.isUploading.collectAsStateWithLifecycle()
-    val error by viewModel.error.collectAsStateWithLifecycle()
-    val localPhotoPath by viewModel.localPhotoPath.collectAsStateWithLifecycle()
-    val localPhotoVersion by viewModel.localPhotoVersion.collectAsStateWithLifecycle()
-
-    val userName by viewModel.userName.collectAsStateWithLifecycle()
-    val memberActive by viewModel.isMember.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isUploading = uiState.isUploading
+    val error = uiState.error
+    val localPhotoPath = uiState.localPhotoPath
+    val localPhotoVersion = uiState.localPhotoVersion
+    val userName = uiState.userName
+    val memberActive = uiState.isMember
 
     val cropLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()

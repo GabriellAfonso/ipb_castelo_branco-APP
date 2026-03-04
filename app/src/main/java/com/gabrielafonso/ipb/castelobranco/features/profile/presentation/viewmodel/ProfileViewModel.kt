@@ -6,15 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
+import com.gabrielafonso.ipb.castelobranco.features.profile.presentation.state.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -25,32 +24,8 @@ class ProfileViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val _isUploading = MutableStateFlow(false)
-    val isUploading: StateFlow<Boolean> = _isUploading.asStateFlow()
-
-    private val _photoUrl = MutableStateFlow<String?>(null)
-    val photoUrl: StateFlow<String?> = _photoUrl.asStateFlow()
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
-
-    private val _localPhotoPath = MutableStateFlow<String?>(null)
-    val localPhotoPath: StateFlow<String?> = _localPhotoPath.asStateFlow()
-
-    private val _localPhotoVersion = MutableStateFlow(0)
-    val localPhotoVersion: StateFlow<Int> = _localPhotoVersion.asStateFlow()
-
-    private val _userName = MutableStateFlow<String?>(null)
-    val userName: StateFlow<String?> = _userName.asStateFlow()
-
-    private val _profileActive = MutableStateFlow<Boolean?>(null)
-    val memberActive: StateFlow<Boolean?> = _profileActive.asStateFlow()
-
-    private val _isMember = MutableStateFlow<Boolean?>(null)
-    val isMember: StateFlow<Boolean?> = _isMember.asStateFlow()
-
-    private val _isAdmin = MutableStateFlow<Boolean?>(null)
-    val isAdmin: StateFlow<Boolean?> = _isAdmin.asStateFlow()
+    private val _uiState = MutableStateFlow(ProfileUiState())
+    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
         observeProfile()
@@ -59,7 +34,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun clearError() {
-        _error.value = null
+        _uiState.update { it.copy(error = null) }
     }
 
     private fun observeProfile() {
@@ -71,13 +46,15 @@ class ProfileViewModel @Inject constructor(
                         is SnapshotState.Data -> {
                             val profile = state.value
 
-                            _userName.value =
-                                profile.name.trim().ifBlank { "Usuário" }
-
-                            _profileActive.value = profile.active
-                            _isMember.value = profile.isMember
-                            _isAdmin.value = profile.isAdmin
-                            _photoUrl.value = profile.photoUrl
+                            _uiState.update {
+                                it.copy(
+                                    userName = profile.name.trim().ifBlank { "Usuário" },
+                                    profileActive = profile.active,
+                                    isMember = profile.isMember,
+                                    isAdmin = profile.isAdmin,
+                                    photoUrl = profile.photoUrl
+                                )
+                            }
 
                             handleProfilePhoto(profile.photoUrl)
                         }
@@ -87,13 +64,15 @@ class ProfileViewModel @Inject constructor(
                         }
 
                         is SnapshotState.Error -> {
-                            _error.value =
-                                state.throwable.message ?: "Erro ao carregar perfil"
+                            _uiState.update {
+                                it.copy(error = state.throwable.message ?: "Erro ao carregar perfil")
+                            }
                         }
                     }
                 }
         }
     }
+
     private suspend fun handleProfilePhoto(url: String?) {
         if (url.isNullOrBlank()) {
             refreshLocalPhotoPathAndBump()
@@ -109,23 +88,27 @@ class ProfileViewModel @Inject constructor(
         val file = dir.listFiles()
             ?.firstOrNull { it.isFile && it.name.startsWith("profile_photo.") && it.length() > 0L }
 
-        _localPhotoPath.value = file?.absolutePath
-        _localPhotoVersion.value = _localPhotoVersion.value + 1
+        _uiState.update {
+            it.copy(
+                localPhotoPath = file?.absolutePath,
+                localPhotoVersion = it.localPhotoVersion + 1
+            )
+        }
     }
 
     fun refreshFromServer() {
         viewModelScope.launch {
-            _error.value = null
+            _uiState.update { it.copy(error = null) }
             try {
                 when (repository.refreshMeProfile()) {
                     is RefreshResult.Error -> {
-                        _error.value = "Falha ao atualizar perfil"
+                        _uiState.update { it.copy(error = "Falha ao atualizar perfil") }
                         refreshLocalPhotoPathAndBump()
                     }
                     else -> Unit
                 }
             } catch (t: Throwable) {
-                _error.value = t.message ?: "Falha ao atualizar perfil"
+                _uiState.update { it.copy(error = t.message ?: "Falha ao atualizar perfil") }
                 refreshLocalPhotoPathAndBump()
             }
         }
@@ -133,9 +116,8 @@ class ProfileViewModel @Inject constructor(
 
     fun uploadProfilePhoto(bytes: ByteArray, fileName: String = "profile.jpg") {
         viewModelScope.launch {
-            if (_isUploading.value) return@launch
-            _isUploading.value = true
-            _error.value = null
+            if (_uiState.value.isUploading) return@launch
+            _uiState.update { it.copy(isUploading = true, error = null) }
 
             try {
                 repository.uploadProfilePhoto(bytes, fileName).getOrThrow()
@@ -157,9 +139,9 @@ class ProfileViewModel @Inject constructor(
                 }
 
             } catch (t: Throwable) {
-                _error.value = t.message ?: "Falha ao enviar imagem"
+                _uiState.update { it.copy(error = t.message ?: "Falha ao enviar imagem") }
             } finally {
-                _isUploading.value = false
+                _uiState.update { it.copy(isUploading = false) }
             }
         }
     }
