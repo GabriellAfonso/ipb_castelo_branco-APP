@@ -3,15 +3,13 @@ package com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
-import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.mapper.SundayPlaysMapper
-import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.repository.WorshipRegisterRepository
+import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.usecase.ObserveSongsUseCase
+import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.usecase.SubmitSundayPlaysUseCase
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.validation.MusicRegistrationValidator
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationEvent
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationUiState
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.RegistrationType
-import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
-import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.util.SongLabelFormatter
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
+import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.util.SundayRowManager
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +19,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
-import kotlin.collections.plus
 
 @HiltViewModel
 class MusicRegistrationViewModel @Inject constructor(
-    private val repository: SongsRepository,
-    private val registerRepository: WorshipRegisterRepository
+    private val observeSongsUseCase: ObserveSongsUseCase,
+    private val submitSundayPlaysUseCase: SubmitSundayPlaysUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MusicRegistrationUiState())
@@ -41,11 +38,7 @@ class MusicRegistrationViewModel @Inject constructor(
             MusicRegistrationEvent.DismissDatePicker -> dismissDatePicker()
             is MusicRegistrationEvent.DatePicked -> confirmDate(event.date)
 
-            is MusicRegistrationEvent.SundaySongQueryChanged -> updateSongQuery(
-                event.position,
-                event.query
-            )
-
+            is MusicRegistrationEvent.SundaySongQueryChanged -> updateSongQuery(event.position, event.query)
             is MusicRegistrationEvent.SundaySongSelected -> selectSong(event.position, event.song)
             is MusicRegistrationEvent.SundayToneChanged -> updateTone(event.position, event.tone)
 
@@ -57,7 +50,6 @@ class MusicRegistrationViewModel @Inject constructor(
             is MusicRegistrationEvent.MusicTitleChanged -> _uiState.update {
                 it.copy(musicForm = it.musicForm.copy(title = event.title))
             }
-
             is MusicRegistrationEvent.MusicArtistChanged -> _uiState.update {
                 it.copy(musicForm = it.musicForm.copy(artist = event.artist))
             }
@@ -70,22 +62,19 @@ class MusicRegistrationViewModel @Inject constructor(
         if (alreadyObserving) return
 
         viewModelScope.launch {
-            repository.observeAllSongs().collect { snapshot ->
+            observeSongsUseCase.observe().collect { snapshot ->
                 when (snapshot) {
                     is SnapshotState.Loading -> {
                         _uiState.update { it.copy(isLoadingSongs = true) }
                     }
-
                     is SnapshotState.Data -> {
                         _uiState.update { state ->
-                            val updated = state.copy(
+                            state.copy(
                                 availableSongs = snapshot.value,
                                 isLoadingSongs = false
-                            )
-                            updated.recomputeSundayErrors()
+                            ).recomputeSundayErrors()
                         }
                     }
-
                     is SnapshotState.Error -> {
                         _uiState.update {
                             it.copy(
@@ -101,7 +90,7 @@ class MusicRegistrationViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingSongs = true) }
             try {
-                repository.refreshAllSongs()
+                observeSongsUseCase.refresh()
             } catch (_: Throwable) {
                 _uiState.update { it.copy(snackbarMessage = "Falha ao atualizar músicas.") }
             } finally {
@@ -143,53 +132,35 @@ class MusicRegistrationViewModel @Inject constructor(
 
     private fun updateSongQuery(position: Int, query: String) {
         _uiState.update { state ->
-            state.copy(
-                sundayRows = state.sundayRows.map { row ->
-                    if (row.position == position) row.copy(
-                        songQuery = query,
-                        selectedSongId = null
-                    ) else row
-                }
-            ).recomputeSundayErrors()
+            state.copy(sundayRows = SundayRowManager.updateQuery(state.sundayRows, position, query))
+                .recomputeSundayErrors()
         }
     }
 
     private fun selectSong(position: Int, song: Song) {
-        val label = SongLabelFormatter.format(song)
         _uiState.update { state ->
-            state.copy(
-                sundayRows = state.sundayRows.map { row ->
-                    if (row.position == position) row.copy(
-                        songQuery = label,
-                        selectedSongId = song.id
-                    ) else row
-                }
-            ).recomputeSundayErrors()
+            state.copy(sundayRows = SundayRowManager.selectSong(state.sundayRows, position, song))
+                .recomputeSundayErrors()
         }
     }
 
     private fun updateTone(position: Int, tone: String) {
         _uiState.update { state ->
-            state.copy(
-                sundayRows = state.sundayRows.map { row ->
-                    if (row.position == position) row.copy(tone = tone) else row
-                }
-            ).recomputeSundayErrors()
+            state.copy(sundayRows = SundayRowManager.updateTone(state.sundayRows, position, tone))
+                .recomputeSundayErrors()
         }
     }
 
     private fun addRow() {
         _uiState.update { state ->
-            val nextPos = (state.sundayRows.maxOfOrNull { it.position } ?: 0) + 1
-            state.copy(sundayRows = state.sundayRows + SundaySongRowState(position = nextPos))
+            state.copy(sundayRows = SundayRowManager.addRow(state.sundayRows))
                 .recomputeSundayErrors()
         }
     }
 
     private fun removeRow(position: Int) {
         _uiState.update { state ->
-            if (position <= 4) state
-            else state.copy(sundayRows = state.sundayRows.filterNot { it.position == position })
+            state.copy(sundayRows = SundayRowManager.removeRow(state.sundayRows, position))
                 .recomputeSundayErrors()
         }
     }
@@ -203,34 +174,31 @@ class MusicRegistrationViewModel @Inject constructor(
             return
         }
 
-        val validation =
-            MusicRegistrationValidator.validateSundayRows(state.sundayRows, state.availableSongs)
-        if (validation.errorsByPosition.isNotEmpty()) {
-            _uiState.update {
-                it.copy(
-                    sundayRowErrors = validation.errorsByPosition,
-                    snackbarMessage = "Existem posições incompletas. Corrija antes de enviar."
-                )
-            }
-            return
-        }
-
         if (!state.canSubmit) return
-
-        val dateIso = SundayPlaysMapper.dateIso(state.selectedDate)
-        val plays = SundayPlaysMapper.toSundayPlayItems(state.sundayRows, state.availableSongs)
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true) }
-            try {
-                registerRepository.pushSundayPlays(date = dateIso, plays = plays).getOrThrow()
-                _uiState.update { it.copy(snackbarMessage = "Enviado com sucesso.") }
-            } catch (t: Throwable) {
-                val msg =
-                    t.message?.trim().takeIf { !it.isNullOrBlank() } ?: "Erro inesperado ao enviar."
-                _uiState.update { it.copy(snackbarMessage = msg) }
-            } finally {
-                _uiState.update { it.copy(isSubmitting = false) }
+            val result = submitSundayPlaysUseCase(
+                rows = state.sundayRows,
+                availableSongs = state.availableSongs,
+                selectedDate = state.selectedDate
+            )
+            _uiState.update { current ->
+                when (result) {
+                    is SubmitSundayPlaysUseCase.Result.ValidationError -> current.copy(
+                        sundayRowErrors = result.errorsByPosition,
+                        snackbarMessage = "Existem posições incompletas. Corrija antes de enviar.",
+                        isSubmitting = false
+                    )
+                    SubmitSundayPlaysUseCase.Result.Success -> current.copy(
+                        snackbarMessage = "Enviado com sucesso.",
+                        isSubmitting = false
+                    )
+                    is SubmitSundayPlaysUseCase.Result.Failure -> current.copy(
+                        snackbarMessage = result.message,
+                        isSubmitting = false
+                    )
+                }
             }
         }
     }
@@ -244,5 +212,4 @@ class MusicRegistrationViewModel @Inject constructor(
         val validation = MusicRegistrationValidator.validateSundayRows(sundayRows, availableSongs)
         return copy(sundayRowErrors = validation.errorsByPosition)
     }
-
 }
