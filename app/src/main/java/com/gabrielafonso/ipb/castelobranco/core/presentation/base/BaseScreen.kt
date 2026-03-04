@@ -24,7 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gabrielafonso.ipb.castelobranco.R
-
+import com.gabrielafonso.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.gabrielafonso.ipb.castelobranco.core.presentation.components.TopBar
 import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.LocalAppNavigator
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.AuthSession
@@ -118,7 +118,7 @@ fun BaseScreen(
     // Resolvemos apenas o arquivo. O Coil fará o decode em background.
     val photoFile: File? = remember(isLoggedIn, profilePhotoVersion) {
         if (!isLoggedIn) return@remember null
-        val dir = File(context.filesDir, "profile")
+        val dir = File(context.filesDir, StorageDirConstants.PROFILE)
         if (!dir.exists()) return@remember null
 
         dir.listFiles()

@@ -7,6 +7,11 @@ import javax.inject.Inject
 
 class AuthErrorMapper @Inject constructor() {
 
+    companion object {
+        private val LOGIN_ERROR_KEY_PRIORITY =
+            listOf("detail", "message", "error", "non_field_errors")
+    }
+
     fun parseLoginError(message: String): String {
         return try {
             val trimmed = message.trim()
@@ -14,8 +19,7 @@ class AuthErrorMapper @Inject constructor() {
 
             val json = JSONObject(trimmed)
 
-            val keysPriority = listOf("detail", "message", "error", "non_field_errors")
-            for (k in keysPriority) {
+            for (k in LOGIN_ERROR_KEY_PRIORITY) {
                 if (json.has(k)) return jsonValueToMessage(json.get(k))
             }
 

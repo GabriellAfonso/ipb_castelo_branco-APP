@@ -1,6 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.features.profile.data.photo
 
 import android.content.Context
+import com.gabrielafonso.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.gabrielafonso.ipb.castelobranco.core.di.ApiBaseUrl
 import com.gabrielafonso.ipb.castelobranco.core.domain.error.AppError
 import com.gabrielafonso.ipb.castelobranco.core.domain.error.mapError
@@ -120,7 +121,7 @@ class ProfilePhotoDataSource @Inject constructor(
                             else -> "jpg"
                         }
 
-                        val dir = File(context.filesDir, "profile").apply { mkdirs() }
+                        val dir = File(context.filesDir, StorageDirConstants.PROFILE).apply { mkdirs() }
                         val outFile = File(dir, "profile_photo.$ext")
 
                         body.byteStream().use { input ->
@@ -142,7 +143,7 @@ class ProfilePhotoDataSource @Inject constructor(
     suspend fun clearLocal(): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
-                val dir = File(context.filesDir, "profile")
+                val dir = File(context.filesDir, StorageDirConstants.PROFILE)
                 if (dir.exists()) {
                     dir.listFiles()?.forEach { file ->
                         if (file.isFile && file.name.startsWith("profile_photo")) {
@@ -159,7 +160,7 @@ class ProfilePhotoDataSource @Inject constructor(
         }
 
     private fun findLastLocalPhotoOrNull(): File? {
-        val dir = File(context.filesDir, "profile")
+        val dir = File(context.filesDir, StorageDirConstants.PROFILE)
         return dir.listFiles()
             ?.asSequence()
             ?.filter { it.isFile && it.name.startsWith("profile_photo.") && it.length() > 0L }

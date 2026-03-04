@@ -6,6 +6,7 @@ import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.Save
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.SaveScheduleRequestDto
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.mapper.toDomain
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
+import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleType
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleUiState
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
 import com.gabrielafonso.ipb.castelobranco.core.domain.error.AppError
@@ -26,17 +27,12 @@ class AdminScheduleRepositoryImpl @Inject constructor(
         val response = api.generateSchedule(
             GenerateScheduleRequestDto(year = year, month = month)
         )
-        val scheduleTypeIdByName = mapOf(
-            "Terça de Oração" to 1,
-            "Quinta de Oração" to 2,
-            "Domingo Liturgia de Adoração" to 3,
-        )
         response.items.map { item ->
             EditableScheduleUiState(
                 date = item.date,
                 day = item.day,
                 scheduleTypeName = item.scheduleType.name,
-                scheduleTypeId = scheduleTypeIdByName[item.scheduleType.name] ?: 0,
+                scheduleTypeId = ScheduleType.idByName(item.scheduleType.name),
                 selectedMember = Member(item.member.id, item.member.name),
                 memberQuery = item.member.name
             )

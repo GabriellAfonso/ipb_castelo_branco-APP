@@ -3,6 +3,7 @@ package com.gabrielafonso.ipb.castelobranco.features.profile.presentation.viewmo
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gabrielafonso.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
@@ -84,7 +85,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun refreshLocalPhotoPathAndBump() {
-        val dir = File(context.filesDir, "profile")
+        val dir = File(context.filesDir, StorageDirConstants.PROFILE)
         val file = dir.listFiles()
             ?.firstOrNull { it.isFile && it.name.startsWith("profile_photo.") && it.length() > 0L }
 

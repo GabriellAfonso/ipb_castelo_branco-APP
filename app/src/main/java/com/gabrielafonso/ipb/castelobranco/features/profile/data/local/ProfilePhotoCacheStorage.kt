@@ -1,6 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.features.profile.data.local
 
 import android.content.Context
+import com.gabrielafonso.ipb.castelobranco.core.data.local.StorageDirConstants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,7 +13,7 @@ import javax.inject.Singleton
 class ProfilePhotoCacheStorage @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    private val dirName = "profile"
+    private val dirName = StorageDirConstants.PROFILE
 
     private fun dir(): File = File(context.filesDir, dirName).apply { mkdirs() }
 

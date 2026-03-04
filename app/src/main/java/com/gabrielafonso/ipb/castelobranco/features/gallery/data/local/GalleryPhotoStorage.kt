@@ -1,6 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.features.gallery.data.local
 
 import android.content.Context
+import com.gabrielafonso.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.gabrielafonso.ipb.castelobranco.features.gallery.data.dto.GalleryPhotoDto
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.decodeFromString
@@ -18,7 +19,7 @@ class GalleryPhotoStorage(
 ) {
 
     private fun albumDir(albumId: Long): File =
-        File(context.filesDir, "gallery/$albumId")
+        File(context.filesDir, "${StorageDirConstants.GALLERY}/$albumId")
 
     fun save(
         albumId: Long,
@@ -79,7 +80,7 @@ class GalleryPhotoStorage(
     }
 
     fun listAllPhotos(): List<File> {
-        val root = File(context.filesDir, "gallery")
+        val root = File(context.filesDir, StorageDirConstants.GALLERY)
         if (!root.exists()) return emptyList()
 
         return root.walkTopDown()
@@ -89,14 +90,14 @@ class GalleryPhotoStorage(
     }
 
     fun clearAll() {
-        val root = File(context.filesDir, "gallery")
+        val root = File(context.filesDir, StorageDirConstants.GALLERY)
         if (root.exists()) {
             root.deleteRecursively()
         }
     }
 
     fun listAlbums(): List<Pair<Long, String>> {
-        val root = File(context.filesDir, "gallery")
+        val root = File(context.filesDir, StorageDirConstants.GALLERY)
         if (!root.exists()) return emptyList()
 
         return root.listFiles()?.filter { it.isDirectory }?.mapNotNull { dir ->
