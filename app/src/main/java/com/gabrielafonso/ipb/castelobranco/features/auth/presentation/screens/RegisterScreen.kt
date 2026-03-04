@@ -34,7 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.AuthViewModel
-import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.RegisterErrors
+import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.RegisterErrors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
