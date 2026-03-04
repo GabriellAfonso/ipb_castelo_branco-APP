@@ -1,6 +1,5 @@
 package com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,10 +19,6 @@ class HymnalViewModel @Inject constructor(
     private val observeHymnsUseCase: ObserveHymnsUseCase,
     private val searchHymnsUseCase: SearchHymnsUseCase,
 ) : ViewModel() {
-
-    companion object {
-        private const val TAG = "HymnalViewModel"
-    }
 
     private val _query = MutableStateFlow("")
 
@@ -56,9 +50,4 @@ class HymnalViewModel @Inject constructor(
         _query.value = query
     }
 
-    fun teste() {
-        viewModelScope.launch {
-            Log.d(TAG, "só pra testar action")
-        }
-    }
 }
