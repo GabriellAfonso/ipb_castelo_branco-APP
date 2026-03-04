@@ -2,7 +2,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.auth.data.local
 
 import android.util.Base64
-import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -14,8 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthSession @Inject constructor(
-    private val tokenStorage: TokenStorage,
-    private val profileRepository: ProfileRepository
+    private val tokenStorage: TokenStorage
 ) {
 
     suspend fun hasValidAccessToken(): Boolean {
@@ -63,6 +61,5 @@ class AuthSession @Inject constructor(
 
     suspend fun logout() {
         tokenStorage.clear()
-        profileRepository.clearLocalProfilePhoto()
     }
 }

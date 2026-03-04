@@ -2,6 +2,7 @@ package com.gabrielafonso.ipb.castelobranco.core.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gabrielafonso.ipb.castelobranco.core.domain.auth.AuthEventBus
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
@@ -32,6 +33,7 @@ class CoreViewModel @Inject constructor(
     private val galleryRepository: GalleryRepository,
     private val authSession: AuthSession,
     private val profileRepository: ProfileRepository,
+    private val authEventBus: AuthEventBus,
 ) : ViewModel() {
 
     sealed interface CoreEvent {
@@ -52,6 +54,15 @@ class CoreViewModel @Inject constructor(
         viewModelScope.launch {
             authSession.isLoggedInFlow.collect { logged ->
                 _isLoggedIn.value = logged
+            }
+        }
+
+        // Reage ao login bem-sucedido para sincronizar dados de perfil
+        viewModelScope.launch {
+            authEventBus.events.collect { event ->
+                if (event is AuthEventBus.Event.LoginSuccess) {
+                    refreshProfileOnAppOpen()
+                }
             }
         }
 
@@ -139,6 +150,7 @@ class CoreViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            profileRepository.clearLocalProfilePhoto()
             authSession.logout()
             _events.trySend(CoreEvent.LogoutSuccess)
         }

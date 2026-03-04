@@ -3,10 +3,8 @@ package com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.RefreshResult
-import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.gabrielafonso.ipb.castelobranco.core.domain.auth.AuthEventBus
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.repository.AuthRepository
-import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +12,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,7 +29,7 @@ data class RegisterErrors(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val profileRepository: ProfileRepository
+    private val authEventBus: AuthEventBus
 ) : ViewModel() {
 
     companion object {
@@ -69,14 +65,7 @@ class AuthViewModel @Inject constructor(
                 val result = repository.signIn(username, password)
                 result.onSuccess { authResponse ->
                     Log.d(TAG, "Login sucesso: $authResponse")
-
-                    // Busca perfil \+ baixa/persiste foto antes de navegar
-                    val ok = fetchUserData()
-                    if (!ok) {
-                        _loginError.value = "Falha ao carregar dados do usuário"
-                        return@onSuccess
-                    }
-
+                    authEventBus.emit(AuthEventBus.Event.LoginSuccess)
                     _events.tryEmit(AuthEvent.LoginSuccess)
                 }.onFailure { throwable ->
                     val raw = throwable.message ?: "Erro ao fazer login"
@@ -98,11 +87,7 @@ class AuthViewModel @Inject constructor(
             try {
                 val result = repository.signInWithGoogle(idToken)
                 result.onSuccess {
-                    val ok = fetchUserData()
-                    if (!ok) {
-                        _loginError.value = "Falha ao carregar dados do usuário"
-                        return@onSuccess
-                    }
+                    authEventBus.emit(AuthEventBus.Event.LoginSuccess)
                     _events.tryEmit(AuthEvent.LoginSuccess)
                 }.onFailure { throwable ->
                     _loginError.value = throwable.message ?: "Erro ao entrar com Google"
@@ -127,14 +112,7 @@ class AuthViewModel @Inject constructor(
                     repository.signUp(username, firstName, lastName, password, passwordConfirm)
                 result.onSuccess { authResponse ->
                     Log.d(TAG, "Registro sucesso: $authResponse")
-
-                    val ok = fetchUserData()
-                    if (!ok) {
-                        _registerErrors.value =
-                            RegisterErrors(general = "Falha ao carregar dados do usuário")
-                        return@onSuccess
-                    }
-
+                    authEventBus.emit(AuthEventBus.Event.LoginSuccess)
                     _events.tryEmit(AuthEvent.RegisterSuccess)
                 }.onFailure { throwable ->
                     val message = throwable.message ?: "Erro ao registrar"
@@ -145,33 +123,6 @@ class AuthViewModel @Inject constructor(
                 _registerErrors.value = RegisterErrors(general = e.message ?: "Erro inesperado")
                 Log.e(TAG, "Erro inesperado no registro", e)
             }
-        }
-    }
-
-    private suspend fun fetchUserData(): Boolean {
-        return try {
-
-            when (profileRepository.refreshMeProfile()) {
-                is RefreshResult.Error -> return false
-                else -> Unit
-            }
-
-            val profile = profileRepository.observeMeProfile()
-                .first { it is SnapshotState.Data }
-                .let { (it as SnapshotState.Data).value }
-
-            val photoUrl = profile.photoUrl
-            if (!photoUrl.isNullOrBlank()) {
-                val photoResult =
-                    profileRepository.downloadAndPersistProfilePhoto(photoUrl)
-
-                if (photoResult.isFailure) return false
-            }
-
-            true
-        } catch (t: Throwable) {
-            Log.e(TAG, "Falha ao buscar dados do usuário", t)
-            false
         }
     }
 
