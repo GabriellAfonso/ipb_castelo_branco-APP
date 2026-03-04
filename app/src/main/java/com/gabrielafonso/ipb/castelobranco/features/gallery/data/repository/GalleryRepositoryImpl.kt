@@ -3,6 +3,7 @@ package com.gabrielafonso.ipb.castelobranco.features.gallery.data.repository
 import com.gabrielafonso.ipb.castelobranco.features.gallery.data.api.GalleryApi
 import com.gabrielafonso.ipb.castelobranco.features.gallery.data.dto.GalleryPhotoDto
 import com.gabrielafonso.ipb.castelobranco.features.gallery.data.local.GalleryPhotoStorage
+import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.DownloadProgress
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import kotlinx.coroutines.Dispatchers
@@ -18,8 +19,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.update
-
-data class Album(val id: Long, val name: String)
 
 @Singleton
 class GalleryRepositoryImpl @Inject constructor(

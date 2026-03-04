@@ -1,6 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository
 
-import com.gabrielafonso.ipb.castelobranco.features.gallery.data.repository.Album
+import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File

@@ -12,7 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
-import com.gabrielafonso.ipb.castelobranco.features.gallery.data.repository.Album
+import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.components.AlbumItem
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.navigation.GalleryNav
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryViewModel

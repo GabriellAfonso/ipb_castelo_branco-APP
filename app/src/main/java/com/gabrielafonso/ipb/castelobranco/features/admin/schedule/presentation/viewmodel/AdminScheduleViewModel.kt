@@ -2,11 +2,11 @@ package com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleEvent
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleUiState
-import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.dto.MemberDto
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.dto.MonthScheduleDto
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.dto.ScheduleEntryDto

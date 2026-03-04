@@ -1,18 +1,10 @@
 package com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state
 
 import androidx.compose.runtime.Immutable
+import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import java.time.LocalDate
 
-@Immutable
-data class EditableScheduleItem(
-    val date: String,
-    val day: Int,
-    val scheduleTypeName: String,
-    val scheduleTypeId: Int = 0,   // <─ novo campo
-    val selectedMember: Member? = null,
-    val memberQuery: String = ""
-)
 @Immutable
 data class AdminScheduleUiState(
     val year: Int = LocalDate.now().year,

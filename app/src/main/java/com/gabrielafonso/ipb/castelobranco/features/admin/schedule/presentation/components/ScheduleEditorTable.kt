@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
-import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleItem
 
 private val SORT_ORDER = listOf("terça", "terca", "quinta", "domingo")
 private val PT_BR = java.util.Locale.forLanguageTag("pt-BR")

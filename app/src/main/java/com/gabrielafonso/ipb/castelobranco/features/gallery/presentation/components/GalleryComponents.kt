@@ -21,7 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.gabrielafonso.ipb.castelobranco.features.gallery.data.repository.Album
+import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryViewModel
 
 @Composable

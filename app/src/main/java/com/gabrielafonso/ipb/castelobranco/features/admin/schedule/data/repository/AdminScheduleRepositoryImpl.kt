@@ -5,10 +5,9 @@ import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.Gene
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.SaveScheduleItemDto
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.SaveScheduleRequestDto
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.mapper.toDomain
+import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
-import com.gabrielafonso.ipb.castelobranco.features.schedule.data.dto.MonthScheduleDto
-import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleItem
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton

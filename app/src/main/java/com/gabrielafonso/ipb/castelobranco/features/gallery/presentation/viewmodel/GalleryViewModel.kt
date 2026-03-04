@@ -3,7 +3,7 @@ package com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.viewmo
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielafonso.ipb.castelobranco.features.gallery.data.repository.Album
+import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
