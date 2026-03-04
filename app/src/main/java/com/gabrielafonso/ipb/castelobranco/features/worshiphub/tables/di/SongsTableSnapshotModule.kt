@@ -11,7 +11,6 @@ import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.T
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.TopToneDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.fetcher.AllSongsSnapshotFetcher
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.fetcher.SongsBySundaySnapshotFetcher
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.fetcher.SuggestedSongsSnapshotFetcher
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.fetcher.TopSongsSnapshotFetcher
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.fetcher.TopTonesSnapshotFetcher
 import dagger.Module
@@ -74,7 +73,4 @@ object SongsTableSnapshotModule {
     @Provides
     fun provideTopTonesFetcher(api: SongsTableApi): SnapshotFetcher<List<TopToneDto>> =
         TopTonesSnapshotFetcher(api)
-    @Provides
-    fun provideSuggestedSongsFetcher(api: SongsTableApi): SnapshotFetcher<List<SuggestedSongDto>> =
-        SuggestedSongsSnapshotFetcher(api)
 }

@@ -1,20 +1,34 @@
 package com.gabrielafonso.ipb.castelobranco.features.hymnal.data.repository
+
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.BaseSnapshotRepository
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.Logger
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotCache
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.dto.HymnDto
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.mapper.HymnMapper
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.repository.HymnalRepository
-import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.snapshot.HymnalSnapshotRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-
 import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
 class HymnalRepositoryImpl @Inject constructor(
-    private val snapshot: HymnalSnapshotRepository
-) : HymnalRepository {
+    cache: SnapshotCache<List<HymnDto>>,
+    fetcher: SnapshotFetcher<List<HymnDto>>,
+    logger: Logger,
+    mapper: HymnMapper,
+) : BaseSnapshotRepository<List<HymnDto>, List<Hymn>>(
+    cache = cache,
+    fetcher = fetcher,
+    mapper = mapper::map,
+    logger = logger,
+    tag = "HymnalSnapshot"
+), HymnalRepository {
 
-    override fun observeHymnal(): Flow<SnapshotState<List<Hymn>>> =
-        snapshot.observe()
+    override fun observeHymnal(): Flow<SnapshotState<List<Hymn>>> = observe()
 
-    override suspend fun refreshHymnal(): RefreshResult =
-        snapshot.refresh()
+    override suspend fun refreshHymnal(): RefreshResult = refresh()
 }
