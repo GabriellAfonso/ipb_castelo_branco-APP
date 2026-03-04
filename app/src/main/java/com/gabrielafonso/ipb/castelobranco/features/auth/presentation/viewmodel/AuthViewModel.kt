@@ -3,7 +3,8 @@ package com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielafonso.ipb.castelobranco.features.auth.data.mapper.AuthErrorMapper
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.mapper.parseLoginError
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.mapper.parseRegisterError
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.RegisterErrors
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.usecase.LoginUseCase
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.usecase.RegisterUseCase
@@ -21,7 +22,6 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val registerUseCase: RegisterUseCase,
-    private val authErrorMapper: AuthErrorMapper,
 ) : ViewModel() {
 
     companion object {
@@ -59,7 +59,7 @@ class AuthViewModel @Inject constructor(
                     _events.tryEmit(AuthEvent.LoginSuccess)
                 }
                 is LoginUseCase.Result.Failure -> {
-                    _loginError.value = authErrorMapper.parseLoginError(result.rawMessage)
+                    _loginError.value = parseLoginError(result.rawMessage)
                     Log.e(TAG, "Falha no login")
                 }
             }
@@ -95,7 +95,7 @@ class AuthViewModel @Inject constructor(
                     _events.tryEmit(AuthEvent.RegisterSuccess)
                 }
                 is RegisterUseCase.Result.Failure -> {
-                    _registerErrors.value = authErrorMapper.parseRegisterError(result.rawMessage)
+                    _registerErrors.value = parseRegisterError(result.rawMessage)
                     Log.e(TAG, "Falha no registro")
                 }
             }

@@ -6,7 +6,7 @@ import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SuggestedSongDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.fetcher.SuggestedSongsFetcher
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapper.SuggestedSongsMapper
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapper.toDomain
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.snapshot.AllSongsSnapshotRepository
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.snapshot.SongsBySundaySnapshotRepository
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.snapshot.TopSongsSnapshotRepository
@@ -30,7 +30,6 @@ class SongsRepositoryImpl @Inject constructor(
     private val allSongsSnapshot: AllSongsSnapshotRepository,
     private val suggestedSongsCache: SnapshotCache<List<SuggestedSongDto>>,
     private val suggestedSongsFetcher: SuggestedSongsFetcher,
-    private val suggestedSongsMapper: SuggestedSongsMapper,
 ) : SongsRepository {
 
     private val _suggestedSongsState =
@@ -64,14 +63,14 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun refreshSuggestedSongs(fixedByPosition: Map<Int, Int>): RefreshResult {
         if (didLoadSuggestedCacheOnce.compareAndSet(false, true)) {
             suggestedSongsCache.load()?.let { cached ->
-                _suggestedSongsState.value = SnapshotState.Data(suggestedSongsMapper.map(cached))
+                _suggestedSongsState.value = SnapshotState.Data(cached.toDomain())
             }
         }
         _suggestedSongsState.value = SnapshotState.Loading
         return when (val result = suggestedSongsFetcher.fetch(fixedByPosition)) {
             is NetworkResult.Success -> {
                 suggestedSongsCache.save(result.body, result.etag)
-                _suggestedSongsState.value = SnapshotState.Data(suggestedSongsMapper.map(result.body))
+                _suggestedSongsState.value = SnapshotState.Data(result.body.toDomain())
                 RefreshResult.Updated
             }
             is NetworkResult.NotModified -> RefreshResult.NotModified

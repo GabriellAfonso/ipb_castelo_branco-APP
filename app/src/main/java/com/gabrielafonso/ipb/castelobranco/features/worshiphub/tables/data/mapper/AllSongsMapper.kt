@@ -2,17 +2,13 @@ package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapp
 
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.AllSongDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
-import javax.inject.Inject
 
-class AllSongsMapper @Inject constructor() {
+fun AllSongDto.toDomain(): Song =
+    Song(
+        id = id,
+        title = title,
+        artist = artist,
+        categoryName = categoryName
+    )
 
-    fun map(dtos: List<AllSongDto>): List<Song> =
-        dtos.map {
-            Song(
-                id = it.id,
-                title = it.title,
-                artist = it.artist,
-                categoryName = it.categoryName
-            )
-        }
-}
+fun List<AllSongDto>.toDomain(): List<Song> = map { it.toDomain() }

@@ -7,7 +7,7 @@ import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.dto.HymnDto
-import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.mapper.HymnMapper
+import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.mapper.toDomain
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.repository.HymnalRepository
 import kotlinx.coroutines.flow.Flow
@@ -19,11 +19,10 @@ class HymnalRepositoryImpl @Inject constructor(
     cache: SnapshotCache<List<HymnDto>>,
     fetcher: SnapshotFetcher<List<HymnDto>>,
     logger: Logger,
-    mapper: HymnMapper,
 ) : BaseSnapshotRepository<List<HymnDto>, List<Hymn>>(
     cache = cache,
     fetcher = fetcher,
-    mapper = mapper::map,
+    mapper = { it.toDomain() },
     logger = logger,
     tag = "HymnalSnapshot"
 ), HymnalRepository {

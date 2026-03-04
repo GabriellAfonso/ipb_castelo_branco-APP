@@ -2,10 +2,7 @@ package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapp
 
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.TopToneDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
-import javax.inject.Inject
 
-class TopTonesMapper @Inject constructor() {
+fun TopToneDto.toDomain(): TopTone = TopTone(tone = tone, count = count)
 
-    fun map(dtos: List<TopToneDto>): List<TopTone> =
-        dtos.map { TopTone(tone = it.tone, count = it.count) }
-}
+fun List<TopToneDto>.toDomain(): List<TopTone> = map { it.toDomain() }

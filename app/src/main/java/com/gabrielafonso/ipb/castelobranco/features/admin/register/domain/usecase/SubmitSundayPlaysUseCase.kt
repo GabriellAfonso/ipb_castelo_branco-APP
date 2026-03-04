@@ -1,6 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.usecase
 
-import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.mapper.SundayPlaysMapper
+import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.mapper.dateIso
+import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.mapper.toSundayPlayItems
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.repository.WorshipRegisterRepository
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.validation.MusicRegistrationValidator
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
@@ -27,8 +28,8 @@ class SubmitSundayPlaysUseCase @Inject constructor(
             return Result.ValidationError(validation.errorsByPosition)
         }
 
-        val dateIso = SundayPlaysMapper.dateIso(selectedDate)
-        val plays = SundayPlaysMapper.toSundayPlayItems(rows, availableSongs)
+        val dateIso = dateIso(selectedDate)
+        val plays = toSundayPlayItems(rows, availableSongs)
 
         return try {
             repository.pushSundayPlays(date = dateIso, plays = plays).getOrThrow()

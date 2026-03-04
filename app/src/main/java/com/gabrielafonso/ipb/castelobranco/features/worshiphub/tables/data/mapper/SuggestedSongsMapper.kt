@@ -2,20 +2,17 @@ package com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.mapp
 
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.dto.SuggestedSongDto
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
-import javax.inject.Inject
 
-class SuggestedSongsMapper @Inject constructor() {
+fun SuggestedSongDto.toDomain(): SuggestedSong =
+    SuggestedSong(
+        id = id,
+        songId = song.id,
+        title = song.title,
+        artist = song.artist,
+        date = date,
+        tone = tone,
+        position = position
+    )
 
-    fun map(dtos: List<SuggestedSongDto>): List<SuggestedSong> =
-        dtos.map { s ->
-            SuggestedSong(
-                id = s.id,
-                songId = s.song.id,
-                title = s.song.title,
-                artist = s.song.artist,
-                date = s.date,
-                tone = s.tone,
-                position = s.position
-            )
-        }.sortedBy { it.position }
-}
+fun List<SuggestedSongDto>.toDomain(): List<SuggestedSong> =
+    map { it.toDomain() }.sortedBy { it.position }

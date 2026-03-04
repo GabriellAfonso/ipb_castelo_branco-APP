@@ -7,7 +7,7 @@ import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.dto.MonthScheduleDto
-import com.gabrielafonso.ipb.castelobranco.features.schedule.data.mapper.MonthScheduleMapper
+import com.gabrielafonso.ipb.castelobranco.features.schedule.data.mapper.toDomain
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
 import kotlinx.coroutines.flow.Flow
@@ -19,11 +19,10 @@ class ScheduleRepositoryImpl @Inject constructor(
     cache: SnapshotCache<MonthScheduleDto>,
     fetcher: SnapshotFetcher<MonthScheduleDto>,
     logger: Logger,
-    mapper: MonthScheduleMapper,
 ) : BaseSnapshotRepository<MonthScheduleDto, MonthSchedule>(
     cache = cache,
     fetcher = fetcher,
-    mapper = mapper::map,
+    mapper = { it.toDomain() },
     logger = logger,
     tag = "ScheduleSnapshot"
 ), ScheduleRepository {
