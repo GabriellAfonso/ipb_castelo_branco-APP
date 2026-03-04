@@ -1,7 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state
 
 import androidx.compose.runtime.Immutable
-import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import java.time.LocalDate
 
@@ -11,7 +10,7 @@ data class AdminScheduleUiState(
     val month: Int = LocalDate.now().plusMonths(1).monthValue,
     val members: List<Member> = emptyList(),
     val isLoadingMembers: Boolean = false,
-    val items: List<EditableScheduleItem> = emptyList(),
+    val items: List<EditableScheduleUiState> = emptyList(),
     val isGenerating: Boolean = false,
     val isSaving: Boolean = false,
     val snackbarMessage: String? = null

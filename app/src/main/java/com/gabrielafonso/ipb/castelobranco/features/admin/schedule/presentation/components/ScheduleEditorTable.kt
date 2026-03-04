@@ -18,15 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
+import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleUiState
 
 private val SORT_ORDER = listOf("terça", "terca", "quinta", "domingo")
 private val PT_BR = java.util.Locale.forLanguageTag("pt-BR")
 
 @Composable
 fun ScheduleEditorTable(
-    items: List<EditableScheduleItem>,
+    items: List<EditableScheduleUiState>,
     members: List<Member>,
     onMemberQueryChange: (itemIndex: Int, query: String) -> Unit,
     onMemberSelect: (itemIndex: Int, member: Member) -> Unit,
@@ -61,7 +61,7 @@ fun ScheduleEditorTable(
 @Composable
 private fun ScheduleEditorSection(
     typeName: String,
-    indexedItems: List<Pair<Int, EditableScheduleItem>>,
+    indexedItems: List<Pair<Int, EditableScheduleUiState>>,
     members: List<Member>,
     onMemberQueryChange: (Int, String) -> Unit,
     onMemberSelect: (Int, Member) -> Unit

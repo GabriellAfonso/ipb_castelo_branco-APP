@@ -5,8 +5,8 @@ import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.Gene
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.SaveScheduleItemDto
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.dto.SaveScheduleRequestDto
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.mapper.toDomain
-import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.EditableScheduleItem
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
+import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleUiState
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
 import org.json.JSONObject
 import javax.inject.Inject
@@ -20,7 +20,7 @@ class AdminScheduleRepositoryImpl @Inject constructor(
         api.getMembers().members.map { it.toDomain() }
     }
 
-    override suspend fun generateSchedule(year: Int, month: Int): Result<List<EditableScheduleItem>> = runCatching {
+    override suspend fun generateSchedule(year: Int, month: Int): Result<List<EditableScheduleUiState>> = runCatching {
         val response = api.generateSchedule(
             GenerateScheduleRequestDto(year = year, month = month)
         )
@@ -30,7 +30,7 @@ class AdminScheduleRepositoryImpl @Inject constructor(
             "Domingo Liturgia de Adoração" to 3,
         )
         response.items.map { item ->
-            EditableScheduleItem(
+            EditableScheduleUiState(
                 date = item.date,
                 day = item.day,
                 scheduleTypeName = item.scheduleType.name,
@@ -41,7 +41,7 @@ class AdminScheduleRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveSchedule(year: Int, month: Int, items: List<EditableScheduleItem>): Result<Unit> {
+    override suspend fun saveSchedule(year: Int, month: Int, items: List<EditableScheduleUiState>): Result<Unit> {
         val body = SaveScheduleRequestDto(
             year = year,
             month = month,

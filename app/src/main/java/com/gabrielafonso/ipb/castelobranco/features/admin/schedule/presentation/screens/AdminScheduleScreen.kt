@@ -392,7 +392,7 @@ private fun AdminScheduleUiState.toWhatsappText(): String {
     sb.append("ESCALA DE $monthName $year - DIRIGENTES E RESPONSÁVEIS\n\n")
 
     sortedGroups.forEach { (typeName, groupItems) ->
-        // time isn't stored in EditableScheduleItem, use 19:30 as default (same as save)
+        // time isn't stored in EditableScheduleUiState, use 19:30 as default (same as save)
         sb.append("$typeName (19:30)\n\n")
         groupItems.sortedBy { it.day }.forEach { item ->
             sb.append(String.format("%02d", item.day))
