@@ -48,7 +48,7 @@ class SongsTableViewModel @Inject constructor(
     private val _fixedByPosition = MutableStateFlow<Map<Int, Int>>(emptyMap())
     val fixedByPosition: StateFlow<Map<Int, Int>> = _fixedByPosition.asStateFlow()
 
-    init {
+    fun initialize() {
         viewModelScope.launch {
             runCatching { repository.refreshSongsBySunday() }
         }

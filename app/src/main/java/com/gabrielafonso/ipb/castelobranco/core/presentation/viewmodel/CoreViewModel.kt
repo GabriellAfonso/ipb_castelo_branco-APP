@@ -38,7 +38,7 @@ class CoreViewModel @Inject constructor(
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
-    init {
+    fun initialize() {
         // Observa estado de login
         viewModelScope.launch {
             authSession.isLoggedInFlow.collect { logged ->

@@ -77,6 +77,8 @@ fun WorshipSongsTableScreen(
     onBackClick: () -> Unit,
     viewModel: SongsTableViewModel
 ) {
+    LaunchedEffect(Unit) { viewModel.initialize() }
+
     val state = WorshipSongsUiState(
         sundays = viewModel.lastSundays.collectAsStateWithLifecycle().value,
         topSongs = viewModel.topSongs.collectAsStateWithLifecycle().value,

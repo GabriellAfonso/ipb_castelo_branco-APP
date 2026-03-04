@@ -27,7 +27,7 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    init {
+    fun initialize() {
         observeProfile()
         refreshLocalPhotoPathAndBump()
         refreshFromServer()

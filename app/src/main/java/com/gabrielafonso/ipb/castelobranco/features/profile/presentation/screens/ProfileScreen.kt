@@ -23,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,6 +47,8 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) { viewModel.initialize() }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isUploading = uiState.isUploading

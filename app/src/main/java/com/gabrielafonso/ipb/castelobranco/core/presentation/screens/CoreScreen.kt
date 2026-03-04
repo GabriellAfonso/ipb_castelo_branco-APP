@@ -48,13 +48,16 @@ fun CoreView(
     profileViewModel: ProfileViewModel = hiltViewModel(),
     scheduleViewModel: ScheduleViewModel = hiltViewModel(),
 ) {
-    val isLoggedIn  by viewModel.isLoggedIn.collectAsStateWithLifecycle()
-    val isAdmin     by profileViewModel.isAdmin.collectAsStateWithLifecycle()
-    val nextSection by scheduleViewModel.nextSection.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { viewModel.initialize() }
+    LaunchedEffect(Unit) { profileViewModel.initialize() }
+
+    val isLoggedIn      by viewModel.isLoggedIn.collectAsStateWithLifecycle()
+    val profileUiState  by profileViewModel.uiState.collectAsStateWithLifecycle()
+    val nextSection     by scheduleViewModel.nextSection.collectAsStateWithLifecycle()
 
     val authState = UserAuthState(
         isLoggedIn = isLoggedIn,
-        isAdmin    = isAdmin ?: false,
+        isAdmin    = profileUiState.isAdmin ?: false,
     )
 
     LaunchedEffect(Unit) {
