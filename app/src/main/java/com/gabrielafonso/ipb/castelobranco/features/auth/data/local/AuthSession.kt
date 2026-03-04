@@ -1,4 +1,3 @@
-// app/src/main/java/com/gabrielafonso/ipb/castelobranco/data/local/AuthSession.kt
 package com.gabrielafonso.ipb.castelobranco.features.auth.data.local
 
 import android.util.Base64
