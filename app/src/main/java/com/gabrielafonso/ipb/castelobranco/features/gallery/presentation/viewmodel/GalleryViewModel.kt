@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.toAppError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,8 +61,9 @@ class GalleryViewModel @Inject constructor(
                 }
                 repository.preload()
             } catch (e: Exception) {
+                val appError = e.toAppError()
                 _downloadState.update {
-                    it.copy(isDownloading = false, error = e.message ?: "Erro ao baixar fotos")
+                    it.copy(isDownloading = false, error = appError.message ?: "Erro ao baixar fotos")
                 }
             }
         }

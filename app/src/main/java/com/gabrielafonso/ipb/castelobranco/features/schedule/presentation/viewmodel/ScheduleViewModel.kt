@@ -90,8 +90,6 @@ class ScheduleViewModel @Inject constructor(
 
             try {
                 repository.refreshMonthSchedule()
-            } catch (e: Exception) {
-                // Erro de rede tratado silenciosamente pois o Snapshot mantém o cache
             } finally {
                 val elapsed = System.currentTimeMillis() - startTime
                 if (elapsed < minDurationMs) {

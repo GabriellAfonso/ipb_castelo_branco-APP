@@ -6,6 +6,7 @@ import com.gabrielafonso.ipb.castelobranco.features.gallery.data.local.GalleryPh
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.model.Album
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.DownloadProgress
 import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.AppError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,7 +67,7 @@ class GalleryRepositoryImpl @Inject constructor(
         val response = api.getAllPhotos()
 
         if (!response.isSuccessful) {
-            throw Exception("Erro HTTP ${response.code()}")
+            throw AppError.Server(response.code())
         }
 
         val photos = response.body() ?: emptyList()
@@ -85,7 +86,7 @@ class GalleryRepositoryImpl @Inject constructor(
             if (!storage.exists(photo.albumId, photo.id)) {
                 val response = api.downloadFile(photo.imageUrl)
                 if (response.isSuccessful) {
-                    val body = response.body() ?: throw Exception("Body nulo")
+                    val body = response.body() ?: throw AppError.Server(response.code(), "Body nulo")
                     storage.save(photo.albumId, photo.id, photo.fileExtension(), body.byteStream())
                     storage.savePhotoMetadata(photo.albumId, photo.id, photo)
                 }

@@ -8,6 +8,8 @@ import com.gabrielafonso.ipb.castelobranco.features.auth.data.dto.LoginRequest
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.dto.RegisterRequest
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.TokenStorage
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.repository.AuthRepository
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.AppError
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.mapError
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -69,15 +71,21 @@ class AuthRepositoryImpl @Inject constructor(
             if (!response.isSuccessful) {
                 val errorBody = response.errorBody()?.string()
                 Log.e("GoogleSignIn", "Erro do servidor: $errorBody")
-                throw Exception(errorBody ?: "HTTP ${response.code()}")
+                val code = response.code()
+                if (code == 401 || code == 403) {
+                    throw AppError.Auth(message = errorBody ?: "HTTP $code")
+                } else {
+                    throw AppError.Server(code = code, message = errorBody ?: "HTTP $code")
+                }
             }
 
-            val tokens = response.body() ?: throw Exception("Resposta vazia")
+            val tokens = response.body()
+                ?: throw AppError.Server(code = response.code(), message = "Resposta vazia")
 
             require(tokens.access.isNotBlank()) { "Access token ausente" }
             require(tokens.refresh.isNotBlank()) { "Refresh token ausente" }
 
             tokenStorage.save(tokens)
             tokens
-        }
+        }.mapError()
 }

@@ -55,6 +55,7 @@ class GalleryPhotoStorage(
         return try {
             Json.decodeFromString(jsonFile.readText())
         } catch (e: Exception) {
+            Log.w("GalleryPhotoStorage", "Failed to parse metadata for photo $photoId in album $albumId", e)
             null
         }
     }

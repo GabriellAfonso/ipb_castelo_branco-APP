@@ -4,6 +4,8 @@ import com.gabrielafonso.ipb.castelobranco.features.admin.register.data.api.Wors
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.data.mapper.RegisterSundayPlaysRequestMapper
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.domain.repository.WorshipRegisterRepository
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.AppError
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.mapError
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,7 +21,7 @@ class WorshipRegisterRepositoryImpl @Inject constructor(
     ): Result<Unit> = runCatching {
         val body = mapper.map(date = date, plays = plays)
         val response = api.registerSundayPlays(body)
-        if (!response.isSuccessful) throw IllegalStateException("HTTP ${response.code()}")
+        if (!response.isSuccessful) throw AppError.Server(response.code())
         Unit
-    }
+    }.mapError()
 }

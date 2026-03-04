@@ -2,6 +2,8 @@ package com.gabrielafonso.ipb.castelobranco.features.profile.data.photo
 
 import android.content.Context
 import com.gabrielafonso.ipb.castelobranco.core.di.ApiBaseUrl
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.AppError
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.mapError
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.api.ProfileApi
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.local.ProfilePhotoBus
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.local.ProfilePhotoCacheStorage
@@ -36,21 +38,31 @@ class ProfilePhotoDataSource @Inject constructor(
             val response = api.uploadProfilePhoto(part)
             if (!response.isSuccessful) {
                 val errorBody = response.errorBody()?.string()
-                throw Exception(errorBody ?: "HTTP ${response.code()}")
+                val code = response.code()
+                if (code == 401 || code == 403) {
+                    throw AppError.Auth(message = errorBody ?: "HTTP $code")
+                } else {
+                    throw AppError.Server(code = code, message = errorBody ?: "HTTP $code")
+                }
             }
 
             response.body()?.photoUrl
-        }
+        }.mapError()
 
     suspend fun delete(): Result<Unit> =
         runCatching {
             val response = api.deleteProfilePhoto()
             if (!response.isSuccessful) {
                 val errorBody = response.errorBody()?.string()
-                throw Exception(errorBody ?: "HTTP ${response.code()}")
+                val code = response.code()
+                if (code == 401 || code == 403) {
+                    throw AppError.Auth(message = errorBody ?: "HTTP $code")
+                } else {
+                    throw AppError.Server(code = code, message = errorBody ?: "HTTP $code")
+                }
             }
             Unit
-        }.also { result ->
+        }.mapError().also { result ->
             if (result.isSuccess) {
                 clearLocal().getOrNull()
                 ProfilePhotoBus.bump()
@@ -87,11 +99,17 @@ class ProfilePhotoDataSource @Inject constructor(
 
                     !response.isSuccessful -> {
                         val err = response.errorBody()?.string()?.trim().orEmpty()
-                        throw Exception(err.ifBlank { "HTTP ${response.code()}" })
+                        val code = response.code()
+                        if (code == 401 || code == 403) {
+                            throw AppError.Auth(message = err.ifBlank { "HTTP $code" })
+                        } else {
+                            throw AppError.Server(code = code, message = err.ifBlank { "HTTP $code" })
+                        }
                     }
 
                     else -> {
-                        val body = response.body() ?: throw Exception("Corpo de resposta vazio")
+                        val body = response.body()
+                            ?: throw AppError.Server(code = response.code(), message = "Corpo de resposta vazio")
 
                         val contentType = body.contentType()?.toString().orEmpty()
                         val ext = when {
@@ -118,7 +136,7 @@ class ProfilePhotoDataSource @Inject constructor(
                         outFile
                     }
                 }
-            }
+            }.mapError()
         }
 
     suspend fun clearLocal(): Result<Unit> =
@@ -135,7 +153,7 @@ class ProfilePhotoDataSource @Inject constructor(
 
                 photoCache.clearAll()
                 Unit
-            }.also { result ->
+            }.mapError().also { result ->
                 if (result.isSuccess) ProfilePhotoBus.bump()
             }
         }

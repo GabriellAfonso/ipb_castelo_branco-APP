@@ -53,9 +53,8 @@ class AuthViewModel @Inject constructor(
     fun singIn(username: String, password: String) {
         viewModelScope.launch {
             _loginError.value = null
-            try {
-                val result = repository.signIn(username, password)
-                result.onSuccess { authResponse ->
+            repository.signIn(username, password)
+                .onSuccess { authResponse ->
                     Log.d(TAG, "Login sucesso: $authResponse")
                     authEventBus.emit(AuthEventBus.Event.LoginSuccess)
                     _events.tryEmit(AuthEvent.LoginSuccess)
@@ -64,11 +63,6 @@ class AuthViewModel @Inject constructor(
                     _loginError.value = authErrorMapper.parseLoginError(raw)
                     Log.e(TAG, "Falha no login", throwable)
                 }
-            } catch (e: Exception) {
-                val raw = e.message ?: "Erro inesperado"
-                _loginError.value = authErrorMapper.parseLoginError(raw)
-                Log.e(TAG, "Erro inesperado no login", e)
-            }
         }
     }
 
@@ -76,17 +70,14 @@ class AuthViewModel @Inject constructor(
         Log.d("GoogleSignIn", "signInWithGoogle chamado")
         viewModelScope.launch {
             _loginError.value = null
-            try {
-                val result = repository.signInWithGoogle(idToken)
-                result.onSuccess {
+            repository.signInWithGoogle(idToken)
+                .onSuccess {
                     authEventBus.emit(AuthEventBus.Event.LoginSuccess)
                     _events.tryEmit(AuthEvent.LoginSuccess)
                 }.onFailure { throwable ->
                     _loginError.value = throwable.message ?: "Erro ao entrar com Google"
+                    Log.e(TAG, "Falha no login com Google", throwable)
                 }
-            } catch (e: Exception) {
-                _loginError.value = e.message ?: "Erro inesperado"
-            }
         }
     }
 
@@ -99,10 +90,8 @@ class AuthViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _registerErrors.value = RegisterErrors()
-            try {
-                val result =
-                    repository.signUp(username, firstName, lastName, password, passwordConfirm)
-                result.onSuccess { authResponse ->
+            repository.signUp(username, firstName, lastName, password, passwordConfirm)
+                .onSuccess { authResponse ->
                     Log.d(TAG, "Registro sucesso: $authResponse")
                     authEventBus.emit(AuthEventBus.Event.LoginSuccess)
                     _events.tryEmit(AuthEvent.RegisterSuccess)
@@ -111,10 +100,6 @@ class AuthViewModel @Inject constructor(
                     _registerErrors.value = authErrorMapper.parseRegisterError(message)
                     Log.e(TAG, "Falha no registro", throwable)
                 }
-            } catch (e: Exception) {
-                _registerErrors.value = RegisterErrors(general = e.message ?: "Erro inesperado")
-                Log.e(TAG, "Erro inesperado no registro", e)
-            }
         }
     }
 

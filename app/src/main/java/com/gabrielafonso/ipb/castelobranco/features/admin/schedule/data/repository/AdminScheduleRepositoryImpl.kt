@@ -8,6 +8,8 @@ import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.mapper.t
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleUiState
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.AppError
+import com.gabrielafonso.ipb.castelobranco.core.domain.error.mapError
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,7 +20,7 @@ class AdminScheduleRepositoryImpl @Inject constructor(
 ) : AdminScheduleRepository {
     override suspend fun getMembers(): Result<List<Member>> = runCatching {
         api.getMembers().members.map { it.toDomain() }
-    }
+    }.mapError()
 
     override suspend fun generateSchedule(year: Int, month: Int): Result<List<EditableScheduleUiState>> = runCatching {
         val response = api.generateSchedule(
@@ -39,9 +41,9 @@ class AdminScheduleRepositoryImpl @Inject constructor(
                 memberQuery = item.member.name
             )
         }
-    }
+    }.mapError()
 
-    override suspend fun saveSchedule(year: Int, month: Int, items: List<EditableScheduleUiState>): Result<Unit> {
+    override suspend fun saveSchedule(year: Int, month: Int, items: List<EditableScheduleUiState>): Result<Unit> = runCatching {
         val body = SaveScheduleRequestDto(
             year = year,
             month = month,
@@ -53,21 +55,15 @@ class AdminScheduleRepositoryImpl @Inject constructor(
                 )
             }
         )
-        return try {
-            val response = api.saveSchedule(body)
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                val errorMessage = try {
-                    JSONObject(errorBody).getString("error")
-                } catch (e: Exception) {
-                    "Erro desconhecido do servidor"
-                }
-                Result.failure(Exception(errorMessage))
+        val response = api.saveSchedule(body)
+        if (!response.isSuccessful) {
+            val errorBody = response.errorBody()?.string()
+            val errorMessage = try {
+                JSONObject(errorBody).getString("error")
+            } catch (e: Exception) {
+                errorBody ?: "Erro desconhecido do servidor"
             }
-        } catch (e: Exception) {
-            Result.failure(e)
+            throw AppError.Server(code = response.code(), message = errorMessage)
         }
-    }
+    }.mapError()
 }
