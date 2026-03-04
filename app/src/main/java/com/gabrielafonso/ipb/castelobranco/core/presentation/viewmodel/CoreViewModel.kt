@@ -4,33 +4,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielafonso.ipb.castelobranco.core.domain.auth.AuthEventBus
 import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.gabrielafonso.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.local.AuthSession
-import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
-import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.repository.HymnalRepository
 import com.gabrielafonso.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
-import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class CoreViewModel @Inject constructor(
-    private val songsRepository: SongsRepository,
-    private val hymnalRepository: HymnalRepository,
-    private val scheduleRepository: ScheduleRepository,
-    private val galleryRepository: GalleryRepository,
+    private val preloadDataUseCase: PreloadDataUseCase,
     private val authSession: AuthSession,
     private val profileRepository: ProfileRepository,
     private val authEventBus: AuthEventBus,
@@ -74,51 +63,13 @@ class CoreViewModel @Inject constructor(
         viewModelScope.launch {
             _isPreloading.value = true
 
-            // 1. CARREGAMENTO EM MEMÓRIA (Preload)
-            // Lê o disco e joga para o StateFlow dos Repositories
-            // Isso mata o lag de abertura das views
-            preloadCachesFromDisk()
-
-            // 2. ATUALIZAÇÃO DE REDE (Refresh)
-            // Agora que a UI já tem o que mostrar (cache), buscamos o novo em background
-            refreshDataFromNetwork()
+            // 1 & 2. PRELOAD (disk) + REFRESH (network) delegated to use case
+            preloadDataUseCase()
 
             // Perfil é um caso à parte pois depende de login
             refreshProfileOnAppOpen()
 
             _isPreloading.value = false
-        }
-    }
-
-    private suspend fun preloadCachesFromDisk() = withContext(Dispatchers.IO) {
-        supervisorScope {
-            val preloads = listOf(
-//              launch { songsRepository.preload() },
-//              launch { hymnalRepository.preload() },
-                launch { scheduleRepository.preload() },
-                launch { galleryRepository.preload() },
-//              launch { profileRepository.preload() }
-            )
-            preloads.joinAll()
-        }
-    }
-
-    private suspend fun refreshDataFromNetwork() = withContext(Dispatchers.IO) {
-        supervisorScope {
-            // Usamos async para não travar um refresh se o outro falhar
-            val jobs = listOf(
-                async { songsRepository.refreshAllSongs() },
-                async { songsRepository.refreshSongsBySunday() },
-                async { songsRepository.refreshTopSongs() },
-                async { songsRepository.refreshTopTones() },
-                async { songsRepository.refreshSuggestedSongs() },
-                async { hymnalRepository.refreshHymnal() },
-                async { scheduleRepository.refreshMonthSchedule() },
-            )
-
-            jobs.forEach { deferred ->
-                runCatching { deferred.await() }
-            }
         }
     }
 
