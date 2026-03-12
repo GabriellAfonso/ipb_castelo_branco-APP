@@ -39,6 +39,7 @@ import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
 
 data class HymnalUiState(
@@ -50,7 +51,6 @@ data class HymnalUiState(
 )
 
 data class HymnalActions(
-    val teste: () -> Unit,
     val onQueryChange: (String) -> Unit,
     val onHymnClick: (String) -> Unit,
 )
@@ -65,7 +65,6 @@ fun HymnalScreen(
 
     val actions = HymnalActions(
         onQueryChange = viewModel::onQueryChange,
-        teste = viewModel::teste,
         onHymnClick = onHymnClick
     )
 
