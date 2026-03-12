@@ -7,6 +7,7 @@ import com.gabrielafonso.ipb.castelobranco.features.gallery.data.api.GalleryApi
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.api.HymnalApi
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.api.ProfileApi
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.api.ScheduleApi
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.data.api.ChordChartsApi
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.api.SongsTableApi
 import dagger.Module
 import dagger.Provides
@@ -66,4 +67,10 @@ object ApiModule {
     fun provideAdminScheduleApi(
         @AuthedRetrofit retrofit: Retrofit
     ): AdminScheduleApi = retrofit.create(AdminScheduleApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideChordChartsApi(
+        @AuthLessRetrofit retrofit: Retrofit
+    ): ChordChartsApi = retrofit.create(ChordChartsApi::class.java)
 }
