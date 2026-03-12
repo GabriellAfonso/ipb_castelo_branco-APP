@@ -56,18 +56,12 @@ fun SuggestionsTab(
 
     fun buildShareText(): String {
         val date = SimpleDateFormat("dd/MM/yy", Locale.forLanguageTag("pt-BR")).format(Date())
-        val header = "Louvor $date"
+        val header = "*Louvor — $date*"
 
         val lines = suggestedSongs
             .sortedBy { it.position }
             .joinToString(separator = "\n\n") { song ->
-                val formattedArtist = if (song.artist.length > 5) {
-                    "${song.artist.take(5)}."
-                } else {
-                    song.artist
-                }
-
-                "${song.title}(${song.tone}) ($formattedArtist)"
+                "*${song.title} (${song.tone})*\n_- ${song.artist}_"
             }
 
         return if (lines.isBlank()) header else "$header\n\n$lines"
