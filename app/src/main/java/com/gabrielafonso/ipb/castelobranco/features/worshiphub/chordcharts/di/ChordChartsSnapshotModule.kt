@@ -1,0 +1,31 @@
+package com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.di
+
+import com.gabrielafonso.ipb.castelobranco.core.data.snapshot.SnapshotCacheFactory
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotCache
+import com.gabrielafonso.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.data.api.ChordChartsApi
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.data.dto.ChordChartDto
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.data.fetcher.ChordChartsSnapshotFetcher
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.builtins.ListSerializer
+
+@Module
+@InstallIn(SingletonComponent::class)
+object ChordChartsSnapshotModule {
+
+    @Provides
+    fun provideChordChartsCache(
+        factory: SnapshotCacheFactory,
+    ): SnapshotCache<List<ChordChartDto>> = factory.create(
+        key = "worshiphub_chord_charts",
+        serializer = ListSerializer(ChordChartDto.serializer()),
+    )
+
+    @Provides
+    fun provideChordChartsFetcher(
+        api: ChordChartsApi,
+    ): SnapshotFetcher<List<ChordChartDto>> = ChordChartsSnapshotFetcher(api)
+}
