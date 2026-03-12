@@ -1,7 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.core.presentation.navigation
 
 object AppRoutes {
-    const val MAIN = "main"
+    const val CORE = "core"
     const val SCHEDULE = "schedule"
     const val SETTINGS = "settings"
     const val PROFILE = "profile"

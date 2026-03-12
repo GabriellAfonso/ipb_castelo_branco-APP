@@ -1,6 +1,8 @@
 package com.gabrielafonso.ipb.castelobranco.core.presentation.navigation
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -8,6 +10,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.gabrielafonso.ipb.castelobranco.core.presentation.base.findActivity
+import com.gabrielafonso.ipb.castelobranco.core.presentation.restartApp
 import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.navigation.adminGraph
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.navigation.authGraph
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.navigation.galleryGraph
@@ -30,9 +34,10 @@ fun AppNavHost(navController: NavHostController) {
     }
 
     CompositionLocalProvider(LocalAppNavigator provides appNavigator) {
-        NavHost(navController = navController, startDestination = AppRoutes.MAIN) {
+        NavHost(navController = navController, startDestination = AppRoutes.CORE) {
 
-            composable(AppRoutes.MAIN) {
+            composable(AppRoutes.CORE) {
+                BackHandler {}
                 CoreView(
                     onNavigateToAuth       = { navController.navigate(AppRoutes.AUTH_GRAPH) },
                     onNavigateToWorshipHub = { navController.navigate(AppRoutes.WORSHIP_HUB_GRAPH) },
@@ -42,8 +47,8 @@ fun AppNavHost(navController: NavHostController) {
                     onNavigateToSettings   = { navController.navigate(AppRoutes.SETTINGS) },
                     onNavigateToAdmin      = { navController.navigate(AppRoutes.ADMIN_GRAPH) },
                     onLogoutSuccess        = {
-                        navController.navigate(AppRoutes.MAIN) {
-                            popUpTo(AppRoutes.MAIN) { inclusive = true }
+                        navController.navigate(AppRoutes.CORE) {
+                            popUpTo(AppRoutes.CORE) { inclusive = false }
                         }
                     },
                 )
@@ -52,9 +57,7 @@ fun AppNavHost(navController: NavHostController) {
             authGraph(
                 navController = navController,
                 onAuthSuccess = {
-                    navController.navigate(AppRoutes.MAIN) {
-                        popUpTo(AppRoutes.MAIN) { inclusive = true }
-                    }
+                     context.findActivity()?.recreate()
                 },
             )
 
@@ -65,7 +68,7 @@ fun AppNavHost(navController: NavHostController) {
 
             composable(AppRoutes.SCHEDULE) {
                 MonthScheduleScreen(
-                    onBackClick = { navController.popBackStack() },
+                    onBackClick = { navController.safePopBackStack() },
                     onShare     = { text ->
                         val intent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -77,11 +80,11 @@ fun AppNavHost(navController: NavHostController) {
             }
 
             composable(AppRoutes.SETTINGS) {
-                SettingsScreen(onBackClick = { navController.popBackStack() })
+                SettingsScreen(onBackClick = { navController.safePopBackStack() })
             }
 
             composable(AppRoutes.PROFILE) {
-                ProfileScreen(onBackClick = { navController.popBackStack() })
+                ProfileScreen(onBackClick = { navController.safePopBackStack() })
             }
         }
     }
