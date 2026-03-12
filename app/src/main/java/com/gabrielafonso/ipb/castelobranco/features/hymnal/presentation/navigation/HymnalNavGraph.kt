@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.screens.HymnDetailScreen
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.screens.HymnalScreen
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
@@ -32,7 +33,7 @@ fun NavGraphBuilder.hymnalGraph(navController: NavHostController) {
             HymnalScreen(
                 viewModel   = viewModel,
                 onHymnClick = { hymnId -> navController.navigate(HymnalRoutes.detailRoute(hymnId)) },
-                onBackClick = { navController.popBackStack() },
+                onBackClick = { navController.safePopBackStack() },
             )
         }
 
@@ -45,7 +46,7 @@ fun NavGraphBuilder.hymnalGraph(navController: NavHostController) {
             val viewModel: HymnalViewModel = hiltViewModel(graphEntry)
             HymnDetailScreen(
                 hymnId    = hymnId,
-                onBack    = { navController.popBackStack() },
+                onBack    = { navController.safePopBackStack() },
                 viewModel = viewModel,
             )
         }

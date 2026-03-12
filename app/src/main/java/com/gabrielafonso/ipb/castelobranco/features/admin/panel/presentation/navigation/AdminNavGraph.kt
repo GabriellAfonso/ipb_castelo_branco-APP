@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.screens.AdminScreen
 import com.gabrielafonso.ipb.castelobranco.features.admin.register.presentation.screens.MusicRegistrationScreen
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.presentation.screens.AdminScheduleScreen
@@ -26,7 +27,7 @@ object AdminRoutes {
 
 fun NavGraphBuilder.adminGraph(navController: NavHostController) {
     fun nav() = AdminNav(
-        back     = { navController.popBackStack() },
+        back     = { navController.safePopBackStack() },
         register = { navController.navigate(AdminRoutes.REGISTER) },
         schedule = { navController.navigate(AdminRoutes.SCHEDULE) },
     )

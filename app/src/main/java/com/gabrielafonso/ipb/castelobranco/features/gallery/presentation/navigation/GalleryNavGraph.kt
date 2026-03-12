@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.screens.AlbumScreen
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.screens.GalleryScreen
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.screens.PhotoScreen
@@ -32,7 +33,7 @@ object GalleryRoutes {
 
 fun NavGraphBuilder.galleryGraph(navController: NavHostController) {
     fun nav() = GalleryNav(
-        back    = { navController.popBackStack() },
+        back    = { navController.safePopBackStack() },
         toAlbum = { albumId -> navController.navigate(GalleryRoutes.Album(albumId)) },
         toPhoto = { albumId, idx -> navController.navigate(GalleryRoutes.Photo(albumId, idx)) },
     )

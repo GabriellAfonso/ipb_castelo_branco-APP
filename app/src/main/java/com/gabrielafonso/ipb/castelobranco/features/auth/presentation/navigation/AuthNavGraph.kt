@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
+import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens.AuthScreen
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.screens.RegisterScreen
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.viewmodel.AuthViewModel
@@ -29,7 +30,7 @@ fun NavGraphBuilder.authGraph(
             val viewModel: AuthViewModel = hiltViewModel(graphEntry)
             AuthScreen(
                 viewModel            = viewModel,
-                onBackClick          = { navController.popBackStack() },
+                onBackClick          = { navController.safePopBackStack() },
                 onNavigateToRegister = { navController.navigate(AuthRoutes.REGISTER) },
                 onAuthSuccess        = onAuthSuccess,
             )
@@ -40,7 +41,7 @@ fun NavGraphBuilder.authGraph(
             val viewModel: AuthViewModel = hiltViewModel(graphEntry)
             RegisterScreen(
                 viewModel     = viewModel,
-                onBackClick   = { navController.popBackStack() },
+                onBackClick   = { navController.safePopBackStack() },
                 onAuthSuccess = onAuthSuccess,
             )
         }
