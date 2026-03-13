@@ -4,6 +4,7 @@ import com.gabrielafonso.ipb.castelobranco.features.gallery.domain.repository.Ga
 import com.gabrielafonso.ipb.castelobranco.features.hymnal.domain.repository.HymnalRepository
 import com.gabrielafonso.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -19,6 +20,7 @@ class PreloadDataUseCase @Inject constructor(
     private val scheduleRepository: ScheduleRepository,
     private val galleryRepository: GalleryRepository,
     private val chordChartRepository: ChordChartRepository,
+    private val lyricsRepository: LyricsRepository,
 ) {
     suspend operator fun invoke() {
         preloadCachesFromDisk()
@@ -33,6 +35,7 @@ class PreloadDataUseCase @Inject constructor(
                 launch { scheduleRepository.preload() },
                 launch { galleryRepository.preload() },
                 launch { chordChartRepository.preload() },
+                launch { lyricsRepository.preload() },
 //              launch { profileRepository.preload() }
             )
             preloads.joinAll()
@@ -50,6 +53,7 @@ class PreloadDataUseCase @Inject constructor(
                 async { hymnalRepository.refreshHymnal() },
                 async { scheduleRepository.refreshMonthSchedule() },
                 async { chordChartRepository.refresh() },
+                async { lyricsRepository.refresh() },
             )
 
             jobs.forEach { deferred ->

@@ -8,6 +8,7 @@ import com.gabrielafonso.ipb.castelobranco.features.hymnal.data.api.HymnalApi
 import com.gabrielafonso.ipb.castelobranco.features.profile.data.api.ProfileApi
 import com.gabrielafonso.ipb.castelobranco.features.schedule.data.api.ScheduleApi
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.data.api.ChordChartsApi
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.data.api.LyricsApi
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.data.api.SongsTableApi
 import dagger.Module
 import dagger.Provides
@@ -73,4 +74,10 @@ object ApiModule {
     fun provideChordChartsApi(
         @AuthLessRetrofit retrofit: Retrofit
     ): ChordChartsApi = retrofit.create(ChordChartsApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideLyricsApi(
+        @AuthLessRetrofit retrofit: Retrofit
+    ): LyricsApi = retrofit.create(LyricsApi::class.java)
 }

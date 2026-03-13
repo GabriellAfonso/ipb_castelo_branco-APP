@@ -11,6 +11,7 @@ import com.gabrielafonso.ipb.castelobranco.core.presentation.components.InDevelo
 import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.gabrielafonso.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.navigation.chordChartsGraph
+import com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.presentation.navigation.lyricsGraph
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.screens.WorshipHubScreen
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.screens.WorshipSongsTableScreen
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
@@ -71,9 +72,9 @@ fun NavGraphBuilder.worshipHubGraph(navController: NavHostController) {
         }
 
         chordChartsGraph(navController)
+        lyricsGraph(navController)
 
         composable(WorshipHubRoutes.Songs)   { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
-        composable(WorshipHubRoutes.Button4) { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
         composable(WorshipHubRoutes.Button5) { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
         composable(WorshipHubRoutes.Button6) { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
         composable(WorshipHubRoutes.Button7) { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
