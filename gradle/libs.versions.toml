@@ -34,6 +34,7 @@ coroutines = "1.10.2"
 coil = "2.6.0"
 googleid = "1.1.1"
 credentials = "1.5.0"
+playAppUpdate = "2.1.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -82,6 +83,7 @@ androidx-compose-foundation = { group = "androidx.compose.foundation", name = "f
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "playAppUpdate" }
 
 
 

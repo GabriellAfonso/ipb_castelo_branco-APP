@@ -27,7 +27,7 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.gabrielafonso.ipb.castelobranco"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "0.7.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -143,4 +143,5 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.googleid)
+    implementation(libs.play.app.update.ktx)
 }
