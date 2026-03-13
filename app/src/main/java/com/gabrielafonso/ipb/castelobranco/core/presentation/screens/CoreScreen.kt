@@ -10,6 +10,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
@@ -61,10 +63,15 @@ fun CoreView(
         isAdmin    = profileUiState.isAdmin ?: false,
     )
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
-                is CoreViewModel.CoreEvent.LogoutSuccess -> onLogoutSuccess()
+                is CoreViewModel.CoreEvent.LogoutSuccess -> {
+                    onLogoutSuccess()
+                    Toast.makeText(context, "Sessão encerrada", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

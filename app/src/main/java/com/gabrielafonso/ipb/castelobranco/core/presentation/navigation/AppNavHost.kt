@@ -1,7 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.core.presentation.navigation
 
-import android.app.Activity
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -10,8 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.gabrielafonso.ipb.castelobranco.core.presentation.base.findActivity
-import com.gabrielafonso.ipb.castelobranco.core.presentation.restartApp
 import com.gabrielafonso.ipb.castelobranco.features.admin.panel.presentation.navigation.adminGraph
 import com.gabrielafonso.ipb.castelobranco.features.auth.presentation.navigation.authGraph
 import com.gabrielafonso.ipb.castelobranco.features.gallery.presentation.navigation.galleryGraph
@@ -46,18 +44,17 @@ fun AppNavHost(navController: NavHostController) {
                     onNavigateToHymnal     = { navController.navigate(AppRoutes.HYMNAL_GRAPH) },
                     onNavigateToSettings   = { navController.navigate(AppRoutes.SETTINGS) },
                     onNavigateToAdmin      = { navController.navigate(AppRoutes.ADMIN_GRAPH) },
-                    onLogoutSuccess        = {
-                        navController.navigate(AppRoutes.CORE) {
-                            popUpTo(AppRoutes.CORE) { inclusive = false }
-                        }
-                    },
+                    onLogoutSuccess        = {},
                 )
             }
 
             authGraph(
                 navController = navController,
                 onAuthSuccess = {
-                     context.findActivity()?.recreate()
+                    navController.navigate(AppRoutes.CORE) {
+                        popUpTo(AppRoutes.AUTH_GRAPH) { inclusive = true }
+                    }
+                    Toast.makeText(context, "Sessão iniciada", Toast.LENGTH_SHORT).show()
                 },
             )
 
