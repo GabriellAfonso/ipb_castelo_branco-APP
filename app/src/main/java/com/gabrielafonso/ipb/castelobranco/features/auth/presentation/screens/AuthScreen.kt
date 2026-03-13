@@ -105,7 +105,7 @@ fun AuthScreen(
                 credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {
                 val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                Log.d("GoogleSignIn", "idToken extraído: ${googleCredential.idToken.take(20)}")
+                if (BuildConfig.DEBUG) Log.d("GoogleSignIn", "idToken extraído: ${googleCredential.idToken.take(20)}")
                 viewModel.signInWithGoogle(googleCredential.idToken)
             } else {
                 Log.w("GoogleSignIn", "Tipo de credential não reconhecido: ${credential.type}")

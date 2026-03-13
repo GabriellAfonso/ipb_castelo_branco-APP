@@ -1,6 +1,7 @@
 package com.gabrielafonso.ipb.castelobranco.features.auth.data.repository
 
 import android.util.Log
+import com.gabrielafonso.ipb.castelobranco.BuildConfig
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.api.AuthApi
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.api.GoogleLoginRequest
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.AuthTokens
@@ -29,7 +30,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
 
     override suspend fun signInWithGoogle(idToken: String): Result<AuthTokens> {
-        Log.d("GoogleSignIn", "Enviando idToken para o backend: ${idToken.take(20)}...")
+        if (BuildConfig.DEBUG) Log.d("GoogleSignIn", "Enviando idToken para o backend: ${idToken.take(20)}...")
         return authenticate {
             api.loginWithGoogle(GoogleLoginRequest(id_token = idToken))
         }
