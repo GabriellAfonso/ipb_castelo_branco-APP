@@ -20,4 +20,4 @@ app/release
 app/build
 .kotlin/errors
 CLAUDE.md
-ARCH_AUDIT.md
+claude-docs/
