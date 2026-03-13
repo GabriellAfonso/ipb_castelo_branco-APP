@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--    tirar   android:usesCleartextTraffic="true" -->
     <application
         android:name=".MyApp"
         android:allowBackup="true"
@@ -15,8 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
 
-        android:theme="@style/Theme.IPBCasteloBranco"
-        android:usesCleartextTraffic="true">
+        android:theme="@style/Theme.IPBCasteloBranco">
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
