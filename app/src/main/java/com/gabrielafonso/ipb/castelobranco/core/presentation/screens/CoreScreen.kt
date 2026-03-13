@@ -287,8 +287,8 @@ fun ButtonGrid(
         ButtonInfo(R.drawable.ic_schedule,       "Escala",      iconColor, onNavigateToSchedule),
         ButtonInfo(R.drawable.ic_galery,         "Galeria",     iconColor, onNavigateToGallery),
         ButtonInfo(R.drawable.ic_sarca_ipb,      "Hinário",     iconColor, onNavigateToHymnal),
-        ButtonInfo(R.drawable.ic_in_development, "In Dev",      iconColor) { },
-        ButtonInfo(R.drawable.ic_in_development, "In Dev",      iconColor) { },
+        ButtonInfo(R.drawable.ic_in_development, "Em Breve",      iconColor) { },
+        ButtonInfo(R.drawable.ic_in_development, "Em Breve",      iconColor) { },
     )
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {

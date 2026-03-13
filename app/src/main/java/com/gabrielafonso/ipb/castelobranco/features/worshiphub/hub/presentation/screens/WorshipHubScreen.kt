@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.gabrielafonso.ipb.castelobranco.R
@@ -21,7 +22,8 @@ import com.gabrielafonso.ipb.castelobranco.features.worshiphub.hub.presentation.
 private data class WorshipHubButtonInfo(
     val iconRes: Int,
     val label: String,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
+    val visible: Boolean = true,
 )
 
 @Composable
@@ -65,11 +67,11 @@ private fun WorshipHubButtonGrid(
     val buttons = remember(actions) {
         listOf(
             WorshipHubButtonInfo(R.drawable.ic_table, "Tabelas", actions.tables),
-            WorshipHubButtonInfo(R.drawable.ic_songs, "Musicas", actions.songs),
             WorshipHubButtonInfo(R.drawable.ic_chord_chart, "Cifras", actions.button3),
             WorshipHubButtonInfo(R.drawable.ic_lyrics, "Letras", actions.button4),
-            WorshipHubButtonInfo(R.drawable.ic_in_development, "In Dev", actions.button5),
-            WorshipHubButtonInfo(R.drawable.ic_in_development, "In Dev", actions.button6),
+            WorshipHubButtonInfo(R.drawable.ic_songs, "Musicas", actions.songs, visible = false),
+            WorshipHubButtonInfo(R.drawable.ic_in_development, "In Dev", actions.button5, visible = false),
+            WorshipHubButtonInfo(R.drawable.ic_in_development, "In Dev", actions.button6, visible = false),
         )
     }
 
@@ -91,14 +93,18 @@ private fun WorshipHubButtonGrid(
                 CustomButton(
                     image = painterResource(id = left.iconRes),
                     text = left.label,
-                    onClick = left.onClick,
+                    onClick = if (left.visible) left.onClick else { {} },
+                    modifier = Modifier.alpha(if (left.visible) 1f else 0f),
                     size = 150.dp,
+                    playSoundOnClick = left.visible,
                 )
                 CustomButton(
                     image = painterResource(id = right.iconRes),
                     text = right.label,
-                    onClick = right.onClick,
+                    onClick = if (right.visible) right.onClick else { {} },
+                    modifier = Modifier.alpha(if (right.visible) 1f else 0f),
                     size = 150.dp,
+                    playSoundOnClick = right.visible,
                 )
             }
         }

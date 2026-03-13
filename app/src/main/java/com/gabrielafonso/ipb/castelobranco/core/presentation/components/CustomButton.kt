@@ -27,11 +27,12 @@ fun CustomButton(
     modifier: Modifier = Modifier,
     size: Dp = 100.dp,
     backgroundColor: Color = ipbGreen,
+    playSoundOnClick: Boolean = true,
 ) {
     val view = LocalView.current
     Button(
         onClick = {
-            view.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            if (playSoundOnClick) view.playSoundEffect(android.view.SoundEffectConstants.CLICK)
             onClick()
         },
         modifier = modifier.size(size),
