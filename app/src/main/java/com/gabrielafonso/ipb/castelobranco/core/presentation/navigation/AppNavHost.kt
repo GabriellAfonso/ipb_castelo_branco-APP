@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,7 +34,14 @@ fun AppNavHost(navController: NavHostController) {
     }
 
     CompositionLocalProvider(LocalAppNavigator provides appNavigator) {
-        NavHost(navController = navController, startDestination = AppRoutes.CORE) {
+        NavHost(
+            navController        = navController,
+            startDestination     = AppRoutes.CORE,
+            enterTransition      = { EnterTransition.None },
+            exitTransition       = { ExitTransition.None },
+            popEnterTransition   = { EnterTransition.None },
+            popExitTransition    = { ExitTransition.None },
+        ) {
 
             composable(AppRoutes.CORE) {
                 BackHandler {}
