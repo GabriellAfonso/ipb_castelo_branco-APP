@@ -23,7 +23,8 @@ class MyApp : Application() {
         super.onCreate()
 
         appScope.launch {
-            val mode = themePreferences.themeModeFlow.first()
+            val mode = runCatching { themePreferences.themeModeFlow.first() }
+                .getOrDefault(ThemeMode.FOLLOW_SYSTEM)
             val nightMode = when (mode) {
                 ThemeMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
                 ThemeMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
