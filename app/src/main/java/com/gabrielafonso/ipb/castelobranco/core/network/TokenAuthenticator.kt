@@ -29,8 +29,6 @@ class TokenAuthenticator @Inject constructor(
             refreshTokenMutex.withLock {
                 val current = tokenStorage.peekOrNull() ?: return@runBlocking null
 
-                // Se enquanto eu esperava no mutex alguém já atualizou o access,
-                // eu só repito a request com o token atual.
                 val failedAuthHeader = response.request.header("Authorization")
                 val currentAccess = current.access
                 if (!failedAuthHeader.isNullOrBlank() &&
@@ -50,7 +48,7 @@ class TokenAuthenticator @Inject constructor(
                 }.getOrNull() ?: return@runBlocking null
 
                 if (!refreshResponse.isSuccessful) {
-                    // Se refresh inválido/expirado -> limpa e para
+
                     if (refreshResponse.code() == 401 || refreshResponse.code() == 400) {
                         tokenStorage.clear()
                     }
@@ -59,8 +57,6 @@ class TokenAuthenticator @Inject constructor(
 
                 val newTokens = refreshResponse.body() ?: return@runBlocking null
 
-                // Seu backend SEMPRE retorna refresh agora, então podemos salvar direto.
-                // (Se um dia mudar, dá pra voltar com fallback.)
                 tokenStorage.save(newTokens)
 
                 return@runBlocking response.request.newBuilder()
