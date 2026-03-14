@@ -1,11 +1,15 @@
 package com.gabrielafonso.ipb.castelobranco.features.auth.di
 
+import com.gabrielafonso.ipb.castelobranco.core.di.AuthLessRetrofit
+import com.gabrielafonso.ipb.castelobranco.features.auth.data.api.AuthApi
 import com.gabrielafonso.ipb.castelobranco.features.auth.data.repository.AuthRepositoryImpl
 import com.gabrielafonso.ipb.castelobranco.features.auth.domain.repository.AuthRepository
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
 import javax.inject.Singleton
 
 @Module
@@ -17,4 +21,12 @@ abstract class AuthModule {
     abstract fun bindAuthRepository(
         impl: AuthRepositoryImpl
     ): AuthRepository
+
+    companion object {
+        @Provides
+        @Singleton
+        fun provideAuthApi(
+            @AuthLessRetrofit retrofit: Retrofit
+        ): AuthApi = retrofit.create(AuthApi::class.java)
+    }
 }

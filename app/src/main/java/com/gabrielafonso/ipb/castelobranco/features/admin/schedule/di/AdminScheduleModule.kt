@@ -1,5 +1,6 @@
 package com.gabrielafonso.ipb.castelobranco.features.admin.schedule.di
 
+import com.gabrielafonso.ipb.castelobranco.core.di.AuthedRetrofit
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.api.AdminScheduleApi
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.data.repository.AdminScheduleRepositoryImpl
 import com.gabrielafonso.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
@@ -8,8 +9,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
 import javax.inject.Singleton
+import retrofit2.Retrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -21,5 +22,11 @@ abstract class AdminScheduleModule {
         impl: AdminScheduleRepositoryImpl
     ): AdminScheduleRepository
 
-
+    companion object {
+        @Provides
+        @Singleton
+        fun provideAdminScheduleApi(
+            @AuthedRetrofit retrofit: Retrofit
+        ): AdminScheduleApi = retrofit.create(AdminScheduleApi::class.java)
+    }
 }
