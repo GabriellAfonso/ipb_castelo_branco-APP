@@ -21,3 +21,4 @@ app/build
 .kotlin/errors
 CLAUDE.md
 claude-docs/
+.claude
