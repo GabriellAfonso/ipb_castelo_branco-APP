@@ -41,7 +41,7 @@ class LyricsDetailViewModel @Inject constructor(
 
                 LyricsDetailUiState(
                     songName = songMap[lyrics.songId]?.title ?: "Song #${lyrics.songId}",
-                    pages    = LyricsParser.parse(lyrics.content),
+                    stanzas  = LyricsParser.parse(lyrics.content),
                 )
             }
         }

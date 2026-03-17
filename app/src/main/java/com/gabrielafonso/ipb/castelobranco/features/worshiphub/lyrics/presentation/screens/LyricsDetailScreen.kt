@@ -1,7 +1,9 @@
 package com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.presentation.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,22 +18,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.presentation.parser.LyricsPage
+import com.gabrielafonso.ipb.castelobranco.core.presentation.modifier.tapToPaginate
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.presentation.parser.LyricsStanza
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsDetailUiState
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel.LyricsDetailViewModel
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Arrangement
 
 private val DotColor   = Color(0xFF1565C0)
 private val TitleColor = Color(0xFFF2A300)
@@ -57,11 +57,11 @@ private fun LyricsDetailContent(
         onBackClick   = onBackClick,
     ) { innerPadding ->
         when {
-            state.isLoading       -> LoadingState(Modifier.padding(innerPadding))
-            state.error != null   -> ErrorState(state.error, Modifier.padding(innerPadding))
-            state.pages.isEmpty() -> ErrorState("No content available", Modifier.padding(innerPadding))
+            state.isLoading          -> LoadingState(Modifier.padding(innerPadding))
+            state.error != null      -> ErrorState(state.error, Modifier.padding(innerPadding))
+            state.stanzas.isEmpty()  -> ErrorState("No content available", Modifier.padding(innerPadding))
             else -> LyricsPager(
-                pages    = state.pages,
+                stanzas  = state.stanzas,
                 songName = state.songName,
                 modifier = Modifier.padding(innerPadding),
             )
@@ -69,32 +69,110 @@ private fun LyricsDetailContent(
     }
 }
 
+/**
+ * Measures each stanza's height, computes page splits, then subcomposes the full
+ * pager UI with the pages already known — same pattern as ChordChartDetailScreen.
+ */
 @Composable
 private fun LyricsPager(
-    pages: List<LyricsPage>,
+    stanzas: List<LyricsStanza>,
     songName: String,
     modifier: Modifier = Modifier,
 ) {
-    val pagerState = rememberPagerState(pageCount = { pages.size })
+    SubcomposeLayout(modifier = modifier.fillMaxSize()) { constraints ->
+        val stanzaSpacingPx = 16.dp.roundToPx()
+        val hPaddingPx      = 40.dp.roundToPx()  // matches LyricsPageContent padding(horizontal = 20.dp)
+        val vPaddingPx      = 24.dp.roundToPx()  // matches LyricsPageContent padding(vertical = 12.dp)
+        val measureWidth    = (constraints.maxWidth - hPaddingPx).coerceAtLeast(0)
 
-    Column(modifier = modifier.fillMaxSize()) {
-        if (songName.isNotEmpty()) {
-            Text(
-                text      = songName,
-                color     = TitleColor,
-                style     = MaterialTheme.typography.titleLarge,
-                modifier  = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-            )
+        // Phase 1: measure each stanza at the correct render width
+        val stanzaHeights = stanzas.mapIndexed { i, stanza ->
+            subcompose("m_$i") {
+                Column { StanzaBlock(stanza) }
+            }.firstOrNull()
+                ?.measure(Constraints(maxWidth = measureWidth))
+                ?.height ?: 0
         }
 
-        HorizontalPager(
-            state    = pagerState,
+        // Phase 2: measure chrome (song title + dots) for available height calculation
+        val titleHeight = subcompose("chrome_title") {
+            if (songName.isNotEmpty()) SongTitle(songName)
+        }.firstOrNull()?.measure(Constraints(maxWidth = constraints.maxWidth))?.height ?: 0
+
+        val dotsHeight = subcompose("chrome_dots") {
+            PageDotIndicator(
+                pageCount   = 1,
+                currentPage = 0,
+                modifier    = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+            )
+        }.first().measure(Constraints(maxWidth = constraints.maxWidth)).height
+
+        // Phase 3: compute pages
+        val availableForStanzas = (constraints.maxHeight - titleHeight - dotsHeight - vPaddingPx)
+            .coerceAtLeast(1)
+        val pages = paginate(stanzas, stanzaHeights, availableForStanzas, stanzaSpacingPx)
+
+        // Phase 4: render full pager — pagerState lives inside this subcomposition
+        val contentPlaceable = subcompose("pager") {
+            PagerContent(pages = pages, songName = songName)
+        }.first().measure(constraints)
+
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            contentPlaceable.place(0, 0)
+        }
+    }
+}
+
+private fun paginate(
+    stanzas: List<LyricsStanza>,
+    heights: List<Int>,
+    availableHeight: Int,
+    spacingPx: Int,
+): List<List<LyricsStanza>> {
+    if (stanzas.isEmpty()) return emptyList()
+
+    val pages = mutableListOf<MutableList<LyricsStanza>>()
+    var currentPage = mutableListOf<LyricsStanza>()
+    var usedHeight = 0
+
+    stanzas.forEachIndexed { i, stanza ->
+        val h       = heights[i]
+        val spacing = if (currentPage.isEmpty()) 0 else spacingPx
+        if (currentPage.isNotEmpty() && usedHeight + spacing + h > availableHeight) {
+            pages += currentPage
+            currentPage = mutableListOf()
+            usedHeight = 0
+        }
+        currentPage += stanza
+        usedHeight += (if (usedHeight == 0) 0 else spacingPx) + h
+    }
+
+    if (currentPage.isNotEmpty()) pages += currentPage
+    return pages
+}
+
+@Composable
+private fun PagerContent(
+    pages: List<List<LyricsStanza>>,
+    songName: String,
+) {
+    val pagerState = rememberPagerState(pageCount = { pages.size })
+    val scope      = rememberCoroutineScope()
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (songName.isNotEmpty()) SongTitle(songName)
+
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
-        ) { index ->
-            AutoScaledContent(modifier = Modifier.fillMaxSize()) {
-                LyricsPageContent(page = pages[index])
+                .fillMaxWidth()
+                .tapToPaginate(pagerState, scope),
+        ) {
+            HorizontalPager(
+                state    = pagerState,
+                modifier = Modifier.fillMaxSize(),
+            ) { index ->
+                LyricsPageContent(stanzas = pages[index])
             }
         }
 
@@ -109,15 +187,25 @@ private fun LyricsPager(
 }
 
 @Composable
-private fun LyricsPageContent(page: LyricsPage) {
+private fun SongTitle(name: String) {
+    Text(
+        text     = name,
+        color    = TitleColor,
+        style    = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+    )
+}
+
+@Composable
+private fun LyricsPageContent(stanzas: List<LyricsStanza>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 12.dp),
     ) {
-        page.stanzas.forEachIndexed { index, stanza ->
+        stanzas.forEachIndexed { index, stanza ->
             if (index > 0) Spacer(modifier = Modifier.height(16.dp))
-            StanzaBlock(stanza = stanza)
+            StanzaBlock(stanza)
         }
     }
 }
@@ -131,29 +219,7 @@ private fun StanzaBlock(stanza: LyricsStanza) {
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-        }
-    }
-}
-
-@Composable
-private fun AutoScaledContent(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    SubcomposeLayout(modifier) { constraints ->
-        val measurable = subcompose("content", content)[0]
-        val placeable  = measurable.measure(Constraints())
-
-        val scale = if (placeable.height > constraints.maxHeight && placeable.height > 0) {
-            constraints.maxHeight.toFloat() / placeable.height.toFloat()
-        } else 1f
-
-        layout(constraints.maxWidth, constraints.maxHeight) {
-            placeable.placeWithLayer(0, 0) {
-                scaleX          = scale
-                scaleY          = scale
-                transformOrigin = TransformOrigin(0f, 0f)
-            }
+            Spacer(modifier = Modifier.height(2.dp))
         }
     }
 }
