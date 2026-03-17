@@ -42,7 +42,7 @@ class ChordChartDetailViewModel @Inject constructor(
                 ChordChartDetailUiState(
                     songName = songMap[chart.songId]?.title ?: "Song #${chart.songId}",
                     tone     = chart.tone,
-                    pages    = ChordProParser.parse(chart.content),
+                    blocks   = ChordProParser.parse(chart.content),
                 )
             }
         }

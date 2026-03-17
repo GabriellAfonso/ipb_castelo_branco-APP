@@ -1,8 +1,8 @@
 package com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.screens
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.unit.Constraints
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,20 +21,24 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabrielafonso.ipb.castelobranco.R
 import com.gabrielafonso.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.ChordBlock
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.ChordLine
-import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.ChordPage
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.LineToken
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartDetailUiState
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewmodel.ChordChartDetailViewModel
+import kotlinx.coroutines.launch
 
 private val ChordColor = Color(0xFFF2A300)
 private val SectionTitleColor = Color(0xFF0F6B5C)
@@ -62,9 +66,9 @@ private fun ChordChartDetailContent(
         when {
             state.isLoading        -> LoadingState(Modifier.padding(innerPadding))
             state.error != null    -> ErrorState(state.error, Modifier.padding(innerPadding))
-            state.pages.isEmpty()  -> ErrorState("No content available", Modifier.padding(innerPadding))
+            state.blocks.isEmpty() -> ErrorState("No content available", Modifier.padding(innerPadding))
             else -> ChordPager(
-                pages    = state.pages,
+                blocks   = state.blocks,
                 tone     = state.tone,
                 modifier = Modifier.padding(innerPadding),
             )
@@ -72,43 +76,104 @@ private fun ChordChartDetailContent(
     }
 }
 
+/**
+ * Measures each block's height, computes page splits via [BlockPaginator], then subcomposes
+ * the entire pager UI (including [rememberPagerState]) with the final pages already known.
+ * This avoids any state round-trip between the measurement layout and the pager.
+ */
 @Composable
 private fun ChordPager(
-    pages: List<ChordPage>,
+    blocks: List<ChordBlock>,
     tone: String,
     modifier: Modifier = Modifier,
 ) {
-    val pagerState = rememberPagerState(pageCount = { pages.size })
+    SubcomposeLayout(modifier = modifier.fillMaxSize()) { constraints ->
+        val blockSpacingPx = 16.dp.roundToPx()
+        // Matches ChordPageContent padding(horizontal = 20.dp, vertical = 12.dp)
+        val hPaddingPx = 40.dp.roundToPx()
+        val vPaddingPx = 24.dp.roundToPx()
+        val measureWidth = (constraints.maxWidth - hPaddingPx).coerceAtLeast(0)
 
-    Column(modifier = modifier.fillMaxSize()) {
-        Row(
-            modifier              = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment     = Alignment.CenterVertically,
-        ) {
-            Text(
-                text       = "Key: $tone",
-                style      = MaterialTheme.typography.bodyMedium,
-                color      = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium,
-            )
-            Text(
-                text  = "${pagerState.currentPage + 1} / ${pages.size}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        // Phase 1: measure each block at the correct render width.
+        // Column wrapper is required — SectionBlock emits multiple root nodes (Text, Spacers, Rows)
+        // with no container, so .firstOrNull() without it would only measure the first child.
+        val blockHeights = blocks.mapIndexed { i, block ->
+            subcompose("m_$i") {
+                Column {
+                    if (block.isIntro) IntroBlock(block) else SectionBlock(block)
+                }
+            }.firstOrNull()
+                ?.measure(Constraints(maxWidth = measureWidth))
+                ?.height ?: 0
         }
 
-        HorizontalPager(
-            state    = pagerState,
+        // Phase 2: measure chrome (header + dots) to determine pager area height
+        val headerHeight = subcompose("chrome_header") {
+            PagerHeader(tone = tone, currentPage = 0, pageCount = 1)
+        }.first().measure(Constraints(maxWidth = constraints.maxWidth)).height
+
+        val dotsHeight = subcompose("chrome_dots") {
+            PageDotIndicator(
+                pageCount   = 1,
+                currentPage = 0,
+                modifier    = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+            )
+        }.first().measure(Constraints(maxWidth = constraints.maxWidth)).height
+
+        // Phase 3: compute pages with the actual available height for block content
+        val availableForBlocks = (constraints.maxHeight - headerHeight - dotsHeight - vPaddingPx)
+            .coerceAtLeast(1)
+        val pages = BlockPaginator.paginate(blocks, blockHeights, availableForBlocks, blockSpacingPx)
+
+        // Phase 4: render the full pager — pagerState lives inside this subcomposition
+        val contentPlaceable = subcompose("pager") {
+            PagerContent(pages = pages, tone = tone)
+        }.first().measure(constraints)
+
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            contentPlaceable.place(0, 0)
+        }
+    }
+}
+
+@Composable
+private fun PagerContent(
+    pages: List<List<ChordBlock>>,
+    tone: String,
+) {
+    val pagerState = rememberPagerState(pageCount = { pages.size })
+    val scope = rememberCoroutineScope()
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        PagerHeader(
+            tone        = tone,
+            currentPage = pagerState.currentPage,
+            pageCount   = pages.size,
+        )
+
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
-        ) { index ->
-            AutoScaledContent(modifier = Modifier.fillMaxSize()) {
-                ChordPageContent(page = pages[index])
+                .fillMaxWidth()
+                .pointerInput(pagerState.pageCount) {
+                    detectTapGestures { offset ->
+                        val zoneWidth = size.width * 0.2f
+                        scope.launch {
+                            when {
+                                offset.x < zoneWidth && pagerState.currentPage > 0 ->
+                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                offset.x > size.width - zoneWidth && pagerState.currentPage < pagerState.pageCount - 1 ->
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
+                        }
+                    }
+                },
+        ) {
+            HorizontalPager(
+                state    = pagerState,
+                modifier = Modifier.fillMaxSize(),
+            ) { index ->
+                ChordPageContent(blocks = pages[index])
             }
         }
 
@@ -123,13 +188,36 @@ private fun ChordPager(
 }
 
 @Composable
-private fun ChordPageContent(page: ChordPage) {
+private fun PagerHeader(tone: String, currentPage: Int, pageCount: Int) {
+    Row(
+        modifier              = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment     = Alignment.CenterVertically,
+    ) {
+        Text(
+            text       = "Key: $tone",
+            style      = MaterialTheme.typography.bodyMedium,
+            color      = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium,
+        )
+        Text(
+            text  = "${currentPage + 1} / $pageCount",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ChordPageContent(blocks: List<ChordBlock>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 12.dp),
     ) {
-        page.blocks.forEachIndexed { index, block ->
+        blocks.forEachIndexed { index, block ->
             if (index > 0) Spacer(modifier = Modifier.height(16.dp))
             if (block.isIntro) IntroBlock(block) else SectionBlock(block)
         }
@@ -169,8 +257,8 @@ private fun SectionBlock(block: ChordBlock) {
             color      = SectionTitleColor,
             fontWeight = FontWeight.Bold,
         )
-        Spacer(modifier = Modifier.height(8.dp))
     }
+    Spacer(modifier = Modifier.height(8.dp))
     block.lines.forEach { line ->
         ChordLineRow(line = line)
         Spacer(modifier = Modifier.height(2.dp))
@@ -181,29 +269,21 @@ private data class ChordLyricGroup(val chord: String?, val lyrics: String)
 
 private fun groupTokens(tokens: List<LineToken>): List<ChordLyricGroup> {
     val groups = mutableListOf<ChordLyricGroup>()
-    var currentChord: String? = null
-    val currentLyrics = StringBuilder()
-    var hasStarted = false
-
-    for (token in tokens) {
+    var i = 0
+    while (i < tokens.size) {
+        val token = tokens[i]
         when (token) {
             is LineToken.Chord -> {
-                if (hasStarted) {
-                    groups += ChordLyricGroup(currentChord, currentLyrics.toString())
-                    currentLyrics.clear()
-                }
-                currentChord = token.value
-                hasStarted = true
+                val lyrics = (tokens.getOrNull(i + 1) as? LineToken.Lyrics)?.value ?: ""
+                groups += ChordLyricGroup(token.value, lyrics)
+                i += 2
             }
             is LineToken.Lyrics -> {
-                currentLyrics.append(token.value)
-                hasStarted = true
+                groups += ChordLyricGroup(null, token.value)
+                i += 1
             }
         }
     }
-
-    if (hasStarted) groups += ChordLyricGroup(currentChord, currentLyrics.toString())
-
     return groups
 }
 
@@ -212,7 +292,7 @@ private fun ChordLineRow(line: ChordLine) {
     val lyricColor = MaterialTheme.colorScheme.onSurface
     val groups = groupTokens(line.tokens)
 
-    Row {
+    FlowRow {
         groups.forEach { group ->
             Column(horizontalAlignment = Alignment.Start) {
                 Text(
@@ -220,35 +300,16 @@ private fun ChordLineRow(line: ChordLine) {
                     color      = ChordColor,
                     fontWeight = FontWeight.Bold,
                     style      = MaterialTheme.typography.labelMedium,
+                    softWrap   = false,
+                    maxLines   = 1,
                 )
                 Text(
-                    text  = group.lyrics,
-                    color = lyricColor,
-                    style = MaterialTheme.typography.bodyLarge,
+                    text     = group.lyrics,
+                    color    = lyricColor,
+                    style    = MaterialTheme.typography.bodyLarge,
+                    softWrap = false,
+                    maxLines = 1,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AutoScaledContent(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    SubcomposeLayout(modifier) { constraints ->
-        val measurable = subcompose("content", content)[0]
-        val placeable = measurable.measure(Constraints())
-
-        val scale = if (placeable.height > constraints.maxHeight && placeable.height > 0) {
-            constraints.maxHeight.toFloat() / placeable.height.toFloat()
-        } else 1f
-
-        layout(constraints.maxWidth, constraints.maxHeight) {
-            placeable.placeWithLayer(0, 0) {
-                scaleX = scale
-                scaleY = scale
-                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
             }
         }
     }
