@@ -1,6 +1,5 @@
 package com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.screens
 
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
@@ -25,8 +24,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
+import com.gabrielafonso.ipb.castelobranco.core.presentation.modifier.tapToPaginate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
@@ -38,7 +37,6 @@ import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.prese
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.LineToken
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartDetailUiState
 import com.gabrielafonso.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewmodel.ChordChartDetailViewModel
-import kotlinx.coroutines.launch
 
 private val ChordColor = Color(0xFFF2A300)
 private val SectionTitleColor = Color(0xFF0F6B5C)
@@ -155,19 +153,7 @@ private fun PagerContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .pointerInput(pagerState.pageCount) {
-                    detectTapGestures { offset ->
-                        val zoneWidth = size.width * 0.2f
-                        scope.launch {
-                            when {
-                                offset.x < zoneWidth && pagerState.currentPage > 0 ->
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                offset.x > size.width - zoneWidth && pagerState.currentPage < pagerState.pageCount - 1 ->
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                            }
-                        }
-                    }
-                },
+                .tapToPaginate(pagerState, scope),
         ) {
             HorizontalPager(
                 state    = pagerState,
