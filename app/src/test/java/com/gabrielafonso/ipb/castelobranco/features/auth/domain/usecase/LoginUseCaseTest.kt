@@ -1,8 +1,8 @@
-package com.gabrielafonso.ipb.castelobranco.features.auth.domain.usecase
+package com.ipb.castelobranco.features.auth.domain.usecase
 
-import com.gabrielafonso.ipb.castelobranco.core.domain.auth.AuthEventBus
-import com.gabrielafonso.ipb.castelobranco.features.auth.domain.model.AuthTokens
-import com.gabrielafonso.ipb.castelobranco.features.auth.domain.repository.AuthRepository
+import com.ipb.castelobranco.core.domain.auth.AuthEventBus
+import com.ipb.castelobranco.features.auth.domain.model.AuthTokens
+import com.ipb.castelobranco.features.auth.domain.repository.AuthRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify

@@ -1,4 +1,4 @@
-package com.gabrielafonso.ipb.castelobranco
+package com.ipb.castelobranco
 
 import org.junit.Test
 

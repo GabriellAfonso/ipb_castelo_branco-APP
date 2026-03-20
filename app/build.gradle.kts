@@ -19,16 +19,16 @@ plugins {
 }
 
 extensions.configure<ApplicationExtension> {
-    namespace = "com.gabrielafonso.ipb.castelobranco"
+    namespace = "com.ipb.castelobranco"
     compileSdk = 36
 
 
     defaultConfig {
-        applicationId = "com.gabrielafonso.ipb.castelobranco"
+        applicationId = "com.ipb.castelobranco"
         minSdk = 24
         targetSdk = 36
-        versionCode = 4
-        versionName = "0.7.3"
+        versionCode = 1
+        versionName = "0.7.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField(

@@ -1,0 +1,13 @@
+package com.ipb.castelobranco.features.profile.data.dto
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class MeProfileDto(
+    @SerialName("name") val name: String,
+    @SerialName("active") val active: Boolean,
+    @SerialName("is_member") val isMember: Boolean,
+    @SerialName("is_admin") val isAdmin: Boolean,
+    @SerialName("photo_url") val photoUrl: String? = null
+)
