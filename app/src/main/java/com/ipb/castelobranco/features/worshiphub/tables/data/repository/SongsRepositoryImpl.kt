@@ -87,4 +87,7 @@ class SongsRepositoryImpl @Inject constructor(
 
     override suspend fun refreshAllSongs(): RefreshResult =
         allSongsSnapshot.refresh()
+
+    override suspend fun preload() =
+        allSongsSnapshot.preload()
 }

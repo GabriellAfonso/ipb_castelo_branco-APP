@@ -26,4 +26,5 @@ interface SongsRepository {
 
     fun observeAllSongs(): Flow<SnapshotState<List<Song>>>
     suspend fun refreshAllSongs(): RefreshResult
+    suspend fun preload()
 }
