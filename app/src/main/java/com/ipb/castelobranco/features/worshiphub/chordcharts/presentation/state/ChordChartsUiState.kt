@@ -13,4 +13,5 @@ data class ChordChartListItem(
     val songName: String,
     val tone: String,
     val instrument: String,
+    val isPinned: Boolean = false,
 )

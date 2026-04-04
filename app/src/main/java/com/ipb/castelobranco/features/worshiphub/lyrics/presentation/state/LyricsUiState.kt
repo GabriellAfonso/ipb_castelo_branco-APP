@@ -11,4 +11,5 @@ data class LyricsUiState(
 data class LyricsListItem(
     val id: Int,
     val songName: String,
+    val isPinned: Boolean = false,
 )

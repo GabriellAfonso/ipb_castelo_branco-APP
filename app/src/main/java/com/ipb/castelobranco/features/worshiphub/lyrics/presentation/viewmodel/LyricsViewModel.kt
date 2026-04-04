@@ -2,6 +2,7 @@ package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsListItem
@@ -13,12 +14,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LyricsViewModel @Inject constructor(
     private val getLyricsUseCase: GetLyricsUseCase,
     private val songsRepository: SongsRepository,
+    private val setlistPreferences: SetlistPreferences,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -26,8 +29,9 @@ class LyricsViewModel @Inject constructor(
     val uiState: StateFlow<LyricsUiState> = combine(
         getLyricsUseCase.observe(),
         songsRepository.observeAllSongs(),
+        setlistPreferences.pinnedLyricsIds,
         _query,
-    ) { lyricsState, songsState, query ->
+    ) { lyricsState, songsState, pinnedIds, query ->
         val songMap = (songsState as? SnapshotState.Data)?.value
             .orEmpty()
             .associateBy { it.id }
@@ -36,17 +40,19 @@ class LyricsViewModel @Inject constructor(
             is SnapshotState.Loading -> LyricsUiState(isLoading = true)
             is SnapshotState.Error   -> LyricsUiState(error = lyricsState.throwable.message)
             is SnapshotState.Data    -> {
-                val items = lyricsState.value.map { lyrics ->
+                val sorted = lyricsState.value.map { lyrics ->
                     LyricsListItem(
                         id       = lyrics.id,
                         songName = songMap[lyrics.songId]?.title ?: "Song #${lyrics.songId}",
+                        isPinned = lyrics.id in pinnedIds,
                     )
-                }
-                val filtered = if (query.isBlank()) items
-                else items.filter { it.songName.contains(query, ignoreCase = true) }
+                }.sortedByDescending { it.isPinned }
+
+                val filtered = if (query.isBlank()) sorted
+                else sorted.filter { it.songName.contains(query, ignoreCase = true) }
 
                 LyricsUiState(
-                    lyrics         = items,
+                    lyrics         = sorted,
                     filteredLyrics = filtered,
                     query          = query,
                 )
@@ -60,5 +66,9 @@ class LyricsViewModel @Inject constructor(
 
     fun onQueryChange(query: String) {
         _query.value = query
+    }
+
+    fun onTogglePin(id: Int) {
+        viewModelScope.launch { setlistPreferences.toggleLyrics(id) }
     }
 }

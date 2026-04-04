@@ -17,7 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -57,6 +59,7 @@ fun LyricsScreen(
         state         = state,
         onQueryChange = viewModel::onQueryChange,
         onLyricsClick = onLyricsClick,
+        onTogglePin   = viewModel::onTogglePin,
         onBackClick   = onBackClick,
     )
 }
@@ -66,6 +69,7 @@ private fun LyricsContent(
     state: LyricsUiState,
     onQueryChange: (String) -> Unit,
     onLyricsClick: (id: Int) -> Unit,
+    onTogglePin: (id: Int) -> Unit,
     onBackClick: () -> Unit,
 ) {
     BaseScreen(
@@ -91,10 +95,11 @@ private fun LyricsContent(
                 EmptyState()
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.filteredLyrics, key = { it.id }) { item ->
+                    items(state.filteredLyrics) { item ->
                         LyricsRow(
-                            item    = item,
-                            onClick = { onLyricsClick(item.id) },
+                            item        = item,
+                            onClick     = { onLyricsClick(item.id) },
+                            onTogglePin = { onTogglePin(item.id) },
                         )
                         HorizontalDivider(
                             color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
@@ -165,12 +170,13 @@ private fun SearchCard(
 private fun LyricsRow(
     item: LyricsListItem,
     onClick: () -> Unit,
+    onTogglePin: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .padding(start = 16.dp, end = 4.dp, top = 16.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -191,6 +197,15 @@ private fun LyricsRow(
             overflow   = TextOverflow.Ellipsis,
             modifier   = Modifier.weight(1f),
         )
+
+        IconButton(onClick = onTogglePin) {
+            Icon(
+                imageVector        = if (item.isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                contentDescription = if (item.isPinned) "Remover do setlist" else "Adicionar ao setlist",
+                tint               = if (item.isPinned) Accent
+                                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+            )
+        }
     }
 }
 

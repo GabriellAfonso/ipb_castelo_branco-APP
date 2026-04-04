@@ -17,7 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -54,10 +56,11 @@ fun ChordChartsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     ChordChartsContent(
-        state            = state,
-        onQueryChange    = viewModel::onQueryChange,
+        state             = state,
+        onQueryChange     = viewModel::onQueryChange,
         onChordChartClick = onChordChartClick,
-        onBackClick      = onBackClick,
+        onTogglePin       = viewModel::onTogglePin,
+        onBackClick       = onBackClick,
     )
 }
 
@@ -66,6 +69,7 @@ private fun ChordChartsContent(
     state: ChordChartsUiState,
     onQueryChange: (String) -> Unit,
     onChordChartClick: (id: Int) -> Unit,
+    onTogglePin: (id: Int) -> Unit,
     onBackClick: () -> Unit,
 ) {
     BaseScreen(
@@ -91,10 +95,11 @@ private fun ChordChartsContent(
                 EmptyState()
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.filteredCharts, key = { it.id }) { item ->
+                    items(state.filteredCharts) { item ->
                         ChordChartRow(
-                            item    = item,
-                            onClick = { onChordChartClick(item.id) },
+                            item        = item,
+                            onClick     = { onChordChartClick(item.id) },
+                            onTogglePin = { onTogglePin(item.id) },
                         )
                         HorizontalDivider(
                             color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
@@ -165,12 +170,13 @@ private fun SearchCard(
 private fun ChordChartRow(
     item: ChordChartListItem,
     onClick: () -> Unit,
+    onTogglePin: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .padding(start = 16.dp, end = 4.dp, top = 16.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -196,6 +202,15 @@ private fun ChordChartRow(
                 text  = "${item.tone} • ${item.instrument}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+
+        IconButton(onClick = onTogglePin) {
+            Icon(
+                imageVector        = if (item.isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                contentDescription = if (item.isPinned) "Remover do setlist" else "Adicionar ao setlist",
+                tint               = if (item.isPinned) Orange
+                                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
             )
         }
     }
