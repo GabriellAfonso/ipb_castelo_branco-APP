@@ -9,7 +9,7 @@ data class ChordBlock(
 data class ChordLine(val tokens: List<LineToken>)
 
 sealed class LineToken {
-    data class Chord(val value: String) : LineToken()
+    data class Chord(val value: String, val charOffset: Int = 0) : LineToken()
     data class Lyrics(val value: String) : LineToken()
 }
 
@@ -79,13 +79,14 @@ object ChordProParser {
         val segments = segmentRegex.findAll(cleanText).toList()
 
         for (segment in segments) {
-            val segStart = segment.range.first
-            val segEnd   = segment.range.last
-            val chord = chords
+            val segStart  = segment.range.first
+            val segEnd    = segment.range.last
+            val chordEntry = chords
                 .filter { it.first >= segStart && it.first <= segEnd }
                 .minByOrNull { it.first }
-                ?.second
-            if (chord != null) tokens += LineToken.Chord(chord)
+            if (chordEntry != null) {
+                tokens += LineToken.Chord(chordEntry.second, chordEntry.first - segStart)
+            }
             tokens += LineToken.Lyrics(segment.value)
         }
 

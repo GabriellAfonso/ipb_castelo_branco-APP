@@ -20,14 +20,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.unit.Constraints
+import kotlin.math.roundToInt
 import com.ipb.castelobranco.core.presentation.modifier.tapToPaginate
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
@@ -251,7 +256,7 @@ private fun SectionBlock(block: ChordBlock) {
     }
 }
 
-private data class ChordLyricGroup(val chord: String?, val lyrics: String)
+private data class ChordLyricGroup(val chord: String?, val charOffset: Int = 0, val lyrics: String)
 
 private fun groupTokens(tokens: List<LineToken>): List<ChordLyricGroup> {
     val groups = mutableListOf<ChordLyricGroup>()
@@ -261,11 +266,11 @@ private fun groupTokens(tokens: List<LineToken>): List<ChordLyricGroup> {
         when (token) {
             is LineToken.Chord -> {
                 val lyrics = (tokens.getOrNull(i + 1) as? LineToken.Lyrics)?.value ?: ""
-                groups += ChordLyricGroup(token.value, lyrics)
+                groups += ChordLyricGroup(token.value, token.charOffset, lyrics)
                 i += 2
             }
             is LineToken.Lyrics -> {
-                groups += ChordLyricGroup(null, token.value)
+                groups += ChordLyricGroup(null, 0, token.value)
                 i += 1
             }
         }
@@ -277,26 +282,61 @@ private fun groupTokens(tokens: List<LineToken>): List<ChordLyricGroup> {
 private fun ChordLineRow(line: ChordLine) {
     val lyricColor = MaterialTheme.colorScheme.onSurface
     val groups = groupTokens(line.tokens)
-
     FlowRow {
         groups.forEach { group ->
-            Column(horizontalAlignment = Alignment.Start) {
-                Text(
-                    text       = group.chord ?: "",
-                    color      = ChordColor,
-                    fontWeight = FontWeight.Bold,
-                    style      = MaterialTheme.typography.labelMedium,
-                    softWrap   = false,
-                    maxLines   = 1,
-                )
-                Text(
-                    text     = group.lyrics,
-                    color    = lyricColor,
-                    style    = MaterialTheme.typography.bodyLarge,
-                    softWrap = false,
-                    maxLines = 1,
-                )
-            }
+            ChordLyricGroupItem(group = group, lyricColor = lyricColor)
+        }
+    }
+}
+
+@Composable
+private fun ChordLyricGroupItem(group: ChordLyricGroup, lyricColor: Color) {
+    var chordOffsetXPx by remember(group.chord, group.charOffset, group.lyrics) {
+        mutableFloatStateOf(0f)
+    }
+
+    val chordContent: @Composable () -> Unit = {
+        Text(
+            text       = group.chord ?: "",
+            color      = ChordColor,
+            fontWeight = FontWeight.Bold,
+            style      = MaterialTheme.typography.labelMedium,
+            softWrap   = false,
+            maxLines   = 1,
+        )
+    }
+
+    val lyricsContent: @Composable () -> Unit = {
+        Text(
+            text         = group.lyrics,
+            color        = lyricColor,
+            style        = MaterialTheme.typography.bodyLarge,
+            softWrap     = false,
+            maxLines     = 1,
+            onTextLayout = { result ->
+                if (group.chord != null && group.lyrics.isNotEmpty()) {
+                    val idx = group.charOffset.coerceIn(0, group.lyrics.length - 1)
+                    chordOffsetXPx = result.getCursorRect(idx).left
+                }
+            },
+        )
+    }
+
+    Layout(contents = listOf(chordContent, lyricsContent)) { measurables, _ ->
+        val chordPlaceable  = measurables[0].firstOrNull()?.measure(Constraints())
+        val lyricsPlaceable = measurables[1].firstOrNull()?.measure(Constraints())
+            ?: return@Layout layout(0, 0) {}
+
+        val chordH    = chordPlaceable?.height ?: 0
+        val chordLeft = if (group.chord != null) chordOffsetXPx.roundToInt() else 0
+        val chordEnd  = chordLeft + (chordPlaceable?.width ?: 0)
+
+        layout(
+            width  = maxOf(lyricsPlaceable.width, chordEnd),
+            height = chordH + lyricsPlaceable.height,
+        ) {
+            chordPlaceable?.placeRelative(chordLeft, 0)
+            lyricsPlaceable.placeRelative(0, chordH)
         }
     }
 }
