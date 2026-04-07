@@ -39,6 +39,9 @@ class AuthViewModel @Inject constructor(
     private val _loginError = MutableStateFlow<String?>(null)
     val loginError: StateFlow<String?> = _loginError.asStateFlow()
 
+    private val _isGoogleLoading = MutableStateFlow(false)
+    val isGoogleLoading: StateFlow<Boolean> = _isGoogleLoading.asStateFlow()
+
     private val _registerErrors = MutableStateFlow(RegisterErrors())
     val registerErrors: StateFlow<RegisterErrors> = _registerErrors.asStateFlow()
 
@@ -69,13 +72,18 @@ class AuthViewModel @Inject constructor(
     fun signInWithGoogle(idToken: String) {
         Log.d("GoogleSignIn", "signInWithGoogle chamado")
         viewModelScope.launch {
+            _isGoogleLoading.value = true
             _loginError.value = null
-            when (val result = loginUseCase.withGoogle(idToken)) {
-                LoginUseCase.Result.Success -> _events.tryEmit(AuthEvent.LoginSuccess)
-                is LoginUseCase.Result.Failure -> {
-                    _loginError.value = result.rawMessage
-                    Log.e(TAG, "Falha no login com Google")
+            try {
+                when (val result = loginUseCase.withGoogle(idToken)) {
+                    LoginUseCase.Result.Success -> _events.tryEmit(AuthEvent.LoginSuccess)
+                    is LoginUseCase.Result.Failure -> {
+                        _loginError.value = result.rawMessage
+                        Log.e(TAG, "Falha no login com Google")
+                    }
                 }
+            } finally {
+                _isGoogleLoading.value = false
             }
         }
     }
