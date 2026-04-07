@@ -257,7 +257,7 @@ val unspecified_scheme = ColorFamily(
 fun IPBCasteloBrancoTheme(
     darkThemeOverride: Boolean? = null,
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable() () -> Unit
 ) {
     val resolvedDarkTheme = darkThemeOverride ?: run {
