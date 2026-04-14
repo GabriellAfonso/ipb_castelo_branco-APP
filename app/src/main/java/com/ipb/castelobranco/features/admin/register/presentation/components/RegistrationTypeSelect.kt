@@ -96,7 +96,7 @@ fun RegistrationTypeSelect(
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = value.label,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)

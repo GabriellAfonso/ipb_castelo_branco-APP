@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 
@@ -41,18 +43,17 @@ private val Green = Color(0xFF0F6B5C)
 
 @Composable
 fun MemberSelectField(
-    query: String,
     selectedMember: Member?,
     members: List<Member>,
-    onQueryChange: (String) -> Unit,
     onMemberSelect: (Member) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
 
-    val filtered = remember(query, members) {
-        if (query.isBlank()) members
-        else members.filter { it.name.contains(query, ignoreCase = true) }
+    val filtered = remember(searchQuery, members) {
+        if (searchQuery.isBlank()) members
+        else members.filter { it.name.contains(searchQuery, ignoreCase = true) }
     }
 
     val triggerShape = if (expanded)
@@ -69,33 +70,20 @@ fun MemberSelectField(
                 .height(48.dp)
                 .clip(triggerShape)
                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                .clickable { expanded = !expanded }
+                .clickable { expanded = !expanded; if (!expanded) searchQuery = "" }
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BasicTextField(
-                value = query,
-                onValueChange = {
-                    onQueryChange(it)
-                    if (!expanded) expanded = true
-                },
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface
-                ),
-                cursorBrush = SolidColor(Green),
-                modifier = Modifier.weight(1f),
-                decorationBox = { inner ->
-                    Box {
-                        if (query.isEmpty()) {
-                            Text(
-                                text = "Responsável",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                            )
-                        }
-                        inner()
-                    }
-                }
+            Text(
+                text = selectedMember?.name ?: "Responsável",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (selectedMember != null)
+                    MaterialTheme.colorScheme.onSurface
+                else
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
             )
             Icon(
                 imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
@@ -117,6 +105,45 @@ fun MemberSelectField(
                     .clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             ) {
+                // Search field
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(Green),
+                        modifier = Modifier.fillMaxWidth(),
+                        decorationBox = { inner ->
+                            Box {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        text = "Buscar responsável...",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                                    )
+                                }
+                                inner()
+                            }
+                        }
+                    )
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+
                 if (filtered.isEmpty()) {
                     Text(
                         text = "Nenhum membro encontrado",
@@ -136,6 +163,7 @@ fun MemberSelectField(
                                 .clickable {
                                     onMemberSelect(member)
                                     expanded = false
+                                    searchQuery = ""
                                 }
                                 .padding(horizontal = 12.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
