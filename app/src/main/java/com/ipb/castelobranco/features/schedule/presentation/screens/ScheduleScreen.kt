@@ -11,6 +11,7 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
     import androidx.compose.material3.CircularProgressIndicator
     import androidx.compose.material3.MaterialTheme
     import androidx.compose.material3.Text
+    import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
     import androidx.compose.runtime.Composable
     import androidx.compose.runtime.getValue
     import androidx.compose.ui.Alignment
@@ -68,8 +69,9 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
             onBackClick = onBackClick,
         ) { innerPadding ->
 
-            // O segredo está em tratar cada estado separadamente
-            Box(
+            ElasticPullToRefresh(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -94,8 +96,6 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
                         )
                     }
                 }
-
-                // Se estiver atualizando (swipe to refresh), você pode mostrar um indicador extra aqui
             }
         }
     }
