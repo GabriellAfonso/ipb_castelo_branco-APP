@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.gallery.di
 
 import android.content.Context
+import androidx.work.WorkManager
 import com.ipb.castelobranco.core.di.AuthedRetrofit
 import com.ipb.castelobranco.features.gallery.data.api.GalleryApi
 import com.ipb.castelobranco.features.gallery.data.local.GalleryPhotoStorage
@@ -35,5 +36,11 @@ abstract class GalleryModule {
         fun provideGalleryApi(
             @AuthedRetrofit retrofit: Retrofit
         ): GalleryApi = retrofit.create(GalleryApi::class.java)
+
+        @Provides
+        @Singleton
+        fun provideWorkManager(
+            @ApplicationContext context: Context
+        ): WorkManager = WorkManager.getInstance(context)
     }
 }
