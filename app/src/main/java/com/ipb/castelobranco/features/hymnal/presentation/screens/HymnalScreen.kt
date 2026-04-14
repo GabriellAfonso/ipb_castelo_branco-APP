@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,6 +63,7 @@ fun HymnalScreen(
     onBackClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     val actions = HymnalActions(
         onQueryChange = viewModel::onQueryChange,
@@ -71,6 +73,8 @@ fun HymnalScreen(
     HymnalContent(
         state = state,
         actions = actions,
+        isRefreshing = isRefreshing,
+        onRefresh = viewModel::refresh,
         onBackClick = onBackClick
     )
 }
@@ -79,6 +83,8 @@ fun HymnalScreen(
 fun HymnalContent(
     state: HymnalUiState,
     actions: HymnalActions,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     onBackClick: () -> Unit
 ) {
 
@@ -89,10 +95,16 @@ fun HymnalContent(
         onBackClick = onBackClick
     ) { innerPadding ->
 
+        ElasticPullToRefresh(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding )
         ) {
 //            Spacer(modifier = Modifier.height(12.dp))
 
@@ -136,6 +148,7 @@ fun HymnalContent(
                     }
                 }
             }
+        }
         }
     }
 }
