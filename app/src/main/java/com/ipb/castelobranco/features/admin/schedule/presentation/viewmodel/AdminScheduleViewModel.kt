@@ -31,9 +31,6 @@ class AdminScheduleViewModel @Inject constructor(
         when (event) {
             AdminScheduleEvent.LoadMembers -> loadMembers()
             is AdminScheduleEvent.MonthChanged -> changeMonth(event.year, event.month)
-            is AdminScheduleEvent.MemberQueryChanged -> updateMemberQuery(
-                event.itemIndex, event.query
-            )
             is AdminScheduleEvent.MemberSelected -> selectMember(event.itemIndex, event.member)
             AdminScheduleEvent.GenerateSchedule -> generateSchedule()
             AdminScheduleEvent.SaveSchedule -> saveSchedule()
@@ -64,21 +61,10 @@ class AdminScheduleViewModel @Inject constructor(
         _uiState.update { it.copy(year = year, month = month, items = emptyList()) }
     }
 
-    private fun updateMemberQuery(index: Int, query: String) {
-        _uiState.update { state ->
-            state.copy(items = state.items.mapIndexed { i, item ->
-                if (i == index) item.copy(memberQuery = query, selectedMember = null) else item
-            })
-        }
-    }
-
     private fun selectMember(index: Int, member: Member) {
         _uiState.update { state ->
             state.copy(items = state.items.mapIndexed { i, item ->
-                if (i == index) item.copy(
-                    selectedMember = member,
-                    memberQuery = member.name
-                ) else item
+                if (i == index) item.copy(selectedMember = member) else item
             })
         }
     }

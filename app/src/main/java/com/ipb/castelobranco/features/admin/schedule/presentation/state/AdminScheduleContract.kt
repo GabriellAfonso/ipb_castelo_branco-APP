@@ -32,7 +32,6 @@ data class AdminScheduleUiState(
 sealed interface AdminScheduleEvent {
     data object LoadMembers : AdminScheduleEvent
     data class MonthChanged(val year: Int, val month: Int) : AdminScheduleEvent
-    data class MemberQueryChanged(val itemIndex: Int, val query: String) : AdminScheduleEvent
     data class MemberSelected(val itemIndex: Int, val member: Member) : AdminScheduleEvent
     data object GenerateSchedule : AdminScheduleEvent
     data object SaveSchedule : AdminScheduleEvent

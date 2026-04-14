@@ -60,7 +60,6 @@ private val Orange = Color(0xFFF2A300)
 data class AdminScheduleActions(
     val onPreviousMonth: () -> Unit,
     val onNextMonth: () -> Unit,
-    val onMemberQueryChange: (itemIndex: Int, query: String) -> Unit,
     val onMemberSelect: (itemIndex: Int, member: Member) -> Unit,
     val onGenerate: () -> Unit,
     val onSave: () -> Unit,
@@ -96,9 +95,6 @@ fun AdminScheduleScreen(
             val next = if (state.month == 12) Pair(state.year + 1, 1)
                        else Pair(state.year, state.month + 1)
             viewModel.onEvent(AdminScheduleEvent.MonthChanged(next.first, next.second))
-        },
-        onMemberQueryChange = { index, query ->
-            viewModel.onEvent(AdminScheduleEvent.MemberQueryChanged(index, query))
         },
         onMemberSelect = { index, member ->
             viewModel.onEvent(AdminScheduleEvent.MemberSelected(index, member))
@@ -170,7 +166,6 @@ fun AdminScheduleContent(
                         ScheduleEditorTable(
                             items = state.items,
                             members = state.members,
-                            onMemberQueryChange = actions.onMemberQueryChange,
                             onMemberSelect = actions.onMemberSelect
                         )
                     }

@@ -33,8 +33,7 @@ class AdminScheduleRepositoryImpl @Inject constructor(
                 day = item.day,
                 scheduleTypeName = item.scheduleType.name,
                 scheduleTypeId = ScheduleType.idByName(item.scheduleType.name),
-                selectedMember = Member(item.member.id, item.member.name),
-                memberQuery = item.member.name
+                selectedMember = Member(item.member.id, item.member.name)
             )
         }
     }.mapError()

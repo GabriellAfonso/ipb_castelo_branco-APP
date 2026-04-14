@@ -7,6 +7,5 @@ data class EditableScheduleUiState(
     val day: Int,
     val scheduleTypeName: String,
     val scheduleTypeId: Int = 0,
-    val selectedMember: Member? = null,
-    val memberQuery: String = ""
+    val selectedMember: Member? = null
 )

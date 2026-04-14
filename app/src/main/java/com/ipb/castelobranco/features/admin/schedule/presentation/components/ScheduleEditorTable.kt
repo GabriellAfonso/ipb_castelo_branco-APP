@@ -28,7 +28,6 @@ private val PT_BR = java.util.Locale.forLanguageTag("pt-BR")
 fun ScheduleEditorTable(
     items: List<EditableScheduleUiState>,
     members: List<Member>,
-    onMemberQueryChange: (itemIndex: Int, query: String) -> Unit,
     onMemberSelect: (itemIndex: Int, member: Member) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -51,7 +50,6 @@ fun ScheduleEditorTable(
                 typeName = typeName,
                 indexedItems = indexedItems,
                 members = members,
-                onMemberQueryChange = onMemberQueryChange,
                 onMemberSelect = onMemberSelect
             )
         }
@@ -63,7 +61,6 @@ private fun ScheduleEditorSection(
     typeName: String,
     indexedItems: List<Pair<Int, EditableScheduleUiState>>,
     members: List<Member>,
-    onMemberQueryChange: (Int, String) -> Unit,
     onMemberSelect: (Int, Member) -> Unit
 ) {
     val container = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -123,10 +120,8 @@ private fun ScheduleEditorSection(
                     fontWeight = FontWeight.SemiBold
                 )
                 MemberSelectField(
-                    query = item.memberQuery,
                     selectedMember = item.selectedMember,
                     members = members,
-                    onQueryChange = { onMemberQueryChange(globalIndex, it) },
                     onMemberSelect = { onMemberSelect(globalIndex, it) },
                     modifier = Modifier.weight(0.8f)
                 )
