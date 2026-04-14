@@ -79,15 +79,42 @@ object ChordProParser {
         val segments = segmentRegex.findAll(cleanText).toList()
 
         for (segment in segments) {
-            val segStart  = segment.range.first
-            val segEnd    = segment.range.last
-            val chordEntry = chords
-                .filter { it.first >= segStart && it.first <= segEnd }
-                .minByOrNull { it.first }
-            if (chordEntry != null) {
-                tokens += LineToken.Chord(chordEntry.second, chordEntry.first - segStart)
+            val segStart = segment.range.first
+            val segEnd   = segment.range.last
+
+            // Merge chords at the same position into one string (e.g. [C][Am] → "C Am")
+            val chordsInSegment = chords
+                .filter { it.first in segStart..segEnd }
+                .groupBy { it.first }
+                .toSortedMap()
+                .map { (pos, group) -> Pair(pos, group.joinToString(" ") { it.second }) }
+
+            when {
+                chordsInSegment.isEmpty() -> {
+                    tokens += LineToken.Lyrics(segment.value)
+                }
+                chordsInSegment.size == 1 -> {
+                    val (pos, chord) = chordsInSegment[0]
+                    tokens += LineToken.Chord(chord, pos - segStart)
+                    tokens += LineToken.Lyrics(segment.value)
+                }
+                else -> {
+                    // Emit any prefix text before the first chord
+                    val firstOffset = chordsInSegment[0].first - segStart
+                    if (firstOffset > 0) {
+                        tokens += LineToken.Lyrics(segment.value.substring(0, firstOffset))
+                    }
+                    // Split segment at each chord boundary
+                    chordsInSegment.forEachIndexed { idx, (pos, chord) ->
+                        val from = pos - segStart
+                        val to   = chordsInSegment.getOrNull(idx + 1)
+                            ?.let { it.first - segStart }
+                            ?: segment.value.length
+                        tokens += LineToken.Chord(chord, 0)
+                        tokens += LineToken.Lyrics(segment.value.substring(from, to))
+                    }
+                }
             }
-            tokens += LineToken.Lyrics(segment.value)
         }
 
         val lastSegEnd = segments.last().range.last
