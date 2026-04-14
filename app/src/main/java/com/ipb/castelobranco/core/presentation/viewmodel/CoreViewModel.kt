@@ -7,6 +7,7 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
+import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
 import com.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -25,6 +26,7 @@ class CoreViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val authEventBus: AuthEventBus,
     private val logoutUseCase: LogoutUseCase,
+    private val galleryAutoDownload: GalleryAutoDownloadUseCase,
 ) : ViewModel() {
 
     sealed interface CoreEvent {
@@ -67,6 +69,9 @@ class CoreViewModel @Inject constructor(
 
             // 1 & 2. PRELOAD (disk) + REFRESH (network) delegated to use case
             preloadDataUseCase()
+
+            // Auto-download da galeria se estiver vazia (somente via WiFi)
+            galleryAutoDownload.triggerIfNeeded()
 
             // Perfil é um caso à parte pois depende de login
             refreshProfileOnAppOpen()
