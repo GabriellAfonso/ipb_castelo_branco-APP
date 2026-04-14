@@ -2,6 +2,8 @@ package com.ipb.castelobranco
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.ipb.castelobranco.core.data.local.ThemePreferences
 import com.ipb.castelobranco.features.settings.domain.model.ThemeMode
 import dagger.hilt.android.HiltAndroidApp
@@ -13,11 +15,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
-class MyApp : Application() {
+class MyApp : Application(), Configuration.Provider {
 
     @Inject lateinit var themePreferences: ThemePreferences
+    @Inject lateinit var workerFactory: HiltWorkerFactory
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     override fun onCreate() {
         super.onCreate()
