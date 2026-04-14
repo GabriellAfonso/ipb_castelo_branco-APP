@@ -24,11 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
+import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
-import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.LastSundaysTab
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.SuggestionsTab
@@ -63,13 +64,15 @@ data class WorshipSongsUiState(
     val topSongs: List<TopSong> = emptyList(),
     val topTones: List<TopTone> = emptyList(),
     val suggestedSongs: List<SuggestedSong> = emptyList(),
-    val isRefreshingSuggestions: Boolean = false
+    val isRefreshingSuggestions: Boolean = false,
+    val isRefreshing: Boolean = false,
 )
 
 
 data class WorshipSongsActions(
     val onBackClick: () -> Unit,
-    val onRefreshSuggestions: () -> Unit
+    val onRefreshSuggestions: () -> Unit,
+    val onRefreshCurrentTab: (tabIndex: Int) -> Unit = {},
 )
 
 @Composable
@@ -84,14 +87,16 @@ fun WorshipSongsTableScreen(
         topSongs = viewModel.topSongs.collectAsStateWithLifecycle().value,
         topTones = viewModel.topTones.collectAsStateWithLifecycle().value,
         suggestedSongs = viewModel.suggestedSongs.collectAsStateWithLifecycle().value,
-        isRefreshingSuggestions = viewModel.isRefreshingSuggestedSongs.collectAsStateWithLifecycle().value
+        isRefreshingSuggestions = viewModel.isRefreshingSuggestedSongs.collectAsStateWithLifecycle().value,
+        isRefreshing = viewModel.isRefreshing.collectAsStateWithLifecycle().value,
     )
 
     val fixedByPosition = viewModel.fixedByPosition.collectAsStateWithLifecycle().value
 
     val actions = WorshipSongsActions(
         onBackClick = onBackClick,
-        onRefreshSuggestions = viewModel::refreshSuggestedSongs
+        onRefreshSuggestions = viewModel::refreshSuggestedSongs,
+        onRefreshCurrentTab = viewModel::refreshCurrentTab,
     )
 
     WorshipSongsTableContent(
@@ -128,10 +133,12 @@ fun WorshipSongsTableContent(
         showBackArrow = true,
         onBackClick = actions.onBackClick
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
+        ElasticPullToRefresh(
+            isRefreshing = state.isRefreshing,
+            onRefresh    = { actions.onRefreshCurrentTab(selectedTabIndex) },
+            modifier     = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
         ) {
             Column(
                 modifier = Modifier

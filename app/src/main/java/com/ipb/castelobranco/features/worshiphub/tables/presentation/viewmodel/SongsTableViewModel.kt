@@ -53,6 +53,28 @@ class SongsTableViewModel @Inject constructor(
     private val _isRefreshingSuggestedSongs = MutableStateFlow(false)
     val isRefreshingSuggestedSongs: StateFlow<Boolean> = _isRefreshingSuggestedSongs.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    fun refreshCurrentTab(tabIndex: Int, minDurationMs: Long = 600L) {
+        if (tabIndex == 3) return // Sugestões has its own refresh button
+        if (_isRefreshing.value) return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val start = System.currentTimeMillis()
+            runCatching {
+                when (tabIndex) {
+                    0 -> repository.refreshSongsBySunday()
+                    1 -> repository.refreshTopSongs()
+                    2 -> repository.refreshTopTones()
+                }
+            }
+            val elapsed = System.currentTimeMillis() - start
+            if (elapsed < minDurationMs) delay(minDurationMs - elapsed)
+            _isRefreshing.value = false
+        }
+    }
+
     private val _fixedByPosition = MutableStateFlow<Map<Int, Int>>(emptyMap())
     val fixedByPosition: StateFlow<Map<Int, Int>> = _fixedByPosition.asStateFlow()
 
