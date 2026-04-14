@@ -3,80 +3,79 @@ package com.ipb.castelobranco.features.gallery.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.ipb.castelobranco.core.data.NetworkConnectivityObserver
+import com.ipb.castelobranco.features.gallery.data.work.GalleryDownloadWorker
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
-import com.ipb.castelobranco.features.gallery.domain.usecase.DownloadAllPhotosUseCase
-import com.ipb.castelobranco.core.domain.error.toAppError
+import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
 data class GalleryDownloadState(
     val isDownloading: Boolean = false,
+    val isPending: Boolean = false,
     val downloaded: Int = 0,
     val total: Int = 0,
-    val error: String? = null
+    val error: String? = null,
 )
 
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     private val repository: GalleryRepository,
-    private val downloadAllPhotosUseCase: DownloadAllPhotosUseCase,
+    private val autoDownload: GalleryAutoDownloadUseCase,
+    connectivityObserver: NetworkConnectivityObserver,
+    workManager: WorkManager,
 ) : ViewModel() {
 
-    private val _downloadState =
-        MutableStateFlow(GalleryDownloadState())
-    val downloadState: StateFlow<GalleryDownloadState> = _downloadState
-
     val albums = repository.albumsFlow
-
     val thumbnails = repository.thumbnailsFlow
-    val cachedPhotos = repository.photosFlow
 
-    suspend fun getLocalPhotos(albumId: Long): List<File> {
-        return repository.getLocalPhotos(albumId)
-    }
+    val isOnWifi: StateFlow<Boolean> = connectivityObserver.isOnWifi
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
-    fun getThumbnailForAlbum(albumId: Long): File? {
-        return thumbnails.value[albumId]
-    }
-
-    fun downloadAllPhotos() {
-        if (_downloadState.value.isDownloading) return
-
-        viewModelScope.launch {
-            try {
-                downloadAllPhotosUseCase.downloadProgress().collect { progress ->
-                    _downloadState.update {
-                        it.copy(
-                            isDownloading = progress.downloaded < progress.total,
-                            downloaded = progress.downloaded,
-                            total = progress.total
-                        )
-                    }
+    val downloadState: StateFlow<GalleryDownloadState> = workManager
+        .getWorkInfosForUniqueWorkFlow(GalleryDownloadWorker.WORK_NAME)
+        .map { infos ->
+            val info = infos.firstOrNull()
+            when (info?.state) {
+                WorkInfo.State.RUNNING -> {
+                    val done = info.progress.getInt(GalleryDownloadWorker.KEY_DOWNLOADED, 0)
+                    val total = info.progress.getInt(GalleryDownloadWorker.KEY_TOTAL, 0)
+                    GalleryDownloadState(isDownloading = true, downloaded = done, total = total)
                 }
-                downloadAllPhotosUseCase.preload()
-            } catch (e: Exception) {
-                val appError = e.toAppError()
-                _downloadState.update {
-                    it.copy(isDownloading = false, error = appError.message ?: "Erro ao baixar fotos")
-                }
+                WorkInfo.State.ENQUEUED -> GalleryDownloadState(isPending = true)
+                WorkInfo.State.FAILED -> GalleryDownloadState(error = "Falha ao baixar galeria")
+                else -> GalleryDownloadState()
             }
         }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GalleryDownloadState())
+
+    fun downloadAllPhotos() {
+        autoDownload.enqueueWifiOnly()
+    }
+
+    fun downloadWithMobileData() {
+        autoDownload.enqueueAnyNetwork()
     }
 
     fun clearGallery() {
         viewModelScope.launch {
             repository.clearAllPhotos()
-            _downloadState.value = GalleryDownloadState()
         }
     }
 
+    suspend fun getLocalPhotos(albumId: Long): List<File> =
+        repository.getLocalPhotos(albumId)
+
     suspend fun getPhotoName(albumId: Long, photoId: Long): String {
-        Log.d("TAG", "getPhotoName: $albumId - $photoId")
+        Log.d("GalleryViewModel", "getPhotoName: $albumId - $photoId")
         return repository.getPhotoName(albumId, photoId) ?: "Foto"
     }
 }
