@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsListItem
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsUiState
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel.LyricsViewModel
@@ -54,9 +55,12 @@ fun LyricsScreen(
     onBackClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     LyricsContent(
         state         = state,
+        isRefreshing  = isRefreshing,
+        onRefresh     = viewModel::refresh,
         onQueryChange = viewModel::onQueryChange,
         onLyricsClick = onLyricsClick,
         onTogglePin   = viewModel::onTogglePin,
@@ -67,6 +71,8 @@ fun LyricsScreen(
 @Composable
 private fun LyricsContent(
     state: LyricsUiState,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     onQueryChange: (String) -> Unit,
     onLyricsClick: (id: Int) -> Unit,
     onTogglePin: (id: Int) -> Unit,
@@ -78,10 +84,15 @@ private fun LyricsContent(
         showBackArrow = true,
         onBackClick   = onBackClick,
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
+        ElasticPullToRefresh(
+            isRefreshing = isRefreshing,
+            onRefresh    = onRefresh,
+            modifier     = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
+        ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
         ) {
             SearchCard(
                 query         = state.query,
@@ -108,6 +119,7 @@ private fun LyricsContent(
                     }
                 }
             }
+        }
         }
     }
 }

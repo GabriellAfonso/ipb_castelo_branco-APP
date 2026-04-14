@@ -9,9 +9,11 @@ import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartsUiState
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,6 +27,21 @@ class ChordChartsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    fun refresh(minDurationMs: Long = 600L) {
+        if (_isRefreshing.value) return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val start = System.currentTimeMillis()
+            runCatching { getChordChartsUseCase.refresh() }
+            val elapsed = System.currentTimeMillis() - start
+            if (elapsed < minDurationMs) delay(minDurationMs - elapsed)
+            _isRefreshing.value = false
+        }
+    }
 
     val uiState: StateFlow<ChordChartsUiState> = combine(
         getChordChartsUseCase.observe(),

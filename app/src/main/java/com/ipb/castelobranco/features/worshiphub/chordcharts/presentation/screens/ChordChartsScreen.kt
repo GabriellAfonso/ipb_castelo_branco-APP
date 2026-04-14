@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartListItem
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartsUiState
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewmodel.ChordChartsViewModel
@@ -54,9 +55,12 @@ fun ChordChartsScreen(
     onBackClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     ChordChartsContent(
         state             = state,
+        isRefreshing      = isRefreshing,
+        onRefresh         = viewModel::refresh,
         onQueryChange     = viewModel::onQueryChange,
         onChordChartClick = onChordChartClick,
         onTogglePin       = viewModel::onTogglePin,
@@ -67,6 +71,8 @@ fun ChordChartsScreen(
 @Composable
 private fun ChordChartsContent(
     state: ChordChartsUiState,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     onQueryChange: (String) -> Unit,
     onChordChartClick: (id: Int) -> Unit,
     onTogglePin: (id: Int) -> Unit,
@@ -78,10 +84,15 @@ private fun ChordChartsContent(
         showBackArrow = true,
         onBackClick   = onBackClick,
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
+        ElasticPullToRefresh(
+            isRefreshing = isRefreshing,
+            onRefresh    = onRefresh,
+            modifier     = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
+        ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
         ) {
             SearchCard(
                 query         = state.query,
@@ -108,6 +119,7 @@ private fun ChordChartsContent(
                     }
                 }
             }
+        }
         }
     }
 }
