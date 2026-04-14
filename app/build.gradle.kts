@@ -145,4 +145,9 @@ dependencies {
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.googleid)
     implementation(libs.play.app.update.ktx)
+
+    // WorkManager + Hilt-Work
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 }

@@ -36,6 +36,8 @@ googleid = "1.1.1"
 credentials = "1.5.0"
 playAppUpdate = "2.1.0"
 mockk = "1.14.9"
+workManager = "2.10.0"
+hiltWork = "1.2.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -86,6 +88,9 @@ androidx-credentials-play-services = { module = "androidx.credentials:credential
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "playAppUpdate" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
 
 
 
