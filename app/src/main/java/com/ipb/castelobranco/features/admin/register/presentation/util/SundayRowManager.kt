@@ -5,14 +5,6 @@ import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 
 object SundayRowManager {
 
-    fun updateQuery(
-        rows: List<SundaySongRowState>,
-        position: Int,
-        query: String
-    ): List<SundaySongRowState> = rows.map { row ->
-        if (row.position == position) row.copy(songQuery = query, selectedSongId = null) else row
-    }
-
     fun selectSong(
         rows: List<SundaySongRowState>,
         position: Int,

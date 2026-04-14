@@ -56,7 +56,6 @@ data class MusicRegistrationScreenActions(
 
 data class SundayRegistrationActions(
     val onOpenDatePicker: () -> Unit,
-    val onSongQueryChange: (position: Int, query: String) -> Unit,
     val onSongSelect: (position: Int, song: Song) -> Unit,
     val onToneChange: (position: Int, tone: String) -> Unit,
     val onAddRow: () -> Unit,
@@ -101,7 +100,6 @@ fun MusicRegistrationScreen(
 
     val sundayActions = SundayRegistrationActions(
         onOpenDatePicker = { viewModel.onEvent(MusicRegistrationEvent.OpenDatePicker) },
-        onSongQueryChange = { pos, q -> viewModel.onEvent(MusicRegistrationEvent.SundaySongQueryChanged(pos, q)) },
         onSongSelect = { pos, song -> viewModel.onEvent(MusicRegistrationEvent.SundaySongSelected(pos, song)) },
         onToneChange = { pos, tone -> viewModel.onEvent(MusicRegistrationEvent.SundayToneChanged(pos, tone)) },
         onAddRow = { viewModel.onEvent(MusicRegistrationEvent.AddSundayRow) },
@@ -181,7 +179,6 @@ fun MusicRegistrationContent(
                     RegistrationType.SUNDAY -> SundayRegistrationForm(
                         availableSongs = state.availableSongs,
                         rows = state.sundayRows,
-                        onSongQueryChange = sundayActions.onSongQueryChange,
                         onSongSelect = sundayActions.onSongSelect,
                         onToneChange = sundayActions.onToneChange,
                         onAddMoreClick = sundayActions.onAddRow,

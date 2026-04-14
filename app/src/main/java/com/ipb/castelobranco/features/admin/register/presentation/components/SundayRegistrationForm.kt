@@ -18,7 +18,6 @@ import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 fun SundayRegistrationForm(
     availableSongs: List<Song>,
     rows: List<SundaySongRowState>,
-    onSongQueryChange: (position: Int, query: String) -> Unit,
     onSongSelect: (position: Int, song: Song) -> Unit,
     onToneChange: (position: Int, tone: String) -> Unit,
     onAddMoreClick: () -> Unit,
@@ -33,7 +32,6 @@ fun SundayRegistrationForm(
             SundaySongRow(
                 availableSongs = availableSongs,
                 state = row,
-                onSongQueryChange = { q -> onSongQueryChange(row.position, q) },
                 onSongSelect = { s -> onSongSelect(row.position, s) },
                 onToneChange = { t -> onToneChange(row.position, t) },
                 onRemoveClick = if (row.position > 4) ({ onRemoveRowClick(row.position) }) else null

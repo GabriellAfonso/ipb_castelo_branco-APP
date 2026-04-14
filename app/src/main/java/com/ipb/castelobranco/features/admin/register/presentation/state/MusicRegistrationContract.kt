@@ -79,7 +79,6 @@ sealed interface MusicRegistrationEvent {
     data object OpenDatePicker : MusicRegistrationEvent
     data object DismissDatePicker : MusicRegistrationEvent
     data class DatePicked(val date: LocalDate) : MusicRegistrationEvent
-    data class SundaySongQueryChanged(val position: Int, val query: String) : MusicRegistrationEvent
     data class SundaySongSelected(val position: Int, val song: Song) : MusicRegistrationEvent
     data class SundayToneChanged(val position: Int, val tone: String) : MusicRegistrationEvent
     data object AddSundayRow : MusicRegistrationEvent

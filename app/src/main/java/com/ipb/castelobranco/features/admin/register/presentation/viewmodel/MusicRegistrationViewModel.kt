@@ -43,7 +43,6 @@ class MusicRegistrationViewModel @Inject constructor(
             MusicRegistrationEvent.DismissDatePicker -> dismissDatePicker()
             is MusicRegistrationEvent.DatePicked -> confirmDate(event.date)
 
-            is MusicRegistrationEvent.SundaySongQueryChanged -> updateSongQuery(event.position, event.query)
             is MusicRegistrationEvent.SundaySongSelected -> selectSong(event.position, event.song)
             is MusicRegistrationEvent.SundayToneChanged -> updateTone(event.position, event.tone)
 
@@ -134,13 +133,6 @@ class MusicRegistrationViewModel @Inject constructor(
 
     private fun confirmDate(date: LocalDate) {
         _uiState.update { it.copy(selectedDate = date, showDatePicker = false) }
-    }
-
-    private fun updateSongQuery(position: Int, query: String) {
-        _uiState.update { state ->
-            state.copy(sundayRows = SundayRowManager.updateQuery(state.sundayRows, position, query))
-                .recomputeSundayErrors()
-        }
     }
 
     private fun selectSong(position: Int, song: Song) {
