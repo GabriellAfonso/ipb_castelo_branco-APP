@@ -8,7 +8,7 @@ import com.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
 import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
-import com.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
+import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class CoreViewModel @Inject constructor(
     private val preloadDataUseCase: PreloadDataUseCase,
     private val authSession: AuthSession,
-    private val profileRepository: ProfileRepository,
+    private val fetchProfileUseCase: FetchProfileUseCase,
     private val authEventBus: AuthEventBus,
     private val logoutUseCase: LogoutUseCase,
     private val galleryAutoDownload: GalleryAutoDownloadUseCase,
@@ -86,14 +86,14 @@ class CoreViewModel @Inject constructor(
 
             runCatching {
                 // Atualiza dados do perfil
-                profileRepository.refreshMeProfile()
+                fetchProfileUseCase.refresh()
 
                 // Tenta pegar a foto se o perfil estiver em estado Data
-                val profileState = profileRepository.observeMeProfile().first()
+                val profileState = fetchProfileUseCase.observe().first()
                 if (profileState is SnapshotState.Data) {
                     val url = profileState.value.photoUrl
                     if (!url.isNullOrBlank()) {
-                        profileRepository.downloadAndPersistProfilePhoto(url)
+                        fetchProfileUseCase.downloadAndPersistPhoto(url)
                     }
                 }
             }
@@ -108,7 +108,7 @@ class CoreViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            profileRepository.clearLocalProfilePhoto()
+            fetchProfileUseCase.clearLocalPhoto()
             logoutUseCase()
             _events.trySend(CoreEvent.LogoutSuccess)
         }
