@@ -88,6 +88,7 @@ androidx-credentials-play-services = { module = "androidx.credentials:credential
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "playAppUpdate" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+org-json = { module = "org.json:json", version = "20231013" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }

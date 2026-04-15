@@ -138,6 +138,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.mockk)
+    testImplementation(libs.org.json)
 
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)

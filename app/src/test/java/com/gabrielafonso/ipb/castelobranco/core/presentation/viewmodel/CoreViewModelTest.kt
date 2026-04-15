@@ -1,0 +1,315 @@
+package com.ipb.castelobranco.core.presentation.viewmodel
+
+import com.ipb.castelobranco.core.domain.auth.AuthEventBus
+import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
+import com.ipb.castelobranco.features.auth.data.local.AuthSession
+import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
+import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
+import com.ipb.castelobranco.features.profile.domain.model.MeProfile
+import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
+import app.cash.turbine.test
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class CoreViewModelTest {
+
+    private val testDispatcher = StandardTestDispatcher()
+
+    private lateinit var preloadDataUseCase: PreloadDataUseCase
+    private lateinit var authSession: AuthSession
+    private lateinit var fetchProfileUseCase: FetchProfileUseCase
+    private lateinit var authEventBus: AuthEventBus
+    private lateinit var logoutUseCase: LogoutUseCase
+    private lateinit var galleryAutoDownload: GalleryAutoDownloadUseCase
+    private lateinit var viewModel: CoreViewModel
+
+    private val authEventsFlow = MutableSharedFlow<AuthEventBus.Event>()
+
+    private val fakeProfile = MeProfile(
+        name = "João",
+        active = true,
+        isMember = true,
+        isAdmin = false,
+        photoUrl = null
+    )
+
+    @Before
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+
+        preloadDataUseCase = mockk()
+        authSession = mockk()
+        fetchProfileUseCase = mockk()
+        authEventBus = mockk()
+        logoutUseCase = mockk()
+        galleryAutoDownload = mockk()
+
+        coEvery { preloadDataUseCase() } just runs
+        every { authSession.isLoggedInFlow } returns emptyFlow()
+        coEvery { authSession.isLoggedIn() } returns false
+        every { authEventBus.events } returns authEventsFlow
+        coEvery { logoutUseCase() } just runs
+        every { galleryAutoDownload.triggerIfNeeded() } just runs
+        coEvery { fetchProfileUseCase.refresh() } returns
+            com.ipb.castelobranco.core.domain.snapshot.RefreshResult.NotModified
+        every { fetchProfileUseCase.observe() } returns emptyFlow()
+        coEvery { fetchProfileUseCase.clearLocalPhoto() } returns Result.success(Unit)
+
+        viewModel = CoreViewModel(
+            preloadDataUseCase,
+            authSession,
+            fetchProfileUseCase,
+            authEventBus,
+            logoutUseCase,
+            galleryAutoDownload
+        )
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    // region initialize — isLoggedIn observation
+
+    @Test
+    fun `initialize reflects isLoggedInFlow emissions in isLoggedIn state`() = runTest {
+        val loginFlow = MutableStateFlow(false)
+        every { authSession.isLoggedInFlow } returns loginFlow
+
+        viewModel.initialize()
+        advanceUntilIdle()
+        assertFalse(viewModel.isLoggedIn.value)
+
+        loginFlow.value = true
+        advanceUntilIdle()
+        assertTrue(viewModel.isLoggedIn.value)
+    }
+
+    // endregion
+
+    // region initialize — app initialization
+
+    @Test
+    fun `initialize calls preloadDataUseCase`() = runTest {
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify { preloadDataUseCase() }
+    }
+
+    @Test
+    fun `initialize calls galleryAutoDownload triggerIfNeeded`() = runTest {
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify { galleryAutoDownload.triggerIfNeeded() }
+    }
+
+    @Test
+    fun `initialize sets isPreloading to false after app initialization completes`() = runTest {
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.isPreloading.value)
+    }
+
+    @Test
+    fun `initialize does not call fetchProfileUseCase refresh when not logged in`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns false
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { fetchProfileUseCase.refresh() }
+    }
+
+    @Test
+    fun `initialize calls fetchProfileUseCase refresh when logged in`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns true
+        every { fetchProfileUseCase.observe() } returns flowOf(SnapshotState.Data(fakeProfile))
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify { fetchProfileUseCase.refresh() }
+    }
+
+    @Test
+    fun `initialize downloads photo when profile has photoUrl`() = runTest {
+        val profileWithPhoto = fakeProfile.copy(photoUrl = "https://example.com/photo.jpg")
+        coEvery { authSession.isLoggedIn() } returns true
+        every { fetchProfileUseCase.observe() } returns flowOf(SnapshotState.Data(profileWithPhoto))
+        coEvery { fetchProfileUseCase.downloadAndPersistPhoto(any()) } returns Result.success(null)
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify { fetchProfileUseCase.downloadAndPersistPhoto("https://example.com/photo.jpg") }
+    }
+
+    @Test
+    fun `initialize does not download photo when profile photoUrl is null`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns true
+        every { fetchProfileUseCase.observe() } returns flowOf(SnapshotState.Data(fakeProfile))
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { fetchProfileUseCase.downloadAndPersistPhoto(any()) }
+    }
+
+    @Test
+    fun `initialize does not download photo when profile photoUrl is blank`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns true
+        every { fetchProfileUseCase.observe() } returns flowOf(
+            SnapshotState.Data(fakeProfile.copy(photoUrl = "  "))
+        )
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { fetchProfileUseCase.downloadAndPersistPhoto(any()) }
+    }
+
+    @Test
+    fun `initialize swallows exception from profile refresh`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns true
+        coEvery { fetchProfileUseCase.refresh() } throws RuntimeException("network error")
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        // ViewModel should not crash; isPreloading ends false
+        assertFalse(viewModel.isPreloading.value)
+    }
+
+    // endregion
+
+    // region initialize — LoginSuccess event
+
+    @Test
+    fun `initialize on LoginSuccess event calls fetchProfileUseCase refresh again`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns true
+        every { fetchProfileUseCase.observe() } returns flowOf(SnapshotState.Data(fakeProfile))
+
+        viewModel.initialize()
+        advanceUntilIdle()
+        // refresh was called once during startAppInitialization
+        coVerify(exactly = 1) { fetchProfileUseCase.refresh() }
+
+        authEventsFlow.emit(AuthEventBus.Event.LoginSuccess)
+        advanceUntilIdle()
+        // refresh called a second time triggered by LoginSuccess event
+        coVerify(exactly = 2) { fetchProfileUseCase.refresh() }
+    }
+
+    @Test
+    fun `initialize on LoginSuccess does not refresh when not logged in`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns false
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        authEventsFlow.emit(AuthEventBus.Event.LoginSuccess)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { fetchProfileUseCase.refresh() }
+    }
+
+    // endregion
+
+    // region refreshLoginState
+
+    @Test
+    fun `refreshLoginState updates isLoggedIn from authSession`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns true
+
+        viewModel.refreshLoginState()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.isLoggedIn.value)
+    }
+
+    @Test
+    fun `refreshLoginState sets isLoggedIn to false when not logged in`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns false
+
+        viewModel.refreshLoginState()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.isLoggedIn.value)
+    }
+
+    // endregion
+
+    // region logout
+
+    @Test
+    fun `logout calls fetchProfileUseCase clearLocalPhoto`() = runTest {
+        viewModel.logout()
+        advanceUntilIdle()
+
+        coVerify { fetchProfileUseCase.clearLocalPhoto() }
+    }
+
+    @Test
+    fun `logout calls logoutUseCase`() = runTest {
+        viewModel.logout()
+        advanceUntilIdle()
+
+        coVerify { logoutUseCase() }
+    }
+
+    @Test
+    fun `logout emits LogoutSuccess event`() = runTest {
+        viewModel.events.test {
+            viewModel.logout()
+            advanceUntilIdle()
+            assertEquals(CoreViewModel.CoreEvent.LogoutSuccess, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `logout clears photo before calling logoutUseCase`() = runTest {
+        val order = mutableListOf<String>()
+        coEvery { fetchProfileUseCase.clearLocalPhoto() } coAnswers {
+            order.add("clearPhoto")
+            Result.success(Unit)
+        }
+        coEvery { logoutUseCase() } coAnswers {
+            order.add("logout")
+        }
+
+        viewModel.logout()
+        advanceUntilIdle()
+
+        assertEquals(listOf("clearPhoto", "logout"), order)
+    }
+
+    // endregion
+}
