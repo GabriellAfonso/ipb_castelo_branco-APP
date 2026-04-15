@@ -6,8 +6,8 @@ import com.ipb.castelobranco.features.admin.schedule.data.dto.SaveScheduleItemDt
 import com.ipb.castelobranco.features.admin.schedule.data.dto.SaveScheduleRequestDto
 import com.ipb.castelobranco.features.admin.schedule.data.mapper.toDomain
 import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
+import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleItem
 import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleType
-import com.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleUiState
 import com.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
 import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.error.mapError
@@ -23,12 +23,12 @@ class AdminScheduleRepositoryImpl @Inject constructor(
         api.getMembers().members.map { it.toDomain() }
     }.mapError()
 
-    override suspend fun generateSchedule(year: Int, month: Int): Result<List<EditableScheduleUiState>> = runCatching {
+    override suspend fun generateSchedule(year: Int, month: Int): Result<List<ScheduleItem>> = runCatching {
         val response = api.generateSchedule(
             GenerateScheduleRequestDto(year = year, month = month)
         )
         response.items.map { item ->
-            EditableScheduleUiState(
+            ScheduleItem(
                 date = item.date,
                 day = item.day,
                 scheduleTypeName = item.scheduleType.name,
@@ -38,7 +38,7 @@ class AdminScheduleRepositoryImpl @Inject constructor(
         }
     }.mapError()
 
-    override suspend fun saveSchedule(year: Int, month: Int, items: List<EditableScheduleUiState>): Result<Unit> = runCatching {
+    override suspend fun saveSchedule(year: Int, month: Int, items: List<ScheduleItem>): Result<Unit> = runCatching {
         val body = SaveScheduleRequestDto(
             year = year,
             month = month,

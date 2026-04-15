@@ -3,15 +3,11 @@ package com.ipb.castelobranco.features.admin.schedule.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
-import com.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleUiState
+import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleItem
 import com.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
 import com.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleEvent
 import com.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleUiState
-import com.ipb.castelobranco.features.schedule.data.dto.MemberDto
-import com.ipb.castelobranco.features.schedule.data.dto.MonthScheduleDto
-import com.ipb.castelobranco.features.schedule.data.dto.ScheduleEntryDto
-import com.ipb.castelobranco.features.schedule.data.dto.ScheduleItemDto
-import com.ipb.castelobranco.features.schedule.data.dto.ScheduleTypeDto
+import com.ipb.castelobranco.features.admin.schedule.presentation.state.EditableScheduleUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -75,7 +71,20 @@ class AdminScheduleViewModel @Inject constructor(
             _uiState.update { it.copy(isGenerating = true) }
             repository.generateSchedule(year = state.year, month = state.month)
                 .onSuccess { items ->
-                    _uiState.update { it.copy(isGenerating = false, items = items) }
+                    _uiState.update {
+                        it.copy(
+                            isGenerating = false,
+                            items = items.map { item ->
+                                EditableScheduleUiState(
+                                    date = item.date,
+                                    day = item.day,
+                                    scheduleTypeName = item.scheduleTypeName,
+                                    scheduleTypeId = item.scheduleTypeId,
+                                    selectedMember = item.selectedMember
+                                )
+                            }
+                        )
+                    }
                 }
                 .onFailure {
                     _uiState.update {
@@ -93,7 +102,16 @@ class AdminScheduleViewModel @Inject constructor(
         if (!state.canSave) return
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            repository.saveSchedule(year = state.year, month = state.month, items = state.items)
+            val domainItems = state.items.map { item ->
+                ScheduleItem(
+                    date = item.date,
+                    day = item.day,
+                    scheduleTypeName = item.scheduleTypeName,
+                    scheduleTypeId = item.scheduleTypeId,
+                    selectedMember = item.selectedMember
+                )
+            }
+            repository.saveSchedule(year = state.year, month = state.month, items = domainItems)
                 .onSuccess {
                     _uiState.update {
                         it.copy(
@@ -112,30 +130,5 @@ class AdminScheduleViewModel @Inject constructor(
                     }
                 }
         }
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-    private fun AdminScheduleUiState.toMonthScheduleDto(): MonthScheduleDto {
-        val grouped = items.groupBy { it.scheduleTypeName }
-        return MonthScheduleDto(
-            year = year,
-            month = month,
-            schedule = grouped.mapValues { (typeName, groupItems) ->
-                ScheduleEntryDto(
-                    time = "19:30",
-                    items = groupItems.map { item ->
-                        ScheduleItemDto(
-                            date = item.date,
-                            day = item.day,
-                            member = MemberDto(
-                                id = item.selectedMember!!.id,
-                                name = item.selectedMember.name
-                            ),
-                            scheduleType = ScheduleTypeDto(id = 0, name = typeName)
-                        )
-                    }
-                )
-            }
-        )
     }
 }
