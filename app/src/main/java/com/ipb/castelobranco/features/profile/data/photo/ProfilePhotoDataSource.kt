@@ -159,7 +159,7 @@ class ProfilePhotoDataSource @Inject constructor(
             }
         }
 
-    private fun findLastLocalPhotoOrNull(): File? {
+    fun findLastLocalPhotoOrNull(): File? {
         val dir = File(context.filesDir, StorageDirConstants.PROFILE)
         return dir.listFiles()
             ?.asSequence()

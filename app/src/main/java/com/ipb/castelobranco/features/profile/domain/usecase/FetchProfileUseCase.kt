@@ -17,4 +17,8 @@ class FetchProfileUseCase @Inject constructor(
 
     suspend fun downloadAndPersistPhoto(url: String): Result<File?> =
         repository.downloadAndPersistProfilePhoto(url)
+
+    fun getLocalPhoto(): File? = repository.getLocalProfilePhoto()
+
+    suspend fun clearLocalPhoto(): Result<Unit> = repository.clearLocalProfilePhoto()
 }

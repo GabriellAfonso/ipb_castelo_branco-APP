@@ -1,29 +1,24 @@
 package com.ipb.castelobranco.features.profile.presentation.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
 import com.ipb.castelobranco.features.profile.domain.usecase.UploadProfilePhotoUseCase
 import com.ipb.castelobranco.features.profile.presentation.state.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val fetchProfileUseCase: FetchProfileUseCase,
     private val uploadProfilePhotoUseCase: UploadProfilePhotoUseCase,
-    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -75,10 +70,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun refreshLocalPhotoPathAndBump() {
-        val dir = File(context.filesDir, StorageDirConstants.PROFILE)
-        val file = dir.listFiles()
-            ?.firstOrNull { it.isFile && it.name.startsWith("profile_photo.") && it.length() > 0L }
-
+        val file = fetchProfileUseCase.getLocalPhoto()
         _uiState.update {
             it.copy(
                 localPhotoPath = file?.absolutePath,

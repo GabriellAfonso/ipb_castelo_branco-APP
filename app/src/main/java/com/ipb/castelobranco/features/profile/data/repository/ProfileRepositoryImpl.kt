@@ -34,4 +34,7 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun clearLocalProfilePhoto(): Result<Unit> =
         photoDataSource.clearLocal()
+
+    override fun getLocalProfilePhoto(): File? =
+        photoDataSource.findLastLocalPhotoOrNull()
 }
