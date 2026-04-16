@@ -30,13 +30,13 @@ class PreloadDataUseCase @Inject constructor(
     private suspend fun preloadCachesFromDisk() = withContext(Dispatchers.IO) {
         supervisorScope {
             val preloads = listOf(
-                launch { songsRepository.preload() },
-//              launch { hymnalRepository.preload() },
-                launch { scheduleRepository.preload() },
-                launch { galleryRepository.preload() },
-                launch { chordChartRepository.preload() },
-                launch { lyricsRepository.preload() },
-//              launch { profileRepository.preload() }
+                launch { runCatching { songsRepository.preload() } },
+//              launch { runCatching { hymnalRepository.preload() } },
+                launch { runCatching { scheduleRepository.preload() } },
+                launch { runCatching { galleryRepository.preload() } },
+                launch { runCatching { chordChartRepository.preload() } },
+                launch { runCatching { lyricsRepository.preload() } },
+//              launch { runCatching { profileRepository.preload() } }
             )
             preloads.joinAll()
         }
