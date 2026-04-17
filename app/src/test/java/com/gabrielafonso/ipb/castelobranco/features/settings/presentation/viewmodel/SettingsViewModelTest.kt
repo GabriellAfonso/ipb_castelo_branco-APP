@@ -1,12 +1,18 @@
 package com.ipb.castelobranco.features.settings.presentation.viewmodel
 
+import androidx.appcompat.app.AppCompatDelegate
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.features.settings.domain.model.ThemeMode
 import com.ipb.castelobranco.features.settings.domain.repository.SettingsRepository
 import app.cash.turbine.test
+import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -98,4 +104,92 @@ class SettingsViewModelTest {
 
         coVerify(exactly = 1) { galleryRepository.clearAllPhotos() }
     }
+
+    // region toggleDarkMode
+
+    @Test
+    fun `toggleDarkMode when current mode is DARK sets theme to LIGHT`() = runTest {
+        mockkStatic(AppCompatDelegate::class)
+        every { AppCompatDelegate.setDefaultNightMode(any()) } just Runs
+
+        viewModel.uiState.test {
+            awaitItem()
+            themeModeFlow.emit(ThemeMode.DARK)
+            awaitItem()
+
+            viewModel.toggleDarkMode()
+            advanceUntilIdle()
+
+            coVerify { settingsRepository.setThemeMode(ThemeMode.LIGHT) }
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        unmockkStatic(AppCompatDelegate::class)
+    }
+
+    @Test
+    fun `toggleDarkMode when current mode is LIGHT sets theme to DARK`() = runTest {
+        mockkStatic(AppCompatDelegate::class)
+        every { AppCompatDelegate.setDefaultNightMode(any()) } just Runs
+
+        viewModel.uiState.test {
+            awaitItem()
+            themeModeFlow.emit(ThemeMode.LIGHT)
+            awaitItem()
+
+            viewModel.toggleDarkMode()
+            advanceUntilIdle()
+
+            coVerify { settingsRepository.setThemeMode(ThemeMode.DARK) }
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        unmockkStatic(AppCompatDelegate::class)
+    }
+
+    @Test
+    fun `toggleDarkMode when FOLLOW_SYSTEM and system is dark sets theme to LIGHT`() = runTest {
+        mockkStatic(AppCompatDelegate::class)
+        every { AppCompatDelegate.getDefaultNightMode() } returns AppCompatDelegate.MODE_NIGHT_YES
+        every { AppCompatDelegate.setDefaultNightMode(any()) } just Runs
+
+        viewModel.toggleDarkMode()
+        advanceUntilIdle()
+
+        coVerify { settingsRepository.setThemeMode(ThemeMode.LIGHT) }
+
+        unmockkStatic(AppCompatDelegate::class)
+    }
+
+    @Test
+    fun `toggleDarkMode when FOLLOW_SYSTEM and system is light sets theme to DARK`() = runTest {
+        mockkStatic(AppCompatDelegate::class)
+        every { AppCompatDelegate.getDefaultNightMode() } returns AppCompatDelegate.MODE_NIGHT_NO
+        every { AppCompatDelegate.setDefaultNightMode(any()) } just Runs
+
+        viewModel.toggleDarkMode()
+        advanceUntilIdle()
+
+        coVerify { settingsRepository.setThemeMode(ThemeMode.DARK) }
+
+        unmockkStatic(AppCompatDelegate::class)
+    }
+
+    @Test
+    fun `toggleDarkMode emits event after successful toggle`() = runTest {
+        mockkStatic(AppCompatDelegate::class)
+        every { AppCompatDelegate.getDefaultNightMode() } returns AppCompatDelegate.MODE_NIGHT_NO
+        every { AppCompatDelegate.setDefaultNightMode(any()) } just Runs
+
+        viewModel.events.test {
+            viewModel.toggleDarkMode()
+            advanceUntilIdle()
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        unmockkStatic(AppCompatDelegate::class)
+    }
+
+    // endregion
 }
