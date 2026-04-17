@@ -19,7 +19,5 @@ local.properties
 app/release
 app/build
 .kotlin/errors
-CLAUDE.md
 claude-docs/
-.claude
 feature_based_problems.md
