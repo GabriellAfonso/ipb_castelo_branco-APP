@@ -4,8 +4,10 @@ import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,9 +28,14 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.ipb.castelobranco.features.admin.register.presentation.constants.NATURAL_TONES
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.RepertoireRowState
 import java.text.SimpleDateFormat
@@ -59,6 +67,8 @@ fun RepertoireTab(
     availableSongs: List<Song>,
     isRefreshing: Boolean,
     onSongSelect: (position: Int, song: Song?) -> Unit,
+    onToneChange: (position: Int, tone: String) -> Unit,
+    onToggleFixed: (position: Int) -> Unit,
     onGenerateClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -105,7 +115,9 @@ fun RepertoireTab(
                 row = row,
                 availableSongs = availableSongs,
                 enabled = !isRefreshing,
-                onSongSelect = { song -> onSongSelect(row.position, song) }
+                onSongSelect = { song -> onSongSelect(row.position, song) },
+                onToneChange = { tone -> onToneChange(row.position, tone) },
+                onToggleFixed = { onToggleFixed(row.position) }
             )
         }
 
@@ -155,14 +167,18 @@ fun RepertoireTab(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun RepertoireRow(
     row: RepertoireRowState,
     availableSongs: List<Song>,
     enabled: Boolean,
-    onSongSelect: (Song?) -> Unit
+    onSongSelect: (Song?) -> Unit,
+    onToneChange: (String) -> Unit,
+    onToggleFixed: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var expandedTone by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
     val filtered = remember(searchQuery, availableSongs) {
@@ -183,8 +199,19 @@ private fun RepertoireRow(
     else
         RoundedCornerShape(8.dp)
 
+    val rowBackground = if (row.isFixed) Green.copy(alpha = 0.12f) else Color.Transparent
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(rowBackground)
+            .combinedClickable(
+                enabled = enabled && row.selectedSong != null,
+                onClick = {},
+                onLongClick = { onToggleFixed() }
+            )
+            .padding(vertical = 4.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Start
     ) {
@@ -205,7 +232,13 @@ private fun RepertoireRow(
                     .height(48.dp)
                     .clip(triggerShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .clickable(enabled = enabled) { expanded = !expanded }
+                    .combinedClickable(
+                        enabled = enabled,
+                        onClick = { expanded = !expanded },
+                        onLongClick = {
+                            if (row.selectedSong != null) onToggleFixed()
+                        }
+                    )
                     .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -306,6 +339,58 @@ private fun RepertoireRow(
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        ExposedDropdownMenuBox(
+            expanded = expandedTone,
+            onExpandedChange = {
+                if (enabled && row.selectedSong != null) expandedTone = !expandedTone
+            },
+            modifier = Modifier.width(72.dp)
+        ) {
+            OutlinedTextField(
+                value = row.tone,
+                onValueChange = {},
+                readOnly = true,
+                singleLine = true,
+                placeholder = {
+                    Text(
+                        text = "Tom",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                },
+                textStyle = MaterialTheme.typography.bodySmall,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f)
+                ),
+                enabled = enabled && row.selectedSong != null,
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+                    .height(48.dp)
+            )
+
+            ExposedDropdownMenu(
+                expanded = expandedTone,
+                onDismissRequest = { expandedTone = false }
+            ) {
+                NATURAL_TONES.forEach { tone ->
+                    DropdownMenuItem(
+                        text = { Text(tone) },
+                        onClick = {
+                            onToneChange(tone)
+                            expandedTone = false
+                        }
+                    )
                 }
             }
         }

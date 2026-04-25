@@ -256,7 +256,7 @@ class SongsTableViewModelTest {
         val rows = viewModel.repertoireRows.value
         assertEquals(4, rows.size)
         assertEquals(listOf(1, 2, 3, 4), rows.map { it.position })
-        assertTrue(rows.all { it.selectedSong == null && it.tone.isBlank() })
+        assertTrue(rows.all { it.selectedSong == null && it.tone.isBlank() && !it.isFixed })
     }
 
     @Test
@@ -286,15 +286,145 @@ class SongsTableViewModelTest {
         assertEquals(null, rows.first { it.position == 4 }.selectedSong)
     }
 
+    @Test
+    fun `selectSong with null also clears isFixed`() = runTest {
+        val song = fakeSongs[0]
+        viewModel.selectSong(position = 1, song = song)
+        viewModel.toggleFixed(position = 1)
+        assertTrue(viewModel.repertoireRows.value.first { it.position == 1 }.isFixed)
+
+        viewModel.selectSong(position = 1, song = null)
+        assertFalse(viewModel.repertoireRows.value.first { it.position == 1 }.isFixed)
+    }
+
+    @Test
+    fun `selectSong with a different song keeps isFixed`() = runTest {
+        viewModel.selectSong(position = 1, song = fakeSongs[0])
+        viewModel.toggleFixed(position = 1)
+        viewModel.selectSong(position = 1, song = fakeSongs[1])
+        val row = viewModel.repertoireRows.value.first { it.position == 1 }
+        assertEquals(fakeSongs[1], row.selectedSong)
+        assertTrue(row.isFixed)
+    }
+
+    @Test
+    fun `selectSong fills tone with the most used tone from lastSundays`() = runTest {
+        val sundays = listOf(
+            SundaySet("01/04/2024", listOf(SundaySetItem(1, "Oceans", "Hillsong", "D"))),
+            SundaySet("08/04/2024", listOf(SundaySetItem(1, "Oceans", "Hillsong", "D"))),
+            SundaySet("15/04/2024", listOf(SundaySetItem(1, "Oceans", "Hillsong", "G"))),
+        )
+        every { repository.observeSongsBySunday() } returns flowOf(SnapshotState.Data(sundays))
+        viewModel = SongsTableViewModel(repository)
+        val job = launch { viewModel.lastSundays.collect { } }
+        advanceUntilIdle()
+
+        viewModel.selectSong(position = 1, song = fakeSongs[0])
+
+        assertEquals("D", viewModel.repertoireRows.value.first { it.position == 1 }.tone)
+        job.cancel()
+    }
+
+    @Test
+    fun `selectSong leaves tone empty when song has no history`() = runTest {
+        val sundays = listOf(
+            SundaySet("01/04/2024", listOf(SundaySetItem(1, "Oceans", "Hillsong", "D")))
+        )
+        every { repository.observeSongsBySunday() } returns flowOf(SnapshotState.Data(sundays))
+        viewModel = SongsTableViewModel(repository)
+        val job = launch { viewModel.lastSundays.collect { } }
+        advanceUntilIdle()
+
+        viewModel.selectSong(position = 1, song = fakeSongs[1]) // Way Maker, no history
+
+        assertEquals("", viewModel.repertoireRows.value.first { it.position == 1 }.tone)
+        job.cancel()
+    }
+
+    @Test
+    fun `selectSong overwrites manual tone when song changes`() = runTest {
+        val sundays = listOf(
+            SundaySet("01/04/2024", listOf(
+                SundaySetItem(1, "Oceans", "Hillsong", "D"),
+                SundaySetItem(2, "Way Maker", "Sinach", "G"),
+            ))
+        )
+        every { repository.observeSongsBySunday() } returns flowOf(SnapshotState.Data(sundays))
+        viewModel = SongsTableViewModel(repository)
+        val job = launch { viewModel.lastSundays.collect { } }
+        advanceUntilIdle()
+
+        viewModel.selectSong(position = 1, song = fakeSongs[0]) // tone = "D"
+        viewModel.onToneChange(position = 1, tone = "E")        // user edits to "E"
+        viewModel.selectSong(position = 1, song = fakeSongs[1]) // switch song
+
+        assertEquals("G", viewModel.repertoireRows.value.first { it.position == 1 }.tone)
+        job.cancel()
+    }
+
+    // endregion
+
+    // region onToneChange
+
+    @Test
+    fun `onToneChange updates tone without touching song or isFixed`() = runTest {
+        viewModel.selectSong(position = 1, song = fakeSongs[0])
+        viewModel.toggleFixed(position = 1)
+
+        viewModel.onToneChange(position = 1, tone = "F")
+
+        val row = viewModel.repertoireRows.value.first { it.position == 1 }
+        assertEquals("F", row.tone)
+        assertEquals(fakeSongs[0], row.selectedSong)
+        assertTrue(row.isFixed)
+    }
+
+    @Test
+    fun `onToneChange only affects the targeted position`() = runTest {
+        viewModel.selectSong(position = 1, song = fakeSongs[0])
+        viewModel.selectSong(position = 2, song = fakeSongs[1])
+
+        viewModel.onToneChange(position = 2, tone = "A")
+
+        assertEquals("", viewModel.repertoireRows.value.first { it.position == 1 }.tone)
+        assertEquals("A", viewModel.repertoireRows.value.first { it.position == 2 }.tone)
+    }
+
+    // endregion
+
+    // region toggleFixed
+
+    @Test
+    fun `toggleFixed sets isFixed to true when row has a selected song`() = runTest {
+        viewModel.selectSong(position = 1, song = fakeSongs[0])
+        viewModel.toggleFixed(position = 1)
+        assertTrue(viewModel.repertoireRows.value.first { it.position == 1 }.isFixed)
+    }
+
+    @Test
+    fun `toggleFixed twice clears isFixed`() = runTest {
+        viewModel.selectSong(position = 1, song = fakeSongs[0])
+        viewModel.toggleFixed(position = 1)
+        viewModel.toggleFixed(position = 1)
+        assertFalse(viewModel.repertoireRows.value.first { it.position == 1 }.isFixed)
+    }
+
+    @Test
+    fun `toggleFixed is a no-op when no song is selected`() = runTest {
+        viewModel.toggleFixed(position = 1)
+        assertFalse(viewModel.repertoireRows.value.first { it.position == 1 }.isFixed)
+    }
+
     // endregion
 
     // region refreshSuggestedSongs
 
     @Test
-    fun `refreshSuggestedSongs sends fixed map built from selected rows`() = runTest {
-        val song = fakeSongs[0]
-        viewModel.selectSong(position = 1, song = song)
-        val expectedFixed = mapOf(1 to song.id)
+    fun `refreshSuggestedSongs sends only fixed rows in the fixed map`() = runTest {
+        viewModel.selectSong(position = 1, song = fakeSongs[0])
+        viewModel.toggleFixed(position = 1)
+        viewModel.selectSong(position = 2, song = fakeSongs[1]) // not fixed
+        val expectedFixed = mapOf(1 to fakeSongs[0].id)
 
         viewModel.refreshSuggestedSongs(minDurationMs = 0L)
         advanceUntilIdle()
@@ -303,14 +433,15 @@ class SongsTableViewModelTest {
     }
 
     @Test
-    fun `refreshSuggestedSongs sends empty fixed map when no selections`() = runTest {
+    fun `refreshSuggestedSongs sends empty fixed map when nothing is fixed`() = runTest {
+        viewModel.selectSong(position = 1, song = fakeSongs[0]) // selected but not fixed
         viewModel.refreshSuggestedSongs(minDurationMs = 0L)
         advanceUntilIdle()
         coVerify { repository.refreshSuggestedSongs(emptyMap()) }
     }
 
     @Test
-    fun `refreshSuggestedSongs syncs rows from API response`() = runTest {
+    fun `refreshSuggestedSongs syncs unfixed rows from API response`() = runTest {
         every { repository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
         every { repository.observeSuggestedSongs() } returns flowOf(SnapshotState.Data(fakeSuggested))
         viewModel = SongsTableViewModel(repository)
@@ -322,6 +453,24 @@ class SongsTableViewModelTest {
         val pos1 = rows.first { it.position == 1 }
         assertEquals(fakeSongs[0], pos1.selectedSong)
         assertEquals("D", pos1.tone)
+    }
+
+    @Test
+    fun `refreshSuggestedSongs does not overwrite fixed rows`() = runTest {
+        every { repository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
+        every { repository.observeSuggestedSongs() } returns flowOf(SnapshotState.Data(fakeSuggested))
+        viewModel = SongsTableViewModel(repository)
+
+        viewModel.selectSong(position = 1, song = fakeSongs[1])
+        viewModel.toggleFixed(position = 1)
+
+        viewModel.refreshSuggestedSongs(minDurationMs = 0L)
+        advanceUntilIdle()
+
+        val pos1 = viewModel.repertoireRows.value.first { it.position == 1 }
+        assertEquals(fakeSongs[1], pos1.selectedSong)
+        assertEquals("", pos1.tone)
+        assertTrue(pos1.isFixed)
     }
 
     @Test

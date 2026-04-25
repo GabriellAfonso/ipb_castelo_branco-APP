@@ -26,7 +26,8 @@ import javax.inject.Inject
 data class RepertoireRowState(
     val position: Int,
     val selectedSong: Song? = null,
-    val tone: String = ""
+    val tone: String = "",
+    val isFixed: Boolean = false
 )
 
 @HiltViewModel
@@ -96,11 +97,48 @@ class SongsTableViewModel @Inject constructor(
     }
 
     fun selectSong(position: Int, song: Song?) {
+        val autoTone = song?.let { mostUsedToneFor(it) } ?: ""
         _repertoireRows.update { rows ->
             rows.map { row ->
-                if (row.position == position) row.copy(selectedSong = song, tone = "") else row
+                if (row.position == position) {
+                    row.copy(
+                        selectedSong = song,
+                        tone = autoTone,
+                        isFixed = if (song == null) false else row.isFixed
+                    )
+                } else row
             }
         }
+    }
+
+    fun onToneChange(position: Int, tone: String) {
+        _repertoireRows.update { rows ->
+            rows.map { row ->
+                if (row.position == position) row.copy(tone = tone) else row
+            }
+        }
+    }
+
+    fun toggleFixed(position: Int) {
+        _repertoireRows.update { rows ->
+            rows.map { row ->
+                if (row.position == position && row.selectedSong != null) {
+                    row.copy(isFixed = !row.isFixed)
+                } else row
+            }
+        }
+    }
+
+    private fun mostUsedToneFor(song: Song): String {
+        return lastSundays.value
+            .flatMap { it.songs }
+            .filter { it.title == song.title && it.artist == song.artist }
+            .takeIf { it.isNotEmpty() }
+            ?.groupingBy { it.tone }
+            ?.eachCount()
+            ?.maxByOrNull { it.value }
+            ?.key
+            .orEmpty()
     }
 
     fun refreshSuggestedSongs(minDurationMs: Long = 600L) {
@@ -110,8 +148,8 @@ class SongsTableViewModel @Inject constructor(
 
             try {
                 val fixed = _repertoireRows.value
-                    .mapNotNull { row -> row.selectedSong?.let { row.position to it.id } }
-                    .toMap()
+                    .filter { it.isFixed && it.selectedSong != null }
+                    .associate { it.position to it.selectedSong!!.id }
 
                 val refreshJob = async { repository.refreshSuggestedSongs(fixed) }
                 val minTimeJob = async { delay(minDurationMs) }
@@ -135,6 +173,7 @@ class SongsTableViewModel @Inject constructor(
 
         _repertoireRows.update { rows ->
             rows.map { row ->
+                if (row.isFixed) return@map row
                 val suggestion = suggestions.find { it.position == row.position }
                 if (suggestion != null) {
                     val song = songs.find { it.id == suggestion.songId }

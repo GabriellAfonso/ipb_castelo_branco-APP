@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -75,6 +76,8 @@ data class WorshipSongsActions(
     val onBackClick: () -> Unit,
     val onGenerateClick: () -> Unit,
     val onSongSelect: (position: Int, song: Song?) -> Unit,
+    val onToneChange: (position: Int, tone: String) -> Unit,
+    val onToggleFixed: (position: Int) -> Unit,
     val onRefreshCurrentTab: (tabIndex: Int) -> Unit = {},
 )
 
@@ -99,6 +102,8 @@ fun WorshipSongsTableScreen(
         onBackClick = onBackClick,
         onGenerateClick = viewModel::refreshSuggestedSongs,
         onSongSelect = viewModel::selectSong,
+        onToneChange = viewModel::onToneChange,
+        onToggleFixed = viewModel::toggleFixed,
         onRefreshCurrentTab = viewModel::refreshCurrentTab,
     )
 
@@ -235,13 +240,17 @@ fun WorshipSongsTableContent(
                         0 -> LastSundaysTab(sundays = state.sundays, searchQuery = searchQuery)
                         1 -> TopSongsTab(topSongs = state.topSongs)
                         2 -> TopTonesTab(topTones = state.topTones)
-                        3 -> RepertoireTab(
-                            rows = state.repertoireRows,
-                            availableSongs = state.allSongs,
-                            isRefreshing = state.isRefreshingSuggestions,
-                            onSongSelect = actions.onSongSelect,
-                            onGenerateClick = actions.onGenerateClick
-                        )
+                        3 -> DisableSelection {
+                            RepertoireTab(
+                                rows = state.repertoireRows,
+                                availableSongs = state.allSongs,
+                                isRefreshing = state.isRefreshingSuggestions,
+                                onSongSelect = actions.onSongSelect,
+                                onToneChange = actions.onToneChange,
+                                onToggleFixed = actions.onToggleFixed,
+                                onGenerateClick = actions.onGenerateClick
+                            )
+                        }
                     }
                 }
             }
