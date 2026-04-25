@@ -8,6 +8,12 @@ val localProps = Properties().apply {
     if (f.exists()) load(f.inputStream())
 }
 
+val googleClientId = localProps.getProperty("GOOGLE_CLIENT_ID", "")
+require(googleClientId.isNotBlank()) {
+    "\n\n❌ GOOGLE_CLIENT_ID não definido em local.properties.\n" +
+    "   Adicione: GOOGLE_CLIENT_ID=<web_client_id>.apps.googleusercontent.com\n"
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -33,7 +39,7 @@ extensions.configure<ApplicationExtension> {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField(
             "String", "GOOGLE_CLIENT_ID",
-            "\"${localProps.getProperty("GOOGLE_CLIENT_ID", "")}\""
+            "\"$googleClientId\""
         )
     }
 
