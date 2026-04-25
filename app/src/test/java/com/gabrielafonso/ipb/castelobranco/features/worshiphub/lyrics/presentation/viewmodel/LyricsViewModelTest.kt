@@ -58,7 +58,7 @@ class LyricsViewModelTest {
 
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Loading)
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Loading)
-        every { setlistPreferences.pinnedLyricsIds } returns flowOf(emptySet())
+        every { setlistPreferences.pinnedLyricsIds } returns flowOf(emptyList())
         coEvery { getLyricsUseCase.refresh() } returns RefreshResult.Updated
         coEvery { setlistPreferences.toggleLyrics(any()) } returns Unit
 
@@ -144,7 +144,7 @@ class LyricsViewModelTest {
     fun `uiState sorts pinned lyrics first`() = runTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        every { setlistPreferences.pinnedLyricsIds } returns flowOf(setOf(11))
+        every { setlistPreferences.pinnedLyricsIds } returns flowOf(listOf(11))
         viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
 
         subscribeAndAdvance()
@@ -152,6 +152,24 @@ class LyricsViewModelTest {
         val lyrics = viewModel.uiState.value.lyrics
         assertTrue(lyrics.first().isPinned)
         assertEquals(11, lyrics.first().id)
+    }
+
+    @Test
+    fun `uiState orders pinned lyrics by pin insertion order`() = runTest {
+        val lyrics = listOf(
+            Lyrics(id = 1, songId = 1, content = "..."),
+            Lyrics(id = 2, songId = 2, content = "..."),
+            Lyrics(id = 3, songId = 1, content = "..."),
+        )
+        every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(lyrics))
+        every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
+        every { setlistPreferences.pinnedLyricsIds } returns flowOf(listOf(3, 1))
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+
+        subscribeAndAdvance()
+
+        val result = viewModel.uiState.value.lyrics
+        assertEquals(listOf(3, 1, 2), result.map { it.id })
     }
 
     // endregion

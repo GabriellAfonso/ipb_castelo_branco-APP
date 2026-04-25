@@ -3,7 +3,6 @@ package com.ipb.castelobranco.core.data.local
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -28,8 +27,8 @@ class SetlistPreferencesTest {
     private lateinit var preferences: SetlistPreferences
 
     private val keyDate = stringPreferencesKey("setlist_date")
-    private val keyChordIds = stringSetPreferencesKey("setlist_chord_chart_ids")
-    private val keyLyricsIds = stringSetPreferencesKey("setlist_lyrics_ids")
+    private val keyChordIds = stringPreferencesKey("setlist_chord_chart_ids_v2")
+    private val keyLyricsIds = stringPreferencesKey("setlist_lyrics_ids_v2")
 
     @Before
     fun setUp() {
@@ -49,7 +48,7 @@ class SetlistPreferencesTest {
     }
 
     @Test
-    fun `pinnedChordChartIds returns empty set when no data stored`() = testScope.runTest {
+    fun `pinnedChordChartIds returns empty list when no data stored`() = testScope.runTest {
         val result = preferences.pinnedChordChartIds.first()
 
         assertTrue(result.isEmpty())
@@ -61,7 +60,7 @@ class SetlistPreferencesTest {
 
         val result = preferences.pinnedChordChartIds.first()
 
-        assertEquals(setOf(42), result)
+        assertEquals(listOf(42), result)
     }
 
     @Test
@@ -75,19 +74,54 @@ class SetlistPreferencesTest {
     }
 
     @Test
+    fun `toggleChordChart preserves pin insertion order`() = testScope.runTest {
+        preferences.toggleChordChart(3)
+        preferences.toggleChordChart(1)
+        preferences.toggleChordChart(2)
+
+        val result = preferences.pinnedChordChartIds.first()
+
+        assertEquals(listOf(3, 1, 2), result)
+    }
+
+    @Test
+    fun `toggleChordChart re-pin appends id at the end`() = testScope.runTest {
+        preferences.toggleChordChart(1)
+        preferences.toggleChordChart(2)
+        preferences.toggleChordChart(3)
+        preferences.toggleChordChart(2) // unpin
+        preferences.toggleChordChart(2) // re-pin
+
+        val result = preferences.pinnedChordChartIds.first()
+
+        assertEquals(listOf(1, 3, 2), result)
+    }
+
+    @Test
     fun `toggleLyrics adds and removes id correctly`() = testScope.runTest {
         preferences.toggleLyrics(10)
-        assertEquals(setOf(10), preferences.pinnedLyricsIds.first())
+        assertEquals(listOf(10), preferences.pinnedLyricsIds.first())
 
         preferences.toggleLyrics(10)
         assertTrue(preferences.pinnedLyricsIds.first().isEmpty())
     }
 
     @Test
-    fun `pinnedChordChartIds returns empty set when stored date differs from today`() = testScope.runTest {
+    fun `toggleLyrics preserves pin insertion order`() = testScope.runTest {
+        preferences.toggleLyrics(7)
+        preferences.toggleLyrics(4)
+        preferences.toggleLyrics(9)
+
+        val result = preferences.pinnedLyricsIds.first()
+
+        assertEquals(listOf(7, 4, 9), result)
+    }
+
+    @Test
+    fun `pinnedChordChartIds returns empty list when stored date differs from today`() = testScope.runTest {
         dataStore.edit { prefs ->
             prefs[keyDate] = "2000-01-01"
-            prefs[keyChordIds] = setOf("1", "2", "3")
+            prefs[keyChordIds] = "1,2,3"
         }
 
         val result = preferences.pinnedChordChartIds.first()
@@ -99,13 +133,13 @@ class SetlistPreferencesTest {
     fun `toggleChordChart on stale date resets all data and adds the new id`() = testScope.runTest {
         dataStore.edit { prefs ->
             prefs[keyDate] = "2000-01-01"
-            prefs[keyChordIds] = setOf("1", "2")
-            prefs[keyLyricsIds] = setOf("5", "6")
+            prefs[keyChordIds] = "1,2"
+            prefs[keyLyricsIds] = "5,6"
         }
 
         preferences.toggleChordChart(99)
 
-        assertEquals(setOf(99), preferences.pinnedChordChartIds.first())
+        assertEquals(listOf(99), preferences.pinnedChordChartIds.first())
         assertTrue(preferences.pinnedLyricsIds.first().isEmpty())
     }
 }

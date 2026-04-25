@@ -58,7 +58,7 @@ class ChordChartsViewModelTest {
 
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Loading)
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Loading)
-        every { setlistPreferences.pinnedChordChartIds } returns flowOf(emptySet())
+        every { setlistPreferences.pinnedChordChartIds } returns flowOf(emptyList())
         coEvery { getChordChartsUseCase.refresh() } returns RefreshResult.Updated
         coEvery { setlistPreferences.toggleChordChart(any()) } returns Unit
 
@@ -144,7 +144,7 @@ class ChordChartsViewModelTest {
     fun `uiState sorts pinned charts first`() = runTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        every { setlistPreferences.pinnedChordChartIds } returns flowOf(setOf(11))
+        every { setlistPreferences.pinnedChordChartIds } returns flowOf(listOf(11))
         viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
 
         subscribeAndAdvance()
@@ -152,6 +152,24 @@ class ChordChartsViewModelTest {
         val charts = viewModel.uiState.value.charts
         assertTrue(charts.first().isPinned)
         assertEquals(11, charts.first().id)
+    }
+
+    @Test
+    fun `uiState orders pinned charts by pin insertion order`() = runTest {
+        val charts = listOf(
+            ChordChart(id = 1, songId = 1, content = "...", tone = "C", instrument = "violão"),
+            ChordChart(id = 2, songId = 2, content = "...", tone = "D", instrument = "violão"),
+            ChordChart(id = 3, songId = 1, content = "...", tone = "E", instrument = "violão"),
+        )
+        every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(charts))
+        every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
+        every { setlistPreferences.pinnedChordChartIds } returns flowOf(listOf(3, 1))
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+
+        subscribeAndAdvance()
+
+        val result = viewModel.uiState.value.charts
+        assertEquals(listOf(3, 1, 2), result.map { it.id })
     }
 
     // endregion

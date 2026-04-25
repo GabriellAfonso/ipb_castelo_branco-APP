@@ -57,15 +57,16 @@ class ChordChartsViewModel @Inject constructor(
             is SnapshotState.Loading -> ChordChartsUiState(isLoading = true)
             is SnapshotState.Error   -> ChordChartsUiState(error = chartsState.throwable.message)
             is SnapshotState.Data    -> {
+                val pinOrder = pinnedIds.withIndex().associate { (index, id) -> id to index }
                 val sorted = chartsState.value.map { chart ->
                     ChordChartListItem(
                         id         = chart.id,
                         songName   = songMap[chart.songId]?.title ?: "Song #${chart.songId}",
                         tone       = chart.tone,
                         instrument = chart.instrument,
-                        isPinned   = chart.id in pinnedIds,
+                        isPinned   = chart.id in pinOrder,
                     )
-                }.sortedByDescending { it.isPinned }
+                }.sortedBy { pinOrder[it.id] ?: Int.MAX_VALUE }
 
                 val filtered = if (query.isBlank()) sorted
                 else sorted.filter { it.songName.contains(query, ignoreCase = true) }

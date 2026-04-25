@@ -4,7 +4,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.ipb.castelobranco.core.di.SetlistPrefs
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,50 +17,54 @@ class SetlistPreferences @Inject constructor(
 ) {
     private object Keys {
         val DATE            = stringPreferencesKey("setlist_date")
-        val CHORD_CHART_IDS = stringSetPreferencesKey("setlist_chord_chart_ids")
-        val LYRICS_IDS      = stringSetPreferencesKey("setlist_lyrics_ids")
+        val CHORD_CHART_IDS = stringPreferencesKey("setlist_chord_chart_ids_v2")
+        val LYRICS_IDS      = stringPreferencesKey("setlist_lyrics_ids_v2")
     }
 
     private fun today(): String =
         SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
-    val pinnedChordChartIds: Flow<Set<Int>> = dataStore.data.map { prefs ->
-        if (prefs[Keys.DATE] != today()) emptySet()
-        else prefs[Keys.CHORD_CHART_IDS].orEmpty().mapNotNull { it.toIntOrNull() }.toSet()
+    val pinnedChordChartIds: Flow<List<Int>> = dataStore.data.map { prefs ->
+        if (prefs[Keys.DATE] != today()) emptyList()
+        else prefs[Keys.CHORD_CHART_IDS].decodeIds()
     }
 
-    val pinnedLyricsIds: Flow<Set<Int>> = dataStore.data.map { prefs ->
-        if (prefs[Keys.DATE] != today()) emptySet()
-        else prefs[Keys.LYRICS_IDS].orEmpty().mapNotNull { it.toIntOrNull() }.toSet()
+    val pinnedLyricsIds: Flow<List<Int>> = dataStore.data.map { prefs ->
+        if (prefs[Keys.DATE] != today()) emptyList()
+        else prefs[Keys.LYRICS_IDS].decodeIds()
     }
 
     suspend fun toggleChordChart(id: Int) {
-        val today = today()
         dataStore.edit { prefs ->
-            if (prefs[Keys.DATE] != today) {
-                prefs[Keys.DATE]            = today
-                prefs[Keys.CHORD_CHART_IDS] = emptySet()
-                prefs[Keys.LYRICS_IDS]      = emptySet()
-            }
-            val current = prefs[Keys.CHORD_CHART_IDS].orEmpty()
-                .mapNotNull { it.toIntOrNull() }.toMutableSet()
-            if (id in current) current.remove(id) else current.add(id)
-            prefs[Keys.CHORD_CHART_IDS] = current.map { it.toString() }.toSet()
+            ensureToday(prefs)
+            val updated = prefs[Keys.CHORD_CHART_IDS].decodeIds().toggle(id)
+            prefs[Keys.CHORD_CHART_IDS] = updated.encodeIds()
         }
     }
 
     suspend fun toggleLyrics(id: Int) {
-        val today = today()
         dataStore.edit { prefs ->
-            if (prefs[Keys.DATE] != today) {
-                prefs[Keys.DATE]            = today
-                prefs[Keys.CHORD_CHART_IDS] = emptySet()
-                prefs[Keys.LYRICS_IDS]      = emptySet()
-            }
-            val current = prefs[Keys.LYRICS_IDS].orEmpty()
-                .mapNotNull { it.toIntOrNull() }.toMutableSet()
-            if (id in current) current.remove(id) else current.add(id)
-            prefs[Keys.LYRICS_IDS] = current.map { it.toString() }.toSet()
+            ensureToday(prefs)
+            val updated = prefs[Keys.LYRICS_IDS].decodeIds().toggle(id)
+            prefs[Keys.LYRICS_IDS] = updated.encodeIds()
         }
     }
+
+    private fun ensureToday(prefs: androidx.datastore.preferences.core.MutablePreferences) {
+        val today = today()
+        if (prefs[Keys.DATE] != today) {
+            prefs[Keys.DATE]            = today
+            prefs[Keys.CHORD_CHART_IDS] = ""
+            prefs[Keys.LYRICS_IDS]      = ""
+        }
+    }
+
+    private fun String?.decodeIds(): List<Int> =
+        if (isNullOrBlank()) emptyList()
+        else split(",").mapNotNull { it.toIntOrNull() }
+
+    private fun List<Int>.encodeIds(): String = joinToString(",")
+
+    private fun List<Int>.toggle(id: Int): List<Int> =
+        if (id in this) this - id else this + id
 }

@@ -57,13 +57,14 @@ class LyricsViewModel @Inject constructor(
             is SnapshotState.Loading -> LyricsUiState(isLoading = true)
             is SnapshotState.Error   -> LyricsUiState(error = lyricsState.throwable.message)
             is SnapshotState.Data    -> {
+                val pinOrder = pinnedIds.withIndex().associate { (index, id) -> id to index }
                 val sorted = lyricsState.value.map { lyrics ->
                     LyricsListItem(
                         id       = lyrics.id,
                         songName = songMap[lyrics.songId]?.title ?: "Song #${lyrics.songId}",
-                        isPinned = lyrics.id in pinnedIds,
+                        isPinned = lyrics.id in pinOrder,
                     )
-                }.sortedByDescending { it.isPinned }
+                }.sortedBy { pinOrder[it.id] ?: Int.MAX_VALUE }
 
                 val filtered = if (query.isBlank()) sorted
                 else sorted.filter { it.songName.contains(query, ignoreCase = true) }
