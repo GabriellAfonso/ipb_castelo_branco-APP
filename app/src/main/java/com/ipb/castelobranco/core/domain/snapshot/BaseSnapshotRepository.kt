@@ -37,6 +37,11 @@ abstract class BaseSnapshotRepository<Dto, Domain>(
 
     fun getCurrentState(): SnapshotState<Domain> = _state.value
 
+    suspend fun clearCache() {
+        withContext(Dispatchers.IO) { cache.clear() }
+        _state.value = SnapshotState.Loading
+    }
+
     suspend fun refresh(): RefreshResult {
         return try {
             val etag = withContext(Dispatchers.IO) { cache.loadETag() }
@@ -52,11 +57,20 @@ abstract class BaseSnapshotRepository<Dto, Domain>(
                     RefreshResult.Updated
                 }
                 is NetworkResult.Failure -> {
-                    val cached = withContext(Dispatchers.IO) { cache.load() }
-                    if (cached != null) {
-                        _state.value = SnapshotState.Data(mapper(cached))
-                        RefreshResult.CacheUsed
-                    } else RefreshResult.Error(result.throwable)
+                    if (result.throwable is HttpPermissionException) {
+                        withContext(Dispatchers.IO) { cache.clear() }
+                        _state.value = SnapshotState.Error(result.throwable)
+                        RefreshResult.Error(result.throwable)
+                    } else {
+                        val cached = withContext(Dispatchers.IO) { cache.load() }
+                        if (cached != null) {
+                            _state.value = SnapshotState.Data(mapper(cached))
+                            RefreshResult.CacheUsed
+                        } else {
+                            _state.value = SnapshotState.Error(result.throwable)
+                            RefreshResult.Error(result.throwable)
+                        }
+                    }
                 }
             }
         } catch (t: Throwable) {
