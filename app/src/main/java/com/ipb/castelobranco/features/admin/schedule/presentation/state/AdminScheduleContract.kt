@@ -6,8 +6,8 @@ import java.time.LocalDate
 
 @Immutable
 data class AdminScheduleUiState(
-    val year: Int = LocalDate.now().year,
-    val month: Int = LocalDate.now().plusMonths(1).monthValue,
+    val year: Int = defaultDate().year,
+    val month: Int = defaultDate().monthValue,
     val members: List<Member> = emptyList(),
     val isLoadingMembers: Boolean = false,
     val items: List<EditableScheduleUiState> = emptyList(),
@@ -26,6 +26,11 @@ data class AdminScheduleUiState(
             "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
             "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
         )
+
+        fun defaultDate(today: LocalDate = LocalDate.now()): LocalDate {
+            val daysUntilNextMonth = today.withDayOfMonth(1).plusMonths(1).toEpochDay() - today.toEpochDay()
+            return if (daysUntilNextMonth < 10) today.plusMonths(1) else today
+        }
     }
 }
 
