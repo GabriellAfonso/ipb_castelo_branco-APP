@@ -10,6 +10,7 @@ import com.ipb.castelobranco.features.gallery.data.local.GalleryPhotoStorage
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import org.json.JSONObject
 
 @HiltWorker
 class GalleryDownloadWorker @AssistedInject constructor(
@@ -24,7 +25,18 @@ class GalleryDownloadWorker @AssistedInject constructor(
         return try {
             val response = api.getAllPhotos()
             if (!response.isSuccessful) {
-                return if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
+                val errorMessage = try {
+                    val raw = response.errorBody()?.string()
+                    raw?.let { JSONObject(it).optString("detail", it) } ?: "HTTP ${response.code()}"
+                } catch (_: Exception) {
+                    "HTTP ${response.code()}"
+                }
+                val code = response.code()
+                if (code == 401 || code == 403) {
+                    return Result.failure(workDataOf(KEY_ERROR to errorMessage, KEY_ERROR_CODE to code))
+                }
+                return if (runAttemptCount < MAX_RETRIES) Result.retry()
+                else Result.failure(workDataOf(KEY_ERROR to errorMessage, KEY_ERROR_CODE to code))
             }
 
             val photos = response.body() ?: return Result.success()
@@ -68,6 +80,8 @@ class GalleryDownloadWorker @AssistedInject constructor(
         const val WORK_NAME = "gallery_auto_download"
         const val KEY_DOWNLOADED = "downloaded"
         const val KEY_TOTAL = "total"
+        const val KEY_ERROR = "error"
+        const val KEY_ERROR_CODE = "error_code"
         private const val MAX_RETRIES = 3
     }
 }

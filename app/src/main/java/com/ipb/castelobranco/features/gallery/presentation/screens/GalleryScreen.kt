@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.components.PermissionErrorPlaceholder
 import com.ipb.castelobranco.features.gallery.domain.model.Album
 import com.ipb.castelobranco.features.gallery.presentation.components.AlbumItem
 import com.ipb.castelobranco.features.gallery.presentation.navigation.GalleryNav
@@ -23,8 +24,9 @@ fun GalleryScreen(
     nav: GalleryNav,
     viewModel: GalleryViewModel,
     albums: List<Album>,
+    onNavigateToAuth: () -> Unit,
 ) {
-    GalleryContent(actions = nav, viewModel = viewModel, albums = albums)
+    GalleryContent(actions = nav, viewModel = viewModel, albums = albums, onNavigateToAuth = onNavigateToAuth)
 }
 
 @Composable
@@ -32,6 +34,7 @@ fun GalleryContent(
     viewModel: GalleryViewModel,
     actions: GalleryNav,
     albums: List<Album>,
+    onNavigateToAuth: () -> Unit = {},
 ) {
     val downloadState by viewModel.downloadState.collectAsState()
     val isOnWifi by viewModel.isOnWifi.collectAsState()
@@ -49,6 +52,7 @@ fun GalleryContent(
         ) {
             // Banner de progresso não-bloqueante (visível mesmo com álbuns na grid)
             when {
+                downloadState.error != null -> { /* tratado no bloco abaixo */ }
                 downloadState.isDownloading -> DownloadProgressBanner(downloadState)
                 downloadState.isPending && !isOnWifi -> WaitingForWifiBanner(
                     onDownloadWithMobileData = { viewModel.downloadWithMobileData() },
@@ -72,7 +76,7 @@ fun GalleryContent(
                         )
                     }
                 }
-            } else if (!downloadState.isDownloading && !downloadState.isPending) {
+            } else if (!downloadState.isDownloading) {
                 // Galeria vazia e nenhum download em andamento
                 Box(
                     modifier = Modifier
@@ -80,10 +84,22 @@ fun GalleryContent(
                         .padding(16.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    EmptyGalleryPlaceholder(
-                        error = downloadState.error,
-                        onDownloadClick = { viewModel.downloadAllPhotos() },
-                    )
+                    if (!downloadState.isResolved) {
+                        CircularProgressIndicator()
+                    } else {
+                        val errorMsg = downloadState.error
+                        if (errorMsg != null) {
+                            PermissionErrorPlaceholder(
+                                message = errorMsg,
+                                onLoginClick = onNavigateToAuth,
+                                showLoginButton = downloadState.errorCode != 403,
+                            )
+                        } else {
+                            EmptyGalleryPlaceholder(
+                                onDownloadClick = { viewModel.downloadAllPhotos() },
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -164,10 +180,10 @@ private fun WaitingForWifiBanner(onDownloadWithMobileData: () -> Unit) {
 }
 
 @Composable
-private fun EmptyGalleryPlaceholder(error: String?, onDownloadClick: () -> Unit) {
+private fun EmptyGalleryPlaceholder(onDownloadClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = error ?: "Nenhum álbum disponível localmente.",
+            text = "Nenhum álbum disponível localmente.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )

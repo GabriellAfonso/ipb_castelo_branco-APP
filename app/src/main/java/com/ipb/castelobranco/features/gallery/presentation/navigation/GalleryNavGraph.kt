@@ -31,7 +31,10 @@ object GalleryRoutes {
     fun Photo(albumId: Long, photoIndex: Int) = "Photo/$albumId/$photoIndex"
 }
 
-fun NavGraphBuilder.galleryGraph(navController: NavHostController) {
+fun NavGraphBuilder.galleryGraph(
+    navController: NavHostController,
+    onNavigateToAuth: () -> Unit,
+) {
     fun nav() = GalleryNav(
         back    = { navController.safePopBackStack() },
         toAlbum = { albumId -> navController.navigate(GalleryRoutes.Album(albumId)) },
@@ -46,7 +49,7 @@ fun NavGraphBuilder.galleryGraph(navController: NavHostController) {
             val graphEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.GALLERY_GRAPH) }
             val viewModel: GalleryViewModel = hiltViewModel(graphEntry)
             val albums by viewModel.albums.collectAsState()
-            GalleryScreen(nav = nav(), viewModel = viewModel, albums = albums)
+            GalleryScreen(nav = nav(), viewModel = viewModel, albums = albums, onNavigateToAuth = onNavigateToAuth)
         }
 
         composable(

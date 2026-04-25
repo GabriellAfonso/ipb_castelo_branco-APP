@@ -24,6 +24,8 @@ data class GalleryDownloadState(
     val downloaded: Int = 0,
     val total: Int = 0,
     val error: String? = null,
+    val errorCode: Int? = null,
+    val isResolved: Boolean = false,
 )
 
 @HiltViewModel
@@ -48,11 +50,16 @@ class GalleryViewModel @Inject constructor(
                 WorkInfo.State.RUNNING -> {
                     val done = info.progress.getInt(GalleryDownloadWorker.KEY_DOWNLOADED, 0)
                     val total = info.progress.getInt(GalleryDownloadWorker.KEY_TOTAL, 0)
-                    GalleryDownloadState(isDownloading = true, downloaded = done, total = total)
+                    GalleryDownloadState(isDownloading = true, downloaded = done, total = total, isResolved = true)
                 }
-                WorkInfo.State.ENQUEUED -> GalleryDownloadState(isPending = true)
-                WorkInfo.State.FAILED -> GalleryDownloadState(error = "Falha ao baixar galeria")
-                else -> GalleryDownloadState()
+                WorkInfo.State.ENQUEUED -> GalleryDownloadState(isPending = true, isResolved = true)
+                WorkInfo.State.FAILED -> {
+                    val errorMsg = info.outputData.getString(GalleryDownloadWorker.KEY_ERROR)
+                        ?: "Falha ao baixar galeria"
+                    val code = info.outputData.getInt(GalleryDownloadWorker.KEY_ERROR_CODE, 0)
+                    GalleryDownloadState(error = errorMsg, errorCode = code.takeIf { it != 0 }, isResolved = true)
+                }
+                else -> GalleryDownloadState(isResolved = true)
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GalleryDownloadState())

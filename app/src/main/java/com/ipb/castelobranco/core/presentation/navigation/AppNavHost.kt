@@ -69,7 +69,10 @@ fun AppNavHost(navController: NavHostController) {
 
             adminGraph(navController)
             worshipHubGraph(navController)
-            galleryGraph(navController)
+            galleryGraph(
+                navController = navController,
+                onNavigateToAuth = { navController.navigate(AppRoutes.AUTH_GRAPH) },
+            )
             hymnalGraph(navController)
 
             composable(AppRoutes.SCHEDULE) {
@@ -82,6 +85,7 @@ fun AppNavHost(navController: NavHostController) {
                         }
                         context.startActivity(Intent.createChooser(intent, "Compartilhar"))
                     },
+                    onNavigateToAuth = { navController.navigate(AppRoutes.AUTH_GRAPH) },
                 )
             }
 
