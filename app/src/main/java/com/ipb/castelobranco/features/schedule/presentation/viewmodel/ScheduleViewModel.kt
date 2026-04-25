@@ -2,6 +2,7 @@ package com.ipb.castelobranco.features.schedule.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.snapshot.logTime
 import com.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
@@ -22,7 +23,7 @@ sealed interface ScheduleUiState {
         val sections: List<ScheduleSectionUi>,
         val data: MonthSchedule
     ) : ScheduleUiState
-    // Dica: Adicione um 'data class Error(val message: String) : ScheduleUiState' aqui se quiser mostrar na tela
+    data class Error(val message: String, val httpCode: Int? = null) : ScheduleUiState
 }
 
 @HiltViewModel
@@ -116,7 +117,13 @@ class ScheduleViewModel @Inject constructor(
 
             is SnapshotState.Loading -> ScheduleUiState.Loading
 
-            else -> ScheduleUiState.Empty
+            is SnapshotState.Error -> {
+                val code = (snapshot.throwable as? HttpPermissionException)?.code
+                ScheduleUiState.Error(
+                    message = snapshot.throwable.message ?: "Erro desconhecido",
+                    httpCode = code,
+                )
+            }
         }
     }
 }

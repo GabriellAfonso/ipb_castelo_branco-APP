@@ -26,6 +26,7 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
     import com.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
     import com.ipb.castelobranco.features.schedule.presentation.components.MonthScheduleTable
     import com.ipb.castelobranco.features.schedule.presentation.components.ScheduleSectionUi
+    import com.ipb.castelobranco.core.presentation.components.PermissionErrorPlaceholder
     import com.ipb.castelobranco.features.schedule.presentation.viewmodel.ScheduleUiState
     import com.ipb.castelobranco.features.schedule.presentation.viewmodel.ScheduleViewModel
 
@@ -41,7 +42,8 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
     fun MonthScheduleScreen(
         viewModel: ScheduleViewModel = hiltViewModel(),
         onBackClick: () -> Unit,
-        onShare: (String) -> Unit
+        onShare: (String) -> Unit,
+        onNavigateToAuth: () -> Unit,
     ) {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -51,7 +53,8 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refreshMonthSchedule() },
             onShare = onShare,
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
+            onNavigateToAuth = onNavigateToAuth,
         )
     }
     @Composable
@@ -60,7 +63,8 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
         isRefreshing: Boolean,
         onRefresh: () -> Unit,
         onShare: (String) -> Unit,
-        onBackClick: () -> Unit
+        onBackClick: () -> Unit,
+        onNavigateToAuth: () -> Unit = {},
     ) {
         BaseScreen(
             tabName = "Escala",
@@ -93,6 +97,15 @@ package com.ipb.castelobranco.features.schedule.presentation.screens
                             sections = uiState.sections,
                             monthSchedule = uiState.data,
                             onShare = onShare
+                        )
+                    }
+
+                    is ScheduleUiState.Error -> {
+                        PermissionErrorPlaceholder(
+                            message = uiState.message,
+                            onLoginClick = onNavigateToAuth,
+                            modifier = Modifier.align(Alignment.Center),
+                            showLoginButton = uiState.httpCode != 403,
                         )
                     }
                 }

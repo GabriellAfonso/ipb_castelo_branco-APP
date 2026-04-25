@@ -7,6 +7,7 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
+import com.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
 import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,7 @@ class CoreViewModel @Inject constructor(
     private val authEventBus: AuthEventBus,
     private val logoutUseCase: LogoutUseCase,
     private val galleryAutoDownload: GalleryAutoDownloadUseCase,
+    private val scheduleRepository: ScheduleRepository,
 ) : ViewModel() {
 
     sealed interface CoreEvent {
@@ -109,6 +111,7 @@ class CoreViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             fetchProfileUseCase.clearLocalPhoto()
+            scheduleRepository.clearScheduleCache()
             logoutUseCase()
             _events.trySend(CoreEvent.LogoutSuccess)
         }

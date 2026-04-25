@@ -34,4 +34,6 @@ class ScheduleRepositoryImpl @Inject constructor(
     // preload() is inherited from BaseSnapshotRepository
 
     override suspend fun refreshMonthSchedule(): RefreshResult = refresh()
+
+    override suspend fun clearScheduleCache() = clearCache()
 }

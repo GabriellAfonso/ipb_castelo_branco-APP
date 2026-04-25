@@ -16,4 +16,6 @@ interface ScheduleRepository {
     suspend fun preload()
 
     suspend fun refreshMonthSchedule(): RefreshResult
+
+    suspend fun clearScheduleCache()
 }

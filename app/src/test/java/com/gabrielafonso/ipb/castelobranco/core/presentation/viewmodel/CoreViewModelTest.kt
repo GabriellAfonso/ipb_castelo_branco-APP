@@ -8,6 +8,7 @@ import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
 import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
 import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
+import com.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
 import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -44,6 +45,7 @@ class CoreViewModelTest {
     private lateinit var authEventBus: AuthEventBus
     private lateinit var logoutUseCase: LogoutUseCase
     private lateinit var galleryAutoDownload: GalleryAutoDownloadUseCase
+    private lateinit var scheduleRepository: ScheduleRepository
     private lateinit var viewModel: CoreViewModel
 
     private val authEventsFlow = MutableSharedFlow<AuthEventBus.Event>()
@@ -66,8 +68,10 @@ class CoreViewModelTest {
         authEventBus = mockk()
         logoutUseCase = mockk()
         galleryAutoDownload = mockk()
+        scheduleRepository = mockk()
 
         coEvery { preloadDataUseCase() } just runs
+        coEvery { scheduleRepository.clearScheduleCache() } just runs
         every { authSession.isLoggedInFlow } returns emptyFlow()
         coEvery { authSession.isLoggedIn() } returns false
         every { authEventBus.events } returns authEventsFlow
@@ -84,7 +88,8 @@ class CoreViewModelTest {
             fetchProfileUseCase,
             authEventBus,
             logoutUseCase,
-            galleryAutoDownload
+            galleryAutoDownload,
+            scheduleRepository
         )
     }
 
@@ -295,11 +300,14 @@ class CoreViewModelTest {
     }
 
     @Test
-    fun `logout clears photo before calling logoutUseCase`() = runTest {
+    fun `logout clears photo and schedule cache before calling logoutUseCase`() = runTest {
         val order = mutableListOf<String>()
         coEvery { fetchProfileUseCase.clearLocalPhoto() } coAnswers {
             order.add("clearPhoto")
             Result.success(Unit)
+        }
+        coEvery { scheduleRepository.clearScheduleCache() } coAnswers {
+            order.add("clearSchedule")
         }
         coEvery { logoutUseCase() } coAnswers {
             order.add("logout")
@@ -308,7 +316,7 @@ class CoreViewModelTest {
         viewModel.logout()
         advanceUntilIdle()
 
-        assertEquals(listOf("clearPhoto", "logout"), order)
+        assertEquals(listOf("clearPhoto", "clearSchedule", "logout"), order)
     }
 
     // endregion
