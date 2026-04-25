@@ -14,7 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +38,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
 import kotlin.math.roundToInt
+import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.presentation.modifier.tapToPaginate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,12 +60,20 @@ fun ChordChartDetailScreen(
     onBackClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    ChordChartDetailContent(state = state, onBackClick = onBackClick)
+    val scrollMode by viewModel.scrollMode.collectAsStateWithLifecycle()
+    ChordChartDetailContent(
+        state          = state,
+        scrollMode     = scrollMode,
+        onToggleScroll = viewModel::toggleScrollMode,
+        onBackClick    = onBackClick,
+    )
 }
 
 @Composable
 private fun ChordChartDetailContent(
     state: ChordChartDetailUiState,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     BaseScreen(
@@ -70,10 +86,19 @@ private fun ChordChartDetailContent(
             state.isLoading        -> LoadingState(Modifier.padding(innerPadding))
             state.error != null    -> ErrorState(state.error, Modifier.padding(innerPadding))
             state.blocks.isEmpty() -> ErrorState("No content available", Modifier.padding(innerPadding))
+            scrollMode == SongScrollMode.VERTICAL -> ChordVerticalContent(
+                blocks         = state.blocks,
+                tone           = state.tone,
+                scrollMode     = scrollMode,
+                onToggleScroll = onToggleScroll,
+                modifier       = Modifier.padding(innerPadding),
+            )
             else -> ChordPager(
-                blocks   = state.blocks,
-                tone     = state.tone,
-                modifier = Modifier.padding(innerPadding),
+                blocks         = state.blocks,
+                tone           = state.tone,
+                scrollMode     = scrollMode,
+                onToggleScroll = onToggleScroll,
+                modifier       = Modifier.padding(innerPadding),
             )
         }
     }
@@ -88,6 +113,8 @@ private fun ChordChartDetailContent(
 private fun ChordPager(
     blocks: List<ChordBlock>,
     tone: String,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SubcomposeLayout(modifier = modifier.fillMaxSize()) { constraints ->
@@ -112,7 +139,12 @@ private fun ChordPager(
 
         // Phase 2: measure chrome (header + dots) to determine pager area height
         val headerHeight = subcompose("chrome_header") {
-            PagerHeader(tone = tone, currentPage = 0, pageCount = 1)
+            PagerHeader(
+                tone           = tone,
+                pageInfo       = "1 / 1",
+                scrollMode     = scrollMode,
+                onToggleScroll = {},
+            )
         }.first().measure(Constraints(maxWidth = constraints.maxWidth)).height
 
         val dotsHeight = subcompose("chrome_dots") {
@@ -130,7 +162,12 @@ private fun ChordPager(
 
         // Phase 4: render the full pager — pagerState lives inside this subcomposition
         val contentPlaceable = subcompose("pager") {
-            PagerContent(pages = pages, tone = tone)
+            PagerContent(
+                pages          = pages,
+                tone           = tone,
+                scrollMode     = scrollMode,
+                onToggleScroll = onToggleScroll,
+            )
         }.first().measure(constraints)
 
         layout(constraints.maxWidth, constraints.maxHeight) {
@@ -143,15 +180,18 @@ private fun ChordPager(
 private fun PagerContent(
     pages: List<List<ChordBlock>>,
     tone: String,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize()) {
         PagerHeader(
-            tone        = tone,
-            currentPage = pagerState.currentPage,
-            pageCount   = pages.size,
+            tone           = tone,
+            pageInfo       = "${pagerState.currentPage + 1} / ${pages.size}",
+            scrollMode     = scrollMode,
+            onToggleScroll = onToggleScroll,
         )
 
         Box(
@@ -179,11 +219,47 @@ private fun PagerContent(
 }
 
 @Composable
-private fun PagerHeader(tone: String, currentPage: Int, pageCount: Int) {
+private fun ChordVerticalContent(
+    blocks: List<ChordBlock>,
+    tone: String,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        PagerHeader(
+            tone           = tone,
+            pageInfo       = null,
+            scrollMode     = scrollMode,
+            onToggleScroll = onToggleScroll,
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+        ) {
+            blocks.forEachIndexed { index, block ->
+                if (index > 0) Spacer(modifier = Modifier.height(16.dp))
+                if (block.isIntro) IntroBlock(block) else SectionBlock(block)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PagerHeader(
+    tone: String,
+    pageInfo: String?,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
+) {
     Row(
         modifier              = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment     = Alignment.CenterVertically,
     ) {
@@ -193,10 +269,31 @@ private fun PagerHeader(tone: String, currentPage: Int, pageCount: Int) {
             color      = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,
         )
-        Text(
-            text  = "${currentPage + 1} / $pageCount",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (pageInfo != null) {
+                Text(
+                    text  = pageInfo,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            ScrollModeToggle(scrollMode = scrollMode, onToggle = onToggleScroll)
+        }
+    }
+}
+
+@Composable
+private fun ScrollModeToggle(scrollMode: SongScrollMode, onToggle: () -> Unit) {
+    val (icon, description) = when (scrollMode) {
+        SongScrollMode.HORIZONTAL -> Icons.AutoMirrored.Filled.ViewList to "Modo vertical"
+        SongScrollMode.VERTICAL   -> Icons.Filled.ViewColumn to "Modo horizontal"
+    }
+    IconButton(onClick = onToggle) {
+        Icon(
+            imageVector        = icon,
+            contentDescription = description,
+            tint               = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

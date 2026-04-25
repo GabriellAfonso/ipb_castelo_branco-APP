@@ -3,6 +3,8 @@ package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ipb.castelobranco.core.data.local.SongScrollMode
+import com.ipb.castelobranco.core.data.local.ThemePreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.parser.LyricsParser
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,6 +23,7 @@ class LyricsDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getLyricsUseCase: GetLyricsUseCase,
     private val songsRepository: SongsRepository,
+    private val themePreferences: ThemePreferences,
 ) : ViewModel() {
 
     private val lyricsId: Int = checkNotNull(savedStateHandle["lyricsId"])
@@ -50,4 +54,20 @@ class LyricsDetailViewModel @Inject constructor(
         started      = SharingStarted.WhileSubscribed(5_000),
         initialValue = LyricsDetailUiState(isLoading = true),
     )
+
+    val scrollMode: StateFlow<SongScrollMode> = themePreferences.songScrollModeFlow.stateIn(
+        scope        = viewModelScope,
+        started      = SharingStarted.WhileSubscribed(5_000),
+        initialValue = SongScrollMode.HORIZONTAL,
+    )
+
+    fun toggleScrollMode() {
+        viewModelScope.launch {
+            val next = when (scrollMode.value) {
+                SongScrollMode.HORIZONTAL -> SongScrollMode.VERTICAL
+                SongScrollMode.VERTICAL   -> SongScrollMode.HORIZONTAL
+            }
+            themePreferences.setSongScrollMode(next)
+        }
+    }
 }

@@ -12,7 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,6 +34,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
+import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.core.presentation.modifier.tapToPaginate
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.parser.LyricsStanza
@@ -42,12 +50,20 @@ fun LyricsDetailScreen(
     onBackClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    LyricsDetailContent(state = state, onBackClick = onBackClick)
+    val scrollMode by viewModel.scrollMode.collectAsStateWithLifecycle()
+    LyricsDetailContent(
+        state          = state,
+        scrollMode     = scrollMode,
+        onToggleScroll = viewModel::toggleScrollMode,
+        onBackClick    = onBackClick,
+    )
 }
 
 @Composable
 private fun LyricsDetailContent(
     state: LyricsDetailUiState,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     BaseScreen(
@@ -60,10 +76,19 @@ private fun LyricsDetailContent(
             state.isLoading          -> LoadingState(Modifier.padding(innerPadding))
             state.error != null      -> ErrorState(state.error, Modifier.padding(innerPadding))
             state.stanzas.isEmpty()  -> ErrorState("No content available", Modifier.padding(innerPadding))
+            scrollMode == SongScrollMode.VERTICAL -> LyricsVerticalContent(
+                stanzas        = state.stanzas,
+                songName       = state.songName,
+                scrollMode     = scrollMode,
+                onToggleScroll = onToggleScroll,
+                modifier       = Modifier.padding(innerPadding),
+            )
             else -> LyricsPager(
-                stanzas  = state.stanzas,
-                songName = state.songName,
-                modifier = Modifier.padding(innerPadding),
+                stanzas        = state.stanzas,
+                songName       = state.songName,
+                scrollMode     = scrollMode,
+                onToggleScroll = onToggleScroll,
+                modifier       = Modifier.padding(innerPadding),
             )
         }
     }
@@ -77,6 +102,8 @@ private fun LyricsDetailContent(
 private fun LyricsPager(
     stanzas: List<LyricsStanza>,
     songName: String,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SubcomposeLayout(modifier = modifier.fillMaxSize()) { constraints ->
@@ -94,10 +121,10 @@ private fun LyricsPager(
                 ?.height ?: 0
         }
 
-        // Phase 2: measure chrome (song title + dots) for available height calculation
-        val titleHeight = subcompose("chrome_title") {
-            if (songName.isNotEmpty()) SongTitle(songName)
-        }.firstOrNull()?.measure(Constraints(maxWidth = constraints.maxWidth))?.height ?: 0
+        // Phase 2: measure chrome (header + dots) for available height calculation
+        val headerHeight = subcompose("chrome_header") {
+            LyricsHeader(songName = songName, scrollMode = scrollMode, onToggleScroll = {})
+        }.first().measure(Constraints(maxWidth = constraints.maxWidth)).height
 
         val dotsHeight = subcompose("chrome_dots") {
             PageDotIndicator(
@@ -108,13 +135,18 @@ private fun LyricsPager(
         }.first().measure(Constraints(maxWidth = constraints.maxWidth)).height
 
         // Phase 3: compute pages
-        val availableForStanzas = (constraints.maxHeight - titleHeight - dotsHeight - vPaddingPx)
+        val availableForStanzas = (constraints.maxHeight - headerHeight - dotsHeight - vPaddingPx)
             .coerceAtLeast(1)
         val pages = paginate(stanzas, stanzaHeights, availableForStanzas, stanzaSpacingPx)
 
         // Phase 4: render full pager — pagerState lives inside this subcomposition
         val contentPlaceable = subcompose("pager") {
-            PagerContent(pages = pages, songName = songName)
+            PagerContent(
+                pages          = pages,
+                songName       = songName,
+                scrollMode     = scrollMode,
+                onToggleScroll = onToggleScroll,
+            )
         }.first().measure(constraints)
 
         layout(constraints.maxWidth, constraints.maxHeight) {
@@ -155,12 +187,14 @@ private fun paginate(
 private fun PagerContent(
     pages: List<List<LyricsStanza>>,
     songName: String,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope      = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (songName.isNotEmpty()) SongTitle(songName)
+        LyricsHeader(songName = songName, scrollMode = scrollMode, onToggleScroll = onToggleScroll)
 
         Box(
             modifier = Modifier
@@ -187,13 +221,68 @@ private fun PagerContent(
 }
 
 @Composable
-private fun SongTitle(name: String) {
-    Text(
-        text     = name,
-        color    = TitleColor,
-        style    = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-    )
+private fun LyricsVerticalContent(
+    stanzas: List<LyricsStanza>,
+    songName: String,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        LyricsHeader(songName = songName, scrollMode = scrollMode, onToggleScroll = onToggleScroll)
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+        ) {
+            stanzas.forEachIndexed { index, stanza ->
+                if (index > 0) Spacer(modifier = Modifier.height(16.dp))
+                StanzaBlock(stanza)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LyricsHeader(
+    songName: String,
+    scrollMode: SongScrollMode,
+    onToggleScroll: () -> Unit,
+) {
+    Row(
+        modifier          = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text     = songName,
+            color    = TitleColor,
+            style    = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+        )
+        ScrollModeToggle(scrollMode = scrollMode, onToggle = onToggleScroll)
+    }
+}
+
+@Composable
+private fun ScrollModeToggle(scrollMode: SongScrollMode, onToggle: () -> Unit) {
+    val (icon, description) = when (scrollMode) {
+        SongScrollMode.HORIZONTAL -> Icons.AutoMirrored.Filled.ViewList to "Modo vertical"
+        SongScrollMode.VERTICAL   -> Icons.Filled.ViewColumn to "Modo horizontal"
+    }
+    IconButton(onClick = onToggle) {
+        Icon(
+            imageVector        = icon,
+            contentDescription = description,
+            tint               = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }
 
 @Composable

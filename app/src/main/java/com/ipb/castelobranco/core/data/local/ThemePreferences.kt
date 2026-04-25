@@ -19,11 +19,14 @@ class ThemePreferences @Inject constructor(
         private const val MODE_FOLLOW_SYSTEM: Int = 0
         private const val MODE_LIGHT: Int = 1
         private const val MODE_DARK: Int = 2
+        private const val SCROLL_MODE_HORIZONTAL: Int = 0
+        private const val SCROLL_MODE_VERTICAL: Int = 1
         const val DEFAULT_HYMNAL_FONT_SIZE: Float = 22f
     }
 
     private val themeModeKey = intPreferencesKey("theme_mode")
     private val hymnalFontSizeKey = floatPreferencesKey("hymnal_font_size")
+    private val songScrollModeKey = intPreferencesKey("song_scroll_mode")
 
     val themeModeFlow: Flow<ThemeMode> =
         dataStore.data.map { prefs ->
@@ -57,6 +60,24 @@ class ThemePreferences @Inject constructor(
     suspend fun setHymnalFontSize(size: Float) {
         dataStore.edit { prefs ->
             prefs[hymnalFontSizeKey] = size
+        }
+    }
+
+    val songScrollModeFlow: Flow<SongScrollMode> =
+        dataStore.data.map { prefs ->
+            when (prefs[songScrollModeKey] ?: SCROLL_MODE_HORIZONTAL) {
+                SCROLL_MODE_VERTICAL -> SongScrollMode.VERTICAL
+                else -> SongScrollMode.HORIZONTAL
+            }
+        }
+
+    suspend fun setSongScrollMode(mode: SongScrollMode) {
+        val persisted = when (mode) {
+            SongScrollMode.HORIZONTAL -> SCROLL_MODE_HORIZONTAL
+            SongScrollMode.VERTICAL -> SCROLL_MODE_VERTICAL
+        }
+        dataStore.edit { prefs ->
+            prefs[songScrollModeKey] = persisted
         }
     }
 }
