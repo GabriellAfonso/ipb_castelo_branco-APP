@@ -4,6 +4,7 @@ import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleItem
 import com.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
 import com.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleEvent
+import com.ipb.castelobranco.features.admin.schedule.presentation.state.SaveResult
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -53,6 +54,21 @@ class AdminScheduleViewModelTest {
         Dispatchers.resetMain()
     }
 
+    // region init
+
+    @Test
+    fun `init populates skeleton items for default month`() {
+        assertTrue(viewModel.uiState.value.items.isNotEmpty())
+        assertTrue(viewModel.uiState.value.items.all { it.selectedMember == null })
+    }
+
+    @Test
+    fun `init does not mark unsaved changes`() {
+        assertFalse(viewModel.uiState.value.hasUnsavedChanges)
+    }
+
+    // endregion
+
     // region generateSchedule
 
     @Test
@@ -81,6 +97,16 @@ class AdminScheduleViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isGenerating)
+    }
+
+    @Test
+    fun `generateSchedule success marks unsaved changes`() = runTest {
+        coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
+
+        viewModel.onEvent(AdminScheduleEvent.GenerateSchedule)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.hasUnsavedChanges)
     }
 
     @Test
@@ -150,7 +176,7 @@ class AdminScheduleViewModelTest {
     }
 
     @Test
-    fun `saveSchedule success sets success snackbar message and clears isSaving`() = runTest {
+    fun `saveSchedule success sets Success saveResult and clears unsaved changes`() = runTest {
         coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
         coEvery { repository.saveSchedule(any(), any(), any()) } returns Result.success(Unit)
 
@@ -159,12 +185,14 @@ class AdminScheduleViewModelTest {
         viewModel.onEvent(AdminScheduleEvent.SaveSchedule)
         advanceUntilIdle()
 
-        assertEquals("Escala salva com sucesso.", viewModel.uiState.value.snackbarMessage)
+        assertEquals(SaveResult.Success, viewModel.uiState.value.saveResult)
         assertFalse(viewModel.uiState.value.isSaving)
+        assertFalse(viewModel.uiState.value.hasUnsavedChanges)
+        assertNull(viewModel.uiState.value.snackbarMessage)
     }
 
     @Test
-    fun `saveSchedule failure sets error message from exception`() = runTest {
+    fun `saveSchedule failure sets Error saveResult with message from exception`() = runTest {
         coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
         coEvery { repository.saveSchedule(any(), any(), any()) } returns
             Result.failure(Exception("Escala já existe"))
@@ -174,7 +202,7 @@ class AdminScheduleViewModelTest {
         viewModel.onEvent(AdminScheduleEvent.SaveSchedule)
         advanceUntilIdle()
 
-        assertEquals("Escala já existe", viewModel.uiState.value.snackbarMessage)
+        assertEquals(SaveResult.Error("Escala já existe"), viewModel.uiState.value.saveResult)
         assertFalse(viewModel.uiState.value.isSaving)
     }
 
@@ -189,15 +217,21 @@ class AdminScheduleViewModelTest {
         viewModel.onEvent(AdminScheduleEvent.SaveSchedule)
         advanceUntilIdle()
 
-        assertEquals("Falha ao salvar escala.", viewModel.uiState.value.snackbarMessage)
+        assertEquals(SaveResult.Error("Falha ao salvar escala."), viewModel.uiState.value.saveResult)
     }
 
     @Test
-    fun `saveSchedule does not call repository when items list is empty`() = runTest {
+    fun `saveSchedule failure does not clear unsaved changes`() = runTest {
+        coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
+        coEvery { repository.saveSchedule(any(), any(), any()) } returns
+            Result.failure(Exception("boom"))
+
+        viewModel.onEvent(AdminScheduleEvent.GenerateSchedule)
+        advanceUntilIdle()
         viewModel.onEvent(AdminScheduleEvent.SaveSchedule)
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { repository.saveSchedule(any(), any(), any()) }
+        assertTrue(viewModel.uiState.value.hasUnsavedChanges)
     }
 
     @Test
@@ -212,6 +246,24 @@ class AdminScheduleViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 0) { repository.saveSchedule(any(), any(), any()) }
+    }
+
+    // endregion
+
+    // region SaveResultDismissed
+
+    @Test
+    fun `SaveResultDismissed clears saveResult`() = runTest {
+        coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
+        coEvery { repository.saveSchedule(any(), any(), any()) } returns Result.success(Unit)
+        viewModel.onEvent(AdminScheduleEvent.GenerateSchedule)
+        advanceUntilIdle()
+        viewModel.onEvent(AdminScheduleEvent.SaveSchedule)
+        advanceUntilIdle()
+
+        viewModel.onEvent(AdminScheduleEvent.SaveResultDismissed)
+
+        assertNull(viewModel.uiState.value.saveResult)
     }
 
     // endregion
@@ -234,17 +286,20 @@ class AdminScheduleViewModelTest {
     }
 
     @Test
-    fun `selectMember on first item does not affect other items`() = runTest {
-        val item2 = scheduleItem.copy(date = "2026-04-08", selectedMember = member2)
-        coEvery { repository.generateSchedule(any(), any()) } returns
-            Result.success(listOf(scheduleItem, item2))
-
-        viewModel.onEvent(AdminScheduleEvent.GenerateSchedule)
+    fun `selectMember marks unsaved changes`() = runTest {
+        coEvery { repository.saveSchedule(any(), any(), any()) } returns Result.success(Unit)
+        // Saving once to clear hasUnsavedChanges (skeleton is populated by init).
+        // Fill all skeleton items so canSave becomes true.
+        viewModel.uiState.value.items.forEachIndexed { idx, _ ->
+            viewModel.onEvent(AdminScheduleEvent.MemberSelected(idx, member1))
+        }
+        viewModel.onEvent(AdminScheduleEvent.SaveSchedule)
         advanceUntilIdle()
-        viewModel.onEvent(AdminScheduleEvent.MemberSelected(itemIndex = 0, member = member2))
+        assertFalse(viewModel.uiState.value.hasUnsavedChanges)
 
-        assertEquals(member2, viewModel.uiState.value.items[0].selectedMember)
-        assertEquals(member2, viewModel.uiState.value.items[1].selectedMember) // unchanged
+        viewModel.onEvent(AdminScheduleEvent.MemberSelected(0, member2))
+
+        assertTrue(viewModel.uiState.value.hasUnsavedChanges)
     }
 
     // endregion
@@ -260,14 +315,28 @@ class AdminScheduleViewModelTest {
     }
 
     @Test
-    fun `changeMonth clears items list`() = runTest {
+    fun `changeMonth repopulates skeleton with empty members`() = runTest {
         coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
         viewModel.onEvent(AdminScheduleEvent.GenerateSchedule)
         advanceUntilIdle()
 
         viewModel.onEvent(AdminScheduleEvent.MonthChanged(2027, 3))
 
-        assertTrue(viewModel.uiState.value.items.isEmpty())
+        val items = viewModel.uiState.value.items
+        assertTrue(items.isNotEmpty())
+        assertTrue(items.all { it.selectedMember == null })
+    }
+
+    @Test
+    fun `changeMonth resets unsaved changes`() = runTest {
+        coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
+        viewModel.onEvent(AdminScheduleEvent.GenerateSchedule)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.hasUnsavedChanges)
+
+        viewModel.onEvent(AdminScheduleEvent.MonthChanged(2027, 3))
+
+        assertFalse(viewModel.uiState.value.hasUnsavedChanges)
     }
 
     // endregion
