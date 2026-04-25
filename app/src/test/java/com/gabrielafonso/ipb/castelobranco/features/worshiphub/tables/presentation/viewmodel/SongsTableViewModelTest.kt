@@ -249,30 +249,41 @@ class SongsTableViewModelTest {
 
     // endregion
 
-    // region toggleFixed
+    // region selectSong
 
     @Test
-    fun `toggleFixed adds song to fixedByPosition when not present`() = runTest {
-        val song = fakeSuggested[0]
-        viewModel.toggleFixed(song)
-        assertEquals(mapOf(song.position to song.id), viewModel.fixedByPosition.value)
+    fun `repertoireRows starts with 4 empty rows`() = runTest {
+        val rows = viewModel.repertoireRows.value
+        assertEquals(4, rows.size)
+        assertEquals(listOf(1, 2, 3, 4), rows.map { it.position })
+        assertTrue(rows.all { it.selectedSong == null && it.tone.isBlank() })
     }
 
     @Test
-    fun `toggleFixed removes song from fixedByPosition when already present`() = runTest {
-        val song = fakeSuggested[0]
-        viewModel.toggleFixed(song)
-        viewModel.toggleFixed(song)
-        assertTrue(viewModel.fixedByPosition.value.isEmpty())
+    fun `selectSong sets the song at the given position`() = runTest {
+        val song = fakeSongs[0]
+        viewModel.selectSong(position = 1, song = song)
+        val rows = viewModel.repertoireRows.value
+        assertEquals(song, rows.first { it.position == 1 }.selectedSong)
     }
 
     @Test
-    fun `toggleFixed replaces position when different song is at same position`() = runTest {
-        val song1 = fakeSuggested[0]
-        val song2 = song1.copy(id = 99)
-        viewModel.toggleFixed(song1)
-        viewModel.toggleFixed(song2)
-        assertEquals(mapOf(song1.position to song2.id), viewModel.fixedByPosition.value)
+    fun `selectSong with null clears the song at the given position`() = runTest {
+        val song = fakeSongs[0]
+        viewModel.selectSong(position = 1, song = song)
+        viewModel.selectSong(position = 1, song = null)
+        assertEquals(null, viewModel.repertoireRows.value.first { it.position == 1 }.selectedSong)
+    }
+
+    @Test
+    fun `selectSong only affects the targeted position`() = runTest {
+        val song = fakeSongs[0]
+        viewModel.selectSong(position = 2, song = song)
+        val rows = viewModel.repertoireRows.value
+        assertEquals(null, rows.first { it.position == 1 }.selectedSong)
+        assertEquals(song, rows.first { it.position == 2 }.selectedSong)
+        assertEquals(null, rows.first { it.position == 3 }.selectedSong)
+        assertEquals(null, rows.first { it.position == 4 }.selectedSong)
     }
 
     // endregion
@@ -280,15 +291,37 @@ class SongsTableViewModelTest {
     // region refreshSuggestedSongs
 
     @Test
-    fun `refreshSuggestedSongs calls repository with current fixedByPosition`() = runTest {
-        val song = fakeSuggested[0]
-        viewModel.toggleFixed(song)
-        val expectedFixed = mapOf(song.position to song.id)
+    fun `refreshSuggestedSongs sends fixed map built from selected rows`() = runTest {
+        val song = fakeSongs[0]
+        viewModel.selectSong(position = 1, song = song)
+        val expectedFixed = mapOf(1 to song.id)
 
         viewModel.refreshSuggestedSongs(minDurationMs = 0L)
         advanceUntilIdle()
 
         coVerify { repository.refreshSuggestedSongs(expectedFixed) }
+    }
+
+    @Test
+    fun `refreshSuggestedSongs sends empty fixed map when no selections`() = runTest {
+        viewModel.refreshSuggestedSongs(minDurationMs = 0L)
+        advanceUntilIdle()
+        coVerify { repository.refreshSuggestedSongs(emptyMap()) }
+    }
+
+    @Test
+    fun `refreshSuggestedSongs syncs rows from API response`() = runTest {
+        every { repository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
+        every { repository.observeSuggestedSongs() } returns flowOf(SnapshotState.Data(fakeSuggested))
+        viewModel = SongsTableViewModel(repository)
+
+        viewModel.refreshSuggestedSongs(minDurationMs = 0L)
+        advanceUntilIdle()
+
+        val rows = viewModel.repertoireRows.value
+        val pos1 = rows.first { it.position == 1 }
+        assertEquals(fakeSongs[0], pos1.selectedSong)
+        assertEquals("D", pos1.tone)
     }
 
     @Test
@@ -319,6 +352,13 @@ class SongsTableViewModelTest {
         viewModel.initialize()
         advanceUntilIdle()
         coVerify(atLeast = 1) { repository.refreshSongsBySunday() }
+    }
+
+    @Test
+    fun `initialize calls refreshAllSongs to populate dropdowns`() = runTest {
+        viewModel.initialize()
+        advanceUntilIdle()
+        coVerify(atLeast = 1) { repository.refreshAllSongs() }
     }
 
     // endregion

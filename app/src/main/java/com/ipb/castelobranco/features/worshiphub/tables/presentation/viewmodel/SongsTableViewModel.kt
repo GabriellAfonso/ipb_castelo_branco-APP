@@ -16,10 +16,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class RepertoireRowState(
+    val position: Int,
+    val selectedSong: Song? = null,
+    val tone: String = ""
+)
 
 @HiltViewModel
 class SongsTableViewModel @Inject constructor(
@@ -57,7 +65,7 @@ class SongsTableViewModel @Inject constructor(
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     fun refreshCurrentTab(tabIndex: Int, minDurationMs: Long = 600L) {
-        if (tabIndex == 3) return // Sugestões has its own refresh button
+        if (tabIndex == 3) return // Repertório has its own generate button
         if (_isRefreshing.value) return
         viewModelScope.launch {
             _isRefreshing.value = true
@@ -75,23 +83,24 @@ class SongsTableViewModel @Inject constructor(
         }
     }
 
-    private val _fixedByPosition = MutableStateFlow<Map<Int, Int>>(emptyMap())
-    val fixedByPosition: StateFlow<Map<Int, Int>> = _fixedByPosition.asStateFlow()
+    private val _repertoireRows = MutableStateFlow(
+        (1..4).map { RepertoireRowState(position = it) }
+    )
+    val repertoireRows: StateFlow<List<RepertoireRowState>> = _repertoireRows.asStateFlow()
 
     fun initialize() {
         viewModelScope.launch {
             runCatching { repository.refreshSongsBySunday() }
         }
+        refreshAllSongs()
     }
 
-    fun toggleFixed(song: SuggestedSong) {
-        val pos = song.position
-        val playedId = song.id
-
-        _fixedByPosition.value = _fixedByPosition.value.toMutableMap().apply {
-            val current = this[pos]
-            if (current == playedId) remove(pos) else put(pos, playedId)
-        }.toMap()
+    fun selectSong(position: Int, song: Song?) {
+        _repertoireRows.update { rows ->
+            rows.map { row ->
+                if (row.position == position) row.copy(selectedSong = song, tone = "") else row
+            }
+        }
     }
 
     fun refreshSuggestedSongs(minDurationMs: Long = 600L) {
@@ -100,16 +109,40 @@ class SongsTableViewModel @Inject constructor(
             _isRefreshingSuggestedSongs.value = true
 
             try {
-                val fixed = _fixedByPosition.value
+                val fixed = _repertoireRows.value
+                    .mapNotNull { row -> row.selectedSong?.let { row.position to it.id } }
+                    .toMap()
+
                 val refreshJob = async { repository.refreshSuggestedSongs(fixed) }
                 val minTimeJob = async { delay(minDurationMs) }
 
                 refreshJob.await()
                 minTimeJob.await()
+
+                syncRepertoireFromSuggestions()
             } catch (_: Exception) {
                 // network errors are non-fatal; the observer will surface cached data
             } finally {
                 _isRefreshingSuggestedSongs.value = false
+            }
+        }
+    }
+
+    private suspend fun syncRepertoireFromSuggestions() {
+        val suggestionsState = repository.observeSuggestedSongs().first()
+        val suggestions = (suggestionsState as? SnapshotState.Data)?.value ?: return
+        val songs = (repository.observeAllSongs().first() as? SnapshotState.Data)?.value ?: emptyList()
+
+        _repertoireRows.update { rows ->
+            rows.map { row ->
+                val suggestion = suggestions.find { it.position == row.position }
+                if (suggestion != null) {
+                    val song = songs.find { it.id == suggestion.songId }
+                        ?: row.selectedSong
+                    row.copy(selectedSong = song, tone = suggestion.tone)
+                } else {
+                    row
+                }
             }
         }
     }

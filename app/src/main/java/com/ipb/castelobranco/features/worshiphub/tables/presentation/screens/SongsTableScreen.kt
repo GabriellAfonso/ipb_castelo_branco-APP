@@ -26,13 +26,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
+import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
+import com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.RepertoireRowState
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.LastSundaysTab
-import com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.SuggestionsTab
+import com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.RepertoireTab
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.TopSongsTab
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs.TopTonesTab
 import androidx.compose.animation.AnimatedVisibility
@@ -63,7 +64,8 @@ data class WorshipSongsUiState(
     val sundays: List<SundaySet> = emptyList(),
     val topSongs: List<TopSong> = emptyList(),
     val topTones: List<TopTone> = emptyList(),
-    val suggestedSongs: List<SuggestedSong> = emptyList(),
+    val repertoireRows: List<RepertoireRowState> = emptyList(),
+    val allSongs: List<Song> = emptyList(),
     val isRefreshingSuggestions: Boolean = false,
     val isRefreshing: Boolean = false,
 )
@@ -71,7 +73,8 @@ data class WorshipSongsUiState(
 
 data class WorshipSongsActions(
     val onBackClick: () -> Unit,
-    val onRefreshSuggestions: () -> Unit,
+    val onGenerateClick: () -> Unit,
+    val onSongSelect: (position: Int, song: Song?) -> Unit,
     val onRefreshCurrentTab: (tabIndex: Int) -> Unit = {},
 )
 
@@ -86,24 +89,22 @@ fun WorshipSongsTableScreen(
         sundays = viewModel.lastSundays.collectAsStateWithLifecycle().value,
         topSongs = viewModel.topSongs.collectAsStateWithLifecycle().value,
         topTones = viewModel.topTones.collectAsStateWithLifecycle().value,
-        suggestedSongs = viewModel.suggestedSongs.collectAsStateWithLifecycle().value,
+        repertoireRows = viewModel.repertoireRows.collectAsStateWithLifecycle().value,
+        allSongs = viewModel.allSongs.collectAsStateWithLifecycle().value,
         isRefreshingSuggestions = viewModel.isRefreshingSuggestedSongs.collectAsStateWithLifecycle().value,
         isRefreshing = viewModel.isRefreshing.collectAsStateWithLifecycle().value,
     )
 
-    val fixedByPosition = viewModel.fixedByPosition.collectAsStateWithLifecycle().value
-
     val actions = WorshipSongsActions(
         onBackClick = onBackClick,
-        onRefreshSuggestions = viewModel::refreshSuggestedSongs,
+        onGenerateClick = viewModel::refreshSuggestedSongs,
+        onSongSelect = viewModel::selectSong,
         onRefreshCurrentTab = viewModel::refreshCurrentTab,
     )
 
     WorshipSongsTableContent(
         state = state,
         actions = actions,
-        fixedByPosition = fixedByPosition,
-        onToggleFixed = viewModel::toggleFixed
     )
 }
 
@@ -111,10 +112,8 @@ fun WorshipSongsTableScreen(
 fun WorshipSongsTableContent(
     state: WorshipSongsUiState,
     actions: WorshipSongsActions,
-    fixedByPosition: Map<Int, Int>,
-    onToggleFixed: (SuggestedSong) -> Unit
 ) {
-    val tabs = listOf("Ultimos Domingos", "Mais tocadas", "Top tons", "Sugestões")
+    val tabs = listOf("Ultimos Domingos", "Mais tocadas", "Top tons", "Repertório")
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
@@ -236,14 +235,13 @@ fun WorshipSongsTableContent(
                         0 -> LastSundaysTab(sundays = state.sundays, searchQuery = searchQuery)
                         1 -> TopSongsTab(topSongs = state.topSongs)
                         2 -> TopTonesTab(topTones = state.topTones)
-                        3 -> SuggestionsTab(
-                            suggestedSongs = state.suggestedSongs,
+                        3 -> RepertoireTab(
+                            rows = state.repertoireRows,
+                            availableSongs = state.allSongs,
                             isRefreshing = state.isRefreshingSuggestions,
-                            fixedByPosition = fixedByPosition,
-                            onToggleFixed = onToggleFixed,
-                            onRefreshClick = actions.onRefreshSuggestions,
-
-                            )
+                            onSongSelect = actions.onSongSelect,
+                            onGenerateClick = actions.onGenerateClick
+                        )
                     }
                 }
             }
