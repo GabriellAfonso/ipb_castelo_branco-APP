@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +31,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,6 +51,7 @@ import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.ipb.castelobranco.features.admin.schedule.presentation.components.ScheduleEditorTable
 import com.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleEvent
 import com.ipb.castelobranco.features.admin.schedule.presentation.state.AdminScheduleUiState
+import com.ipb.castelobranco.features.admin.schedule.presentation.state.SaveResult
 import com.ipb.castelobranco.features.admin.schedule.presentation.viewmodel.AdminScheduleViewModel
 import com.ipb.castelobranco.features.schedule.domain.formatter.MonthScheduleWhatsappFormatter
 
@@ -64,6 +67,7 @@ data class AdminScheduleActions(
     val onGenerate: () -> Unit,
     val onSave: () -> Unit,
     val onShare: (String) -> Unit,
+    val onDismissSaveResult: () -> Unit,
 )
 
 // ── Entry point ───────────────────────────────────────────────────────────────
@@ -102,6 +106,7 @@ fun AdminScheduleScreen(
         onGenerate = { viewModel.onEvent(AdminScheduleEvent.GenerateSchedule) },
         onSave = { viewModel.onEvent(AdminScheduleEvent.SaveSchedule) },
         onShare = onShare,
+        onDismissSaveResult = { viewModel.onEvent(AdminScheduleEvent.SaveResultDismissed) },
     )
 
     AdminScheduleContent(
@@ -152,22 +157,21 @@ fun AdminScheduleContent(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                when {
-                    state.isGenerating -> {
-                        CircularProgressIndicator(
-                            color = Green,
-                            modifier = Modifier.padding(32.dp)
-                        )
-                    }
-                    state.items.isEmpty() -> {
-                        EmptyScheduleHint()
-                    }
-                    else -> {
-                        ScheduleEditorTable(
-                            items = state.items,
-                            members = state.members,
-                            onMemberSelect = actions.onMemberSelect
-                        )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    ScheduleEditorTable(
+                        items = state.items,
+                        members = state.members,
+                        onMemberSelect = actions.onMemberSelect
+                    )
+                    if (state.isGenerating) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 32.dp),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            CircularProgressIndicator(color = Green)
+                        }
                     }
                 }
 
@@ -177,7 +181,7 @@ fun AdminScheduleContent(
                     isGenerating = state.isGenerating,
                     isSaving = state.isSaving,
                     canSave = state.canSave,
-                    canShare = state.items.isNotEmpty() && !state.isGenerating,
+                    canShare = state.canShare,
                     onGenerate = actions.onGenerate,
                     onSave = actions.onSave,
                     onShare = {
@@ -194,6 +198,15 @@ fun AdminScheduleContent(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 8.dp)
+            )
+
+            SaveResultDialog(
+                result = state.saveResult,
+                onShare = {
+                    actions.onShare(state.toWhatsappText())
+                    actions.onDismissSaveResult()
+                },
+                onDismiss = actions.onDismissSaveResult
             )
         }
     }
@@ -261,24 +274,6 @@ private fun MonthSelector(
 }
 
 @Composable
-private fun EmptyScheduleHint() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(8.dp))
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Clique em \"Gerar aleatória\" para criar\numa escala automática, ou preencha\nmanualmente após gerar.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
 private fun ActionButtons(
     isGenerating: Boolean,
     isSaving: Boolean,
@@ -341,7 +336,7 @@ private fun ActionButtons(
             )
         }
 
-        // Compartilhar — só aparece quando tem itens
+        // Compartilhar — só aparece após salvar com sucesso e enquanto não houver alterações
         if (canShare) {
             OutlinedButton(
                 onClick = onShare,
@@ -365,6 +360,57 @@ private fun ActionButtons(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SaveResultDialog(
+    result: SaveResult?,
+    onShare: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    when (result) {
+        is SaveResult.Success -> {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = { Text("Escala salva") },
+                text = { Text("Sua escala foi salva com sucesso.") },
+                confirmButton = {
+                    TextButton(onClick = onShare) {
+                        Icon(
+                            imageVector = Icons.Filled.Share,
+                            contentDescription = null,
+                            tint = Orange,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Compartilhar",
+                            fontWeight = FontWeight.SemiBold,
+                            color = Orange
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text("Fechar")
+                    }
+                }
+            )
+        }
+        is SaveResult.Error -> {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = { Text("Erro ao salvar") },
+                text = { Text(result.message) },
+                confirmButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+        null -> Unit
     }
 }
 

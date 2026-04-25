@@ -13,10 +13,15 @@ data class AdminScheduleUiState(
     val items: List<EditableScheduleUiState> = emptyList(),
     val isGenerating: Boolean = false,
     val isSaving: Boolean = false,
+    val hasUnsavedChanges: Boolean = false,
+    val saveResult: SaveResult? = null,
     val snackbarMessage: String? = null
 ) {
     val canSave: Boolean
         get() = items.isNotEmpty() && items.all { it.selectedMember != null }
+
+    val canShare: Boolean
+        get() = !hasUnsavedChanges && canSave
 
     val monthLabel: String
         get() = MONTHS[month - 1] + " $year"
@@ -34,11 +39,17 @@ data class AdminScheduleUiState(
     }
 }
 
+sealed interface SaveResult {
+    data object Success : SaveResult
+    data class Error(val message: String) : SaveResult
+}
+
 sealed interface AdminScheduleEvent {
     data object LoadMembers : AdminScheduleEvent
     data class MonthChanged(val year: Int, val month: Int) : AdminScheduleEvent
     data class MemberSelected(val itemIndex: Int, val member: Member) : AdminScheduleEvent
     data object GenerateSchedule : AdminScheduleEvent
     data object SaveSchedule : AdminScheduleEvent
+    data object SaveResultDismissed : AdminScheduleEvent
     data object SnackbarShown : AdminScheduleEvent
 }
