@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.schedule.presentation.viewmodel
 
+import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
@@ -105,11 +106,50 @@ class ScheduleViewModelTest {
     }
 
     @Test
-    fun `uiState emits Empty when observe emits Error`() = runTest {
+    fun `uiState emits Error when observe emits SnapshotState Error`() = runTest {
         val flow = flowOf(SnapshotState.Error(RuntimeException("network error")))
         val vm = buildViewModel(observed = flow)
         advanceUntilIdle()
-        assertEquals(ScheduleUiState.Empty, vm.uiState.value)
+        assertTrue(vm.uiState.value is ScheduleUiState.Error)
+    }
+
+    @Test
+    fun `uiState Error has httpCode 401 when error is HttpPermissionException with 401`() = runTest {
+        val exception = HttpPermissionException(401, "Não autorizado")
+        val flow = flowOf(SnapshotState.Error(exception))
+        val vm = buildViewModel(observed = flow)
+        advanceUntilIdle()
+        val state = vm.uiState.value as ScheduleUiState.Error
+        assertEquals(401, state.httpCode)
+    }
+
+    @Test
+    fun `uiState Error has httpCode 403 when error is HttpPermissionException with 403`() = runTest {
+        val exception = HttpPermissionException(403, "Proibido")
+        val flow = flowOf(SnapshotState.Error(exception))
+        val vm = buildViewModel(observed = flow)
+        advanceUntilIdle()
+        val state = vm.uiState.value as ScheduleUiState.Error
+        assertEquals(403, state.httpCode)
+    }
+
+    @Test
+    fun `uiState Error has null httpCode for non-permission exceptions`() = runTest {
+        val flow = flowOf(SnapshotState.Error(RuntimeException("timeout")))
+        val vm = buildViewModel(observed = flow)
+        advanceUntilIdle()
+        val state = vm.uiState.value as ScheduleUiState.Error
+        assertNull(state.httpCode)
+    }
+
+    @Test
+    fun `uiState Error message matches exception message`() = runTest {
+        val exception = HttpPermissionException(401, "Token expirado")
+        val flow = flowOf(SnapshotState.Error(exception))
+        val vm = buildViewModel(observed = flow)
+        advanceUntilIdle()
+        val state = vm.uiState.value as ScheduleUiState.Error
+        assertEquals("Token expirado", state.message)
     }
 
     // endregion

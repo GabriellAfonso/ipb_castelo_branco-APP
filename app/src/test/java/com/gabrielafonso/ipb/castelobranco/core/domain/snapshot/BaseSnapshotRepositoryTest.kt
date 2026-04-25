@@ -7,6 +7,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BaseSnapshotRepositoryTest {
@@ -171,6 +172,32 @@ class BaseSnapshotRepositoryTest {
 
     // endregion
 
+    // region clearCache
+
+    @Test
+    fun `clearCache resets state to Loading`() = runTest {
+        val cache = FakeCache(stored = "data")
+        val repo = buildRepository(cache, FakeFetcher(NetworkResult.NotModified))
+        repo.preload()
+        assertEquals(SnapshotState.Data("DATA"), repo.getCurrentState())
+
+        repo.clearCache()
+
+        assertTrue(repo.getCurrentState() is SnapshotState.Loading)
+    }
+
+    @Test
+    fun `clearCache removes stored data from cache`() = runTest {
+        val cache = FakeCache(stored = "data")
+        val repo = buildRepository(cache, FakeFetcher(NetworkResult.NotModified))
+
+        repo.clearCache()
+
+        assertNull(cache.load())
+    }
+
+    // endregion
+
     // region refresh — Failure
 
     @Test
@@ -195,6 +222,47 @@ class BaseSnapshotRepositoryTest {
 
         assertTrue(result is RefreshResult.Error)
         assertEquals(error, (result as RefreshResult.Error).throwable)
+    }
+
+    // endregion
+
+    // region refresh — HttpPermissionException
+
+    @Test
+    fun `refresh on HttpPermissionException ignores cache and emits Error state`() = runTest {
+        val cache = FakeCache(stored = "fallback")
+        val exception = HttpPermissionException(401, "Não autorizado")
+        val repo = buildRepository(cache, FakeFetcher(NetworkResult.Failure(exception)))
+
+        val result = repo.refresh()
+
+        assertTrue(result is RefreshResult.Error)
+        assertEquals(exception, (result as RefreshResult.Error).throwable)
+        assertTrue(repo.getCurrentState() is SnapshotState.Error)
+    }
+
+    @Test
+    fun `refresh on HttpPermissionException clears cache even when it has data`() = runTest {
+        val cache = FakeCache(stored = "fallback")
+        val exception = HttpPermissionException(403, "Proibido")
+        val repo = buildRepository(cache, FakeFetcher(NetworkResult.Failure(exception)))
+
+        repo.refresh()
+
+        assertNull(cache.load())
+    }
+
+    @Test
+    fun `refresh on HttpPermissionException preserves exception in Error state`() = runTest {
+        val cache = FakeCache(stored = null)
+        val exception = HttpPermissionException(401, "Token inválido")
+        val repo = buildRepository(cache, FakeFetcher(NetworkResult.Failure(exception)))
+
+        repo.refresh()
+
+        val state = repo.getCurrentState()
+        assertTrue(state is SnapshotState.Error)
+        assertEquals(exception, (state as SnapshotState.Error).throwable)
     }
 
     // endregion

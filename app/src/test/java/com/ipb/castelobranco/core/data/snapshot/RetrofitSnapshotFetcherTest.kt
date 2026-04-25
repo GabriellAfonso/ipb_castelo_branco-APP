@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.core.data.snapshot
 
+import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
 import com.ipb.castelobranco.core.domain.snapshot.NetworkResult
 import kotlinx.coroutines.test.runTest
 import okhttp3.Headers
@@ -92,6 +93,71 @@ class RetrofitSnapshotFetcherTest {
         assertEquals("HTTP 500", failure.throwable.message)
     }
 
+    @Test
+    fun `fetch returns HttpPermissionException with code 401 on 401 response`() = runTest {
+        val fetcher = RetrofitSnapshotFetcher<String> { buildRawResponse(code = 401) }
+
+        val result = fetcher.fetch(etag = null)
+
+        assertTrue(result is NetworkResult.Failure)
+        val failure = result as NetworkResult.Failure
+        assertTrue(failure.throwable is HttpPermissionException)
+        assertEquals(401, (failure.throwable as HttpPermissionException).code)
+    }
+
+    @Test
+    fun `fetch returns HttpPermissionException with code 403 on 403 response`() = runTest {
+        val fetcher = RetrofitSnapshotFetcher<String> { buildRawResponse(code = 403) }
+
+        val result = fetcher.fetch(etag = null)
+
+        assertTrue(result is NetworkResult.Failure)
+        val failure = result as NetworkResult.Failure
+        assertTrue(failure.throwable is HttpPermissionException)
+        assertEquals(403, (failure.throwable as HttpPermissionException).code)
+    }
+
+    @Test
+    fun `fetch extracts detail field from JSON error body on 401`() = runTest {
+        val fetcher = RetrofitSnapshotFetcher<String> {
+            buildErrorResponse(code = 401, body = """{"detail":"Token expirado"}""")
+        }
+
+        val result = fetcher.fetch(etag = null)
+
+        val failure = result as NetworkResult.Failure
+        val ex = failure.throwable as HttpPermissionException
+        assertEquals(401, ex.code)
+        assertEquals("Token expirado", ex.message)
+    }
+
+    @Test
+    fun `fetch falls back to raw body when JSON has no detail field on 401`() = runTest {
+        val fetcher = RetrofitSnapshotFetcher<String> {
+            buildErrorResponse(code = 401, body = """{"error":"invalid"}""")
+        }
+
+        val result = fetcher.fetch(etag = null)
+
+        val failure = result as NetworkResult.Failure
+        val ex = failure.throwable as HttpPermissionException
+        assertEquals(401, ex.code)
+    }
+
+    @Test
+    fun `fetch falls back to HTTP code message when error body is not valid JSON on 401`() = runTest {
+        val fetcher = RetrofitSnapshotFetcher<String> {
+            buildErrorResponse(code = 401, body = "Unauthorized plain text")
+        }
+
+        val result = fetcher.fetch(etag = null)
+
+        val failure = result as NetworkResult.Failure
+        val ex = failure.throwable as HttpPermissionException
+        assertEquals(401, ex.code)
+        assertEquals("HTTP 401", ex.message)
+    }
+
     // endregion
 
     // region network exception
@@ -139,6 +205,17 @@ class RetrofitSnapshotFetcherTest {
             .body("".toResponseBody())
             .build()
         return Response.error("".toResponseBody(), raw)
+    }
+
+    private fun buildErrorResponse(code: Int, body: String): Response<String> {
+        val raw = okhttp3.Response.Builder()
+            .request(Request.Builder().url("https://api.example.com/").build())
+            .protocol(Protocol.HTTP_1_1)
+            .code(code)
+            .message("")
+            .body("".toResponseBody())
+            .build()
+        return Response.error(body.toResponseBody(), raw)
     }
 
     // endregion

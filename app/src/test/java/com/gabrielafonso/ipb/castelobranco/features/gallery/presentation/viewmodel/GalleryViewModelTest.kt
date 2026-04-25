@@ -1,7 +1,10 @@
 package com.ipb.castelobranco.features.gallery.presentation.viewmodel
 
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.ipb.castelobranco.core.data.NetworkConnectivityObserver
+import com.ipb.castelobranco.features.gallery.data.work.GalleryDownloadWorker
 import com.ipb.castelobranco.features.gallery.domain.model.Album
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
@@ -96,6 +99,126 @@ class GalleryViewModelTest {
         assertFalse(state.isDownloading)
         assertFalse(state.isPending)
         assertNull(state.error)
+    }
+
+    @Test
+    fun `downloadState initial value has isResolved false before flow collects`() {
+        assertFalse(viewModel.downloadState.value.isResolved)
+    }
+
+    @Test
+    fun `downloadState maps RUNNING WorkInfo to isDownloading with progress`() = runTest {
+        val progress = workDataOf(
+            GalleryDownloadWorker.KEY_DOWNLOADED to 3,
+            GalleryDownloadWorker.KEY_TOTAL to 10
+        )
+        val workInfo = mockk<WorkInfo>()
+        every { workInfo.state } returns WorkInfo.State.RUNNING
+        every { workInfo.progress } returns progress
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns flowOf(listOf(workInfo))
+        viewModel = GalleryViewModel(repository, autoDownload, connectivityObserver, workManager)
+
+        val job = launch { viewModel.downloadState.collect { } }
+        advanceUntilIdle()
+        job.cancel()
+
+        val state = viewModel.downloadState.value
+        assertTrue(state.isDownloading)
+        assertEquals(3, state.downloaded)
+        assertEquals(10, state.total)
+        assertTrue(state.isResolved)
+    }
+
+    @Test
+    fun `downloadState maps ENQUEUED WorkInfo to isPending with isResolved`() = runTest {
+        val workInfo = mockk<WorkInfo>()
+        every { workInfo.state } returns WorkInfo.State.ENQUEUED
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns flowOf(listOf(workInfo))
+        viewModel = GalleryViewModel(repository, autoDownload, connectivityObserver, workManager)
+
+        val job = launch { viewModel.downloadState.collect { } }
+        advanceUntilIdle()
+        job.cancel()
+
+        val state = viewModel.downloadState.value
+        assertTrue(state.isPending)
+        assertFalse(state.isDownloading)
+        assertTrue(state.isResolved)
+    }
+
+    @Test
+    fun `downloadState maps FAILED WorkInfo with 401 to error state with errorCode`() = runTest {
+        val outputData = workDataOf(
+            GalleryDownloadWorker.KEY_ERROR to "Não autorizado",
+            GalleryDownloadWorker.KEY_ERROR_CODE to 401
+        )
+        val workInfo = mockk<WorkInfo>()
+        every { workInfo.state } returns WorkInfo.State.FAILED
+        every { workInfo.outputData } returns outputData
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns flowOf(listOf(workInfo))
+        viewModel = GalleryViewModel(repository, autoDownload, connectivityObserver, workManager)
+
+        val job = launch { viewModel.downloadState.collect { } }
+        advanceUntilIdle()
+        job.cancel()
+
+        val state = viewModel.downloadState.value
+        assertEquals("Não autorizado", state.error)
+        assertEquals(401, state.errorCode)
+        assertTrue(state.isResolved)
+    }
+
+    @Test
+    fun `downloadState maps FAILED WorkInfo with errorCode 0 to null errorCode`() = runTest {
+        val outputData = workDataOf(
+            GalleryDownloadWorker.KEY_ERROR to "Falha genérica",
+            GalleryDownloadWorker.KEY_ERROR_CODE to 0
+        )
+        val workInfo = mockk<WorkInfo>()
+        every { workInfo.state } returns WorkInfo.State.FAILED
+        every { workInfo.outputData } returns outputData
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns flowOf(listOf(workInfo))
+        viewModel = GalleryViewModel(repository, autoDownload, connectivityObserver, workManager)
+
+        val job = launch { viewModel.downloadState.collect { } }
+        advanceUntilIdle()
+        job.cancel()
+
+        assertNull(viewModel.downloadState.value.errorCode)
+    }
+
+    @Test
+    fun `downloadState uses default error message when KEY_ERROR is absent in FAILED state`() = runTest {
+        val outputData = workDataOf(GalleryDownloadWorker.KEY_ERROR_CODE to 500)
+        val workInfo = mockk<WorkInfo>()
+        every { workInfo.state } returns WorkInfo.State.FAILED
+        every { workInfo.outputData } returns outputData
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns flowOf(listOf(workInfo))
+        viewModel = GalleryViewModel(repository, autoDownload, connectivityObserver, workManager)
+
+        val job = launch { viewModel.downloadState.collect { } }
+        advanceUntilIdle()
+        job.cancel()
+
+        assertEquals("Falha ao baixar galeria", viewModel.downloadState.value.error)
+    }
+
+    @Test
+    fun `downloadState maps other WorkInfo states to resolved with no flags set`() = runTest {
+        val workInfo = mockk<WorkInfo>()
+        every { workInfo.state } returns WorkInfo.State.SUCCEEDED
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns flowOf(listOf(workInfo))
+        viewModel = GalleryViewModel(repository, autoDownload, connectivityObserver, workManager)
+
+        val job = launch { viewModel.downloadState.collect { } }
+        advanceUntilIdle()
+        job.cancel()
+
+        val state = viewModel.downloadState.value
+        assertFalse(state.isDownloading)
+        assertFalse(state.isPending)
+        assertNull(state.error)
+        assertTrue(state.isResolved)
     }
 
     // endregion
