@@ -110,7 +110,7 @@ fun RepertoireTab(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+            .padding(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         rows.forEach { row ->
@@ -127,7 +127,7 @@ fun RepertoireTab(
         Spacer(modifier = Modifier.height(4.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Button(
@@ -202,19 +202,18 @@ private fun RepertoireRow(
     else
         RoundedCornerShape(8.dp)
 
-    val rowBackground = if (row.isFixed) Green.copy(alpha = 0.12f) else Color.Transparent
+    val rowBackground = if (row.isFixed) Green.copy(alpha = 0.85f) else Color.Transparent
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
             .background(rowBackground)
             .combinedClickable(
                 enabled = enabled && row.selectedSong != null,
                 onClick = {},
                 onLongClick = { onToggleFixed() }
             )
-            .padding(vertical = 4.dp, horizontal = 4.dp),
+            .padding(vertical = 4.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Start
     ) {
