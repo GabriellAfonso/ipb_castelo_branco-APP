@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.worshiphub.hub.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,6 +19,8 @@ import com.ipb.castelobranco.core.presentation.components.CustomButton
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.features.worshiphub.hub.presentation.navigation.WorshipHubNav
 
+private const val EDGE_PADDING_RATIO = 0.041f
+private const val GAP_RATIO = 0.127f
 
 private data class WorshipHubButtonInfo(
     val iconRes: Int,
@@ -48,7 +51,7 @@ private fun WorshipHubContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             WorshipHubButtonGrid(
@@ -75,37 +78,43 @@ private fun WorshipHubButtonGrid(
         )
     }
 
-    val gap = 50.dp
+    BoxWithConstraints(modifier = modifier) {
+        val edgePadding = maxWidth * EDGE_PADDING_RATIO
+        val gap = maxWidth * GAP_RATIO
+        val buttonSize = (maxWidth - edgePadding * 2 - gap) / 2
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(gap, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        repeat(3) { rowIndex ->
-            val left = buttons[rowIndex * 2]
-            val right = buttons[rowIndex * 2 + 1]
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = edgePadding),
+            verticalArrangement = Arrangement.spacedBy(gap, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            repeat(3) { rowIndex ->
+                val left = buttons[rowIndex * 2]
+                val right = buttons[rowIndex * 2 + 1]
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(gap),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CustomButton(
-                    image = painterResource(id = left.iconRes),
-                    text = left.label,
-                    onClick = if (left.visible) left.onClick else { {} },
-                    modifier = Modifier.alpha(if (left.visible) 1f else 0f),
-                    size = 150.dp,
-                    playSoundOnClick = left.visible,
-                )
-                CustomButton(
-                    image = painterResource(id = right.iconRes),
-                    text = right.label,
-                    onClick = if (right.visible) right.onClick else { {} },
-                    modifier = Modifier.alpha(if (right.visible) 1f else 0f),
-                    size = 150.dp,
-                    playSoundOnClick = right.visible,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(gap),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CustomButton(
+                        image = painterResource(id = left.iconRes),
+                        text = left.label,
+                        onClick = if (left.visible) left.onClick else { {} },
+                        modifier = Modifier.alpha(if (left.visible) 1f else 0f),
+                        size = buttonSize,
+                        playSoundOnClick = left.visible,
+                    )
+                    CustomButton(
+                        image = painterResource(id = right.iconRes),
+                        text = right.label,
+                        onClick = if (right.visible) right.onClick else { {} },
+                        modifier = Modifier.alpha(if (right.visible) 1f else 0f),
+                        size = buttonSize,
+                        playSoundOnClick = right.visible,
+                    )
+                }
             }
         }
     }

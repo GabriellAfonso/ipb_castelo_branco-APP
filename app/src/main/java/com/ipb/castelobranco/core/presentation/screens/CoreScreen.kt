@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +29,10 @@ import com.ipb.castelobranco.features.schedule.presentation.components.ScheduleS
 import com.ipb.castelobranco.features.schedule.presentation.viewmodel.ScheduleViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
+private const val GRID_EDGE_PADDING_RATIO = 0.055f
+private const val GRID_GAP_RATIO = 0.064f
+private const val GRID_ROW_VERTICAL_PADDING_RATIO = 0.041f
 
 /**
  * Agrupador de permissões e estado de autenticação
@@ -287,21 +292,36 @@ fun ButtonGrid(
         ButtonInfo(R.drawable.ic_schedule,       "Escala",      iconColor, onNavigateToSchedule),
         ButtonInfo(R.drawable.ic_galery,         "Galeria",     iconColor, onNavigateToGallery),
         ButtonInfo(R.drawable.ic_sarca_ipb,      "Hinário",     iconColor, onNavigateToHymnal),
-        ButtonInfo(R.drawable.ic_in_development, "Em Breve",      iconColor) { },
-        ButtonInfo(R.drawable.ic_in_development, "Em Breve",      iconColor) { },
+        ButtonInfo(R.drawable.ic_in_development, "Em Breve",    iconColor) { },
+        ButtonInfo(R.drawable.ic_in_development, "Em Breve",    iconColor) { },
     )
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        ButtonRow(buttons.subList(0, 3))
-        ButtonRow(buttons.subList(3, 6))
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val edgePadding = maxWidth * GRID_EDGE_PADDING_RATIO
+        val gap = maxWidth * GRID_GAP_RATIO
+        val rowVerticalPadding = maxWidth * GRID_ROW_VERTICAL_PADDING_RATIO
+        val buttonSize = (maxWidth - edgePadding * 2 - gap * 2) / 3
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = edgePadding),
+        ) {
+            ButtonRow(buttons.subList(0, 3), gap, rowVerticalPadding, buttonSize)
+            ButtonRow(buttons.subList(3, 6), gap, rowVerticalPadding, buttonSize)
+        }
     }
 }
 
 @Composable
-private fun ButtonRow(rowButtons: List<ButtonInfo>) {
+private fun ButtonRow(
+    rowButtons: List<ButtonInfo>,
+    gap: Dp,
+    verticalPadding: Dp,
+    buttonSize: Dp,
+) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(25.dp),
-        modifier              = Modifier.padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(gap),
+        modifier              = Modifier.padding(vertical = verticalPadding),
     ) {
         rowButtons.forEach { button ->
             CustomButton(
@@ -309,6 +329,7 @@ private fun ButtonRow(rowButtons: List<ButtonInfo>) {
                 text            = button.label,
                 backgroundColor = button.color,
                 onClick         = button.onClick,
+                size            = buttonSize,
             )
         }
     }
