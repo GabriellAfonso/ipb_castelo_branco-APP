@@ -41,9 +41,9 @@ import com.ipb.castelobranco.features.bible.domain.model.BibleBook
 import com.ipb.castelobranco.features.bible.presentation.viewmodel.BibleViewModel
 
 private enum class IndexTab(val label: String, val key: String) {
-    BOOK("BOOK", "book"),
-    CHAPTER("CHAPTER", "chapter"),
-    VERSE("VERSE", "verse");
+    BOOK("Livro", "book"),
+    CHAPTER("Capítulo", "chapter"),
+    VERSE("Versículo", "verse");
 
     companion object {
         fun fromKey(key: String?): IndexTab =
@@ -68,7 +68,7 @@ fun BibleIndexScreen(
     }
 
     BaseScreen(
-        tabName = "Index",
+        tabName = "Bíblia",
         showBackArrow = true,
         onBackClick = onBack,
         showAccountAction = false,
