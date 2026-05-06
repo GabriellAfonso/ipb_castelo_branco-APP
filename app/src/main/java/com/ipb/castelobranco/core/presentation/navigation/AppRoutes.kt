@@ -12,4 +12,5 @@ object AppRoutes {
     const val WORSHIP_HUB_GRAPH = "graph/worship_hub"
     const val GALLERY_GRAPH     = "graph/gallery"
     const val HYMNAL_GRAPH      = "graph/hymnal"
+    const val BIBLE_GRAPH       = "graph/bible"
 }

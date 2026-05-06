@@ -49,6 +49,7 @@ fun CoreView(
     onNavigateToSchedule: () -> Unit,
     onNavigateToGallery: () -> Unit,
     onNavigateToHymnal: () -> Unit,
+    onNavigateToBible: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     onLogoutSuccess: () -> Unit,
@@ -87,6 +88,7 @@ fun CoreView(
         onNavigateToSchedule   = onNavigateToSchedule,
         onNavigateToGallery    = onNavigateToGallery,
         onNavigateToHymnal     = onNavigateToHymnal,
+        onNavigateToBible      = onNavigateToBible,
         onNavigateToSettings   = onNavigateToSettings,
         onNavigateToAdmin      = onNavigateToAdmin,
         authState              = authState,
@@ -102,6 +104,7 @@ fun CoreScreen(
     onNavigateToSchedule: () -> Unit,
     onNavigateToGallery: () -> Unit,
     onNavigateToHymnal: () -> Unit,
+    onNavigateToBible: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     authState: UserAuthState,
@@ -136,6 +139,7 @@ fun CoreScreen(
                     onNavigateToSchedule   = onNavigateToSchedule,
                     onNavigateToGallery    = onNavigateToGallery,
                     onNavigateToHymnal     = onNavigateToHymnal,
+                    onNavigateToBible      = onNavigateToBible,
                 )
             }
         }
@@ -285,6 +289,7 @@ fun ButtonGrid(
     onNavigateToSchedule: () -> Unit,
     onNavigateToGallery: () -> Unit,
     onNavigateToHymnal: () -> Unit,
+    onNavigateToBible: () -> Unit,
 ) {
     val iconColor = MaterialTheme.colorScheme.primaryContainer
     val buttons = listOf(
@@ -293,7 +298,7 @@ fun ButtonGrid(
         ButtonInfo(R.drawable.ic_galery,         "Galeria",     iconColor, onNavigateToGallery),
         ButtonInfo(R.drawable.ic_sarca_ipb,      "Hinário",     iconColor, onNavigateToHymnal),
         ButtonInfo(R.drawable.ic_in_development, "Em Breve",    iconColor) { },
-        ButtonInfo(R.drawable.ic_in_development, "Em Breve",    iconColor) { },
+        ButtonInfo(R.drawable.ic_bible,          "Bíblia",      iconColor, onNavigateToBible),
     )
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {

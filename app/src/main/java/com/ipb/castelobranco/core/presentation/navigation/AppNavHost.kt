@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ipb.castelobranco.features.admin.panel.presentation.navigation.adminGraph
 import com.ipb.castelobranco.features.auth.presentation.navigation.authGraph
+import com.ipb.castelobranco.features.bible.presentation.navigation.bibleGraph
 import com.ipb.castelobranco.features.gallery.presentation.navigation.galleryGraph
 import com.ipb.castelobranco.features.hymnal.presentation.navigation.hymnalGraph
 import com.ipb.castelobranco.core.presentation.screens.CoreView
@@ -51,6 +52,7 @@ fun AppNavHost(navController: NavHostController) {
                     onNavigateToSchedule   = { navController.navigate(AppRoutes.SCHEDULE) },
                     onNavigateToGallery    = { navController.navigate(AppRoutes.GALLERY_GRAPH) },
                     onNavigateToHymnal     = { navController.navigate(AppRoutes.HYMNAL_GRAPH) },
+                    onNavigateToBible      = { navController.navigate(AppRoutes.BIBLE_GRAPH) },
                     onNavigateToSettings   = { navController.navigate(AppRoutes.SETTINGS) },
                     onNavigateToAdmin      = { navController.navigate(AppRoutes.ADMIN_GRAPH) },
                     onLogoutSuccess        = {},
@@ -74,6 +76,7 @@ fun AppNavHost(navController: NavHostController) {
                 onNavigateToAuth = { navController.navigate(AppRoutes.AUTH_GRAPH) },
             )
             hymnalGraph(navController)
+            bibleGraph(navController)
 
             composable(AppRoutes.SCHEDULE) {
                 MonthScheduleScreen(

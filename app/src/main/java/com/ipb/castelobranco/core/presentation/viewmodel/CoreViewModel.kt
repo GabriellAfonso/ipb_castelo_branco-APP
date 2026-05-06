@@ -8,6 +8,7 @@ import com.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
 import com.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
+import com.ipb.castelobranco.features.bible.domain.usecase.BibleAutoDownloadUseCase
 import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,8 @@ class CoreViewModel @Inject constructor(
     private val authEventBus: AuthEventBus,
     private val logoutUseCase: LogoutUseCase,
     private val galleryAutoDownload: GalleryAutoDownloadUseCase,
+    private val bibleAutoDownload: BibleAutoDownloadUseCase,
+    private val bibleRepository: com.ipb.castelobranco.features.bible.domain.repository.BibleRepository,
     private val scheduleRepository: ScheduleRepository,
 ) : ViewModel() {
 
@@ -71,6 +74,10 @@ class CoreViewModel @Inject constructor(
 
             // 1 & 2. PRELOAD (disk) + REFRESH (network) delegated to use case
             preloadDataUseCase()
+
+            // Bíblia: preload do cache + auto-download se faltar tradução (WiFi only)
+            runCatching { bibleRepository.preload() }
+            bibleAutoDownload.triggerIfNeeded()
 
             // Auto-download da galeria se estiver vazia (somente via WiFi)
             galleryAutoDownload.triggerIfNeeded()
