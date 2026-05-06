@@ -3,6 +3,7 @@ package com.ipb.castelobranco.features.settings.presentation.viewmodel
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ipb.castelobranco.features.bible.domain.usecase.DeleteAndRedownloadBibleUseCase
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.features.settings.domain.model.ThemeMode
 import com.ipb.castelobranco.features.settings.domain.repository.SettingsRepository
@@ -24,7 +25,8 @@ data class SettingsUiState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
-    private val galleryRepository: GalleryRepository
+    private val galleryRepository: GalleryRepository,
+    private val deleteAndRedownloadBible: DeleteAndRedownloadBibleUseCase,
 ) : ViewModel() {
 
     val uiState: StateFlow<SettingsUiState> = repository.themeModeFlow
@@ -50,6 +52,12 @@ class SettingsViewModel @Inject constructor(
     fun clearGallery() {
         viewModelScope.launch {
             galleryRepository.clearAllPhotos()
+        }
+    }
+
+    fun clearAndRedownloadBible() {
+        viewModelScope.launch {
+            deleteAndRedownloadBible()
         }
     }
 

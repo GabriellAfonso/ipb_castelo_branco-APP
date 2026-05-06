@@ -46,6 +46,7 @@ fun SettingsScreen(
         darkMode       = resolvedDark,
         onToggleDark   = { viewModel.toggleDarkMode() },
         onClearGallery = { viewModel.clearGallery() },
+        onClearBible   = { viewModel.clearAndRedownloadBible() },
     )
 }
 
@@ -55,6 +56,7 @@ fun SettingsContent(
     darkMode: Boolean,
     onToggleDark: () -> Unit,
     onClearGallery: () -> Unit,
+    onClearBible: () -> Unit,
 ) {
     BaseScreen(
         tabName           = "Configurações",
@@ -74,6 +76,9 @@ fun SettingsContent(
             )
             Button(onClick = onClearGallery) {
                 Text("Apagar galeria")
+            }
+            Button(onClick = onClearBible) {
+                Text("Apagar e baixar Bíblia")
             }
         }
     }
