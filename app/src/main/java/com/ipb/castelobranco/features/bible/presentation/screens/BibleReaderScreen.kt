@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +17,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -24,6 +29,7 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,11 +37,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -182,6 +191,8 @@ fun BibleReaderScreen(
                 ChapterChevrons(
                     onPrevious = viewModel::previousChapter,
                     onNext = viewModel::nextChapter,
+                    listState = listState,
+                    chapter = state.position.chapter,
                 )
             }
         }
@@ -192,22 +203,64 @@ fun BibleReaderScreen(
 private fun androidx.compose.foundation.layout.BoxScope.ChapterChevrons(
     onPrevious: () -> Unit,
     onNext: () -> Unit,
+    listState: LazyListState,
+    chapter: Int,
 ) {
-    IconButton(
-        onClick = onPrevious,
-        modifier = Modifier
-            .align(Alignment.BottomStart)
-            .padding(12.dp),
-    ) {
-        Icon(Icons.Filled.ChevronLeft, contentDescription = "Capítulo anterior")
+    var previousIndex by remember { mutableIntStateOf(listState.firstVisibleItemIndex) }
+    var previousOffset by remember { mutableIntStateOf(listState.firstVisibleItemScrollOffset) }
+    var visible by remember { mutableStateOf(true) }
+
+    // Capítulo mudou: reseta visibilidade sem deixar o scroll detector interferir.
+    LaunchedEffect(chapter) {
+        visible = true
+        previousIndex = 0
+        previousOffset = 0
     }
-    IconButton(
-        onClick = onNext,
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(12.dp),
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .collect { (index, offset) ->
+                visible = when {
+                    index < previousIndex -> true
+                    index > previousIndex -> false
+                    offset < previousOffset -> true
+                    offset > previousOffset -> false
+                    else -> visible
+                }
+                previousIndex = index
+                previousOffset = offset
+            }
+    }
+
+    val chevronBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier.align(Alignment.BottomStart),
     ) {
-        Icon(Icons.Filled.ChevronRight, contentDescription = "Próximo capítulo")
+        IconButton(
+            onClick = onPrevious,
+            modifier = Modifier.padding(12.dp).size(53.dp),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = chevronBackground),
+        ) {
+            Icon(Icons.Filled.ChevronLeft, contentDescription = "Capítulo anterior")
+        }
+    }
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier.align(Alignment.BottomEnd),
+    ) {
+        IconButton(
+            onClick = onNext,
+            modifier = Modifier.padding(12.dp).size(53.dp),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = chevronBackground),
+        ) {
+            Icon(Icons.Filled.ChevronRight, contentDescription = "Próximo capítulo")
+        }
     }
 }
 
