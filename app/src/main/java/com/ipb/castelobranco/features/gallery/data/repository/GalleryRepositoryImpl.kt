@@ -4,7 +4,7 @@ import com.ipb.castelobranco.features.gallery.data.api.GalleryApi
 import com.ipb.castelobranco.features.gallery.data.dto.GalleryPhotoDto
 import com.ipb.castelobranco.features.gallery.data.local.GalleryPhotoStorage
 import com.ipb.castelobranco.features.gallery.domain.model.Album
-import com.ipb.castelobranco.features.gallery.domain.repository.DownloadProgress
+import com.ipb.castelobranco.core.domain.download.DownloadProgress
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.core.domain.error.AppError
 import kotlinx.coroutines.Dispatchers

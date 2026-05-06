@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.gallery.domain.repository
 
+import com.ipb.castelobranco.core.domain.download.DownloadProgress
 import com.ipb.castelobranco.features.gallery.domain.model.Album
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,11 +21,4 @@ interface GalleryRepository {
     suspend fun getLocalAlbums(): List<Album>
     suspend fun getThumbnailForAlbum(albumId: Long): File?
     suspend fun getPhotoName(albumId: Long, photoId: Long): String?
-}
-data class DownloadProgress(
-    val downloaded: Int,
-    val total: Int
-) {
-    val percentage: Int
-        get() = if (total == 0) 0 else (downloaded * 100) / total
 }
