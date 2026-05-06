@@ -5,6 +5,8 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
+import com.ipb.castelobranco.features.bible.domain.repository.BibleRepository
+import com.ipb.castelobranco.features.bible.domain.usecase.BibleAutoDownloadUseCase
 import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownloadUseCase
 import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
@@ -45,6 +47,8 @@ class CoreViewModelTest {
     private lateinit var authEventBus: AuthEventBus
     private lateinit var logoutUseCase: LogoutUseCase
     private lateinit var galleryAutoDownload: GalleryAutoDownloadUseCase
+    private lateinit var bibleAutoDownload: BibleAutoDownloadUseCase
+    private lateinit var bibleRepository: BibleRepository
     private lateinit var scheduleRepository: ScheduleRepository
     private lateinit var viewModel: CoreViewModel
 
@@ -68,6 +72,8 @@ class CoreViewModelTest {
         authEventBus = mockk()
         logoutUseCase = mockk()
         galleryAutoDownload = mockk()
+        bibleAutoDownload = mockk()
+        bibleRepository = mockk()
         scheduleRepository = mockk()
 
         coEvery { preloadDataUseCase() } just runs
@@ -77,6 +83,8 @@ class CoreViewModelTest {
         every { authEventBus.events } returns authEventsFlow
         coEvery { logoutUseCase() } just runs
         every { galleryAutoDownload.triggerIfNeeded() } just runs
+        every { bibleAutoDownload.triggerIfNeeded() } just runs
+        coEvery { bibleRepository.preload() } just runs
         coEvery { fetchProfileUseCase.refresh() } returns
             com.ipb.castelobranco.core.domain.snapshot.RefreshResult.NotModified
         every { fetchProfileUseCase.observe() } returns emptyFlow()
@@ -89,6 +97,8 @@ class CoreViewModelTest {
             authEventBus,
             logoutUseCase,
             galleryAutoDownload,
+            bibleAutoDownload,
+            bibleRepository,
             scheduleRepository
         )
     }

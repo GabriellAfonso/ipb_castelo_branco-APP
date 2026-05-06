@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.settings.presentation.viewmodel
 
 import androidx.appcompat.app.AppCompatDelegate
+import com.ipb.castelobranco.features.bible.domain.usecase.DeleteAndRedownloadBibleUseCase
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.features.settings.domain.model.ThemeMode
 import com.ipb.castelobranco.features.settings.domain.repository.SettingsRepository
@@ -36,6 +37,7 @@ class SettingsViewModelTest {
 
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var galleryRepository: GalleryRepository
+    private lateinit var deleteAndRedownloadBible: DeleteAndRedownloadBibleUseCase
     private lateinit var viewModel: SettingsViewModel
 
     private val themeModeFlow = MutableSharedFlow<ThemeMode>(replay = 1)
@@ -45,8 +47,9 @@ class SettingsViewModelTest {
         Dispatchers.setMain(testDispatcher)
         settingsRepository = mockk(relaxed = true)
         galleryRepository = mockk(relaxed = true)
+        deleteAndRedownloadBible = mockk(relaxed = true)
         every { settingsRepository.themeModeFlow } returns themeModeFlow
-        viewModel = SettingsViewModel(settingsRepository, galleryRepository)
+        viewModel = SettingsViewModel(settingsRepository, galleryRepository, deleteAndRedownloadBible)
     }
 
     @After
