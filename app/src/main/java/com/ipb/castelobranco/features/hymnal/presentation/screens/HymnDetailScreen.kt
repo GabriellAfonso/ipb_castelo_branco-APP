@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.hymnal.presentation.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,7 +34,9 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -82,14 +86,80 @@ fun HymnDetailContent(
     val maxFont = 32f
     val step = 1f
 
-    // Altura "alvo" do rodapé (pra dar espaço no scroll)
-    val footerOverlayPadding = 92.dp
+    var showFontBar by remember { mutableStateOf(false) }
 
     BaseScreen(
         tabName = "Hinário",
         showBackArrow = true,
         onBackClick = onBack,
-        containerColor = MaterialTheme.colorScheme.surfaceDim
+        containerColor = MaterialTheme.colorScheme.surfaceDim,
+        extraActions = {
+            IconButton(onClick = { showFontBar = !showFontBar }) {
+                Icon(
+                    imageVector = Icons.Filled.FormatSize,
+                    contentDescription = "Tamanho da fonte",
+                    tint = if (showFontBar) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.6f)
+                           else androidx.compose.ui.graphics.Color.White,
+                )
+            }
+        },
+        topBarExtension = {
+            AnimatedVisibility(visible = showFontBar) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        IconButton(
+                            onClick = { onFontSizeChange((fontSizeSp - step).coerceIn(minFont, maxFont)) }
+                        ) {
+                            Icon(imageVector = Icons.Filled.Remove, contentDescription = "Diminuir fonte")
+                        }
+                        Box(
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Slider(
+                                value = fontSizeSp,
+                                onValueChange = { onFontSizeChange(it) },
+                                valueRange = minFont..maxFont,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = Color.Transparent,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                ),
+                            )
+                            val thumbColor = MaterialTheme.colorScheme.primary
+                            Canvas(modifier = Modifier.matchParentSize().padding(horizontal = 12.dp)) {
+                                val fraction = (fontSizeSp - minFont) / (maxFont - minFont)
+                                drawCircle(
+                                    color = thumbColor,
+                                    radius = 14.dp.toPx(),
+                                    center = Offset(size.width * fraction, size.height / 2),
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = { onFontSizeChange((fontSizeSp + step).coerceIn(minFont, maxFont)) }
+                        ) {
+                            Icon(imageVector = Icons.Filled.Add, contentDescription = "Aumentar fonte")
+                        }
+                        Text(
+                            text = "${fontSizeSp.roundToInt()}sp",
+                            modifier = Modifier.padding(end = 6.dp),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        },
     ) { innerPadding ->
         if (hymn == null) {
             Text(
@@ -103,110 +173,26 @@ fun HymnDetailContent(
             return@BaseScreen
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            // Conteúdo (por baixo do rodapé)
-            SelectionContainer {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .padding(bottom = footerOverlayPadding),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Text(
-                        text = "${hymn.number} \u2022 ${hymn.title}",
-                        color = headerGreen,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-
-                    hymn.lyrics.forEach { lyric ->
-                        LyricCard(
-                            lyric = lyric,
-                            fontSizeSp = fontSizeSp
-                        )
-                    }
-                }
-            }
-
-            // Rodapé sobreposto (fica sempre visível)
-            Card(
+        SelectionContainer {
+            Column(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = { onFontSizeChange((fontSizeSp - step).coerceIn(minFont, maxFont)) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Remove,
-                            contentDescription = "Diminuir fonte"
-                        )
-                    }
+                Text(
+                    text = "${hymn.number} \u2022 ${hymn.title}",
+                    color = headerGreen,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.headlineSmall
+                )
 
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Slider(
-                            value = fontSizeSp,
-                            onValueChange = { onFontSizeChange(it) },
-                            valueRange = minFont..maxFont,
-                            colors = SliderDefaults.colors(
-                                thumbColor = Color.Transparent,
-                                activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        )
-
-                        val thumbColor = MaterialTheme.colorScheme.primary
-
-                        Canvas(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .padding(horizontal = 12.dp)
-                        ) {
-                            val fraction = (fontSizeSp - minFont) / (maxFont - minFont)
-
-                            val x = size.width * fraction
-                            val y = size.height / 2
-
-                            drawCircle(
-                                color = thumbColor,
-                                radius = 14.dp.toPx(),
-                                center = Offset(x, y)
-                            )
-                        }
-                    }
-                    IconButton(
-                        onClick = { onFontSizeChange((fontSizeSp + step).coerceIn(minFont, maxFont)) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Aumentar fonte"
-                        )
-                    }
-
-                    Text(
-                        text = "${fontSizeSp.roundToInt()}sp",
-                        modifier = Modifier.padding(end = 6.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                hymn.lyrics.forEach { lyric ->
+                    LyricCard(
+                        lyric = lyric,
+                        fontSizeSp = fontSizeSp
                     )
                 }
             }
