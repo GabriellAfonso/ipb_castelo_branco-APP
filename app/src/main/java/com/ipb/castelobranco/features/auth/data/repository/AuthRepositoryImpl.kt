@@ -67,11 +67,11 @@ class AuthRepositoryImpl @Inject constructor(
     ): Result<AuthTokens> =
         runCatching {
             val response = call()
-            Log.d("GoogleSignIn", "Response code: ${response.code()}")
+            if (BuildConfig.DEBUG) Log.d("GoogleSignIn", "Response code: ${response.code()}")
 
             if (!response.isSuccessful) {
                 val errorBody = response.errorBody()?.string()
-                Log.e("GoogleSignIn", "Erro do servidor: $errorBody")
+                if (BuildConfig.DEBUG) Log.e("GoogleSignIn", "Erro do servidor: $errorBody")
                 val code = response.code()
                 if (code == 401 || code == 403) {
                     throw AppError.Auth(message = errorBody ?: "HTTP $code")
