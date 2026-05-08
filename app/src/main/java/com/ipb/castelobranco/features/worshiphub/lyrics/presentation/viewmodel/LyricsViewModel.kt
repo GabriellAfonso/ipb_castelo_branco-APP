@@ -46,9 +46,9 @@ class LyricsViewModel @Inject constructor(
     val uiState: StateFlow<LyricsUiState> = combine(
         getLyricsUseCase.observe(),
         songsRepository.observeAllSongs(),
-        setlistPreferences.pinnedLyricsIds,
+        setlistPreferences.pinnedSongIds,
         _query,
-    ) { lyricsState, songsState, pinnedIds, query ->
+    ) { lyricsState, songsState, pinnedSongIds, query ->
         val songMap = (songsState as? SnapshotState.Data)?.value
             .orEmpty()
             .associateBy { it.id }
@@ -57,14 +57,15 @@ class LyricsViewModel @Inject constructor(
             is SnapshotState.Loading -> LyricsUiState(isLoading = true)
             is SnapshotState.Error   -> LyricsUiState(error = lyricsState.throwable.message)
             is SnapshotState.Data    -> {
-                val pinOrder = pinnedIds.withIndex().associate { (index, id) -> id to index }
+                val pinOrder = pinnedSongIds.withIndex().associate { (index, songId) -> songId to index }
                 val sorted = lyricsState.value.map { lyrics ->
                     LyricsListItem(
                         id       = lyrics.id,
+                        songId   = lyrics.songId,
                         songName = songMap[lyrics.songId]?.title ?: "Song #${lyrics.songId}",
-                        isPinned = lyrics.id in pinOrder,
+                        isPinned = lyrics.songId in pinOrder,
                     )
-                }.sortedBy { pinOrder[it.id] ?: Int.MAX_VALUE }
+                }.sortedBy { pinOrder[it.songId] ?: Int.MAX_VALUE }
 
                 val filtered = if (query.isBlank()) sorted
                 else sorted.filter { it.songName.contains(query, ignoreCase = true) }
@@ -86,7 +87,7 @@ class LyricsViewModel @Inject constructor(
         _query.value = query
     }
 
-    fun onTogglePin(id: Int) {
-        viewModelScope.launch { setlistPreferences.toggleLyrics(id) }
+    fun onTogglePin(songId: Int) {
+        viewModelScope.launch { setlistPreferences.toggleSong(songId) }
     }
 }

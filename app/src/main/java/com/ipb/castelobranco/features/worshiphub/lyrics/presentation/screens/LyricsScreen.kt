@@ -110,7 +110,7 @@ private fun LyricsContent(
                         LyricsRow(
                             item        = item,
                             onClick     = { onLyricsClick(item.id) },
-                            onTogglePin = { onTogglePin(item.id) },
+                            onTogglePin = { onTogglePin(item.songId) },
                         )
                         HorizontalDivider(
                             color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),

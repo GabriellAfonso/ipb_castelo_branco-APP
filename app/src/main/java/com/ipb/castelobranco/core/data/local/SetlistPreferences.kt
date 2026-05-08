@@ -16,46 +16,31 @@ class SetlistPreferences @Inject constructor(
     @param:SetlistPrefs private val dataStore: DataStore<Preferences>,
 ) {
     private object Keys {
-        val DATE            = stringPreferencesKey("setlist_date")
-        val CHORD_CHART_IDS = stringPreferencesKey("setlist_chord_chart_ids_v2")
-        val LYRICS_IDS      = stringPreferencesKey("setlist_lyrics_ids_v2")
+        val DATE     = stringPreferencesKey("setlist_date")
+        val SONG_IDS = stringPreferencesKey("setlist_song_ids_v1")
     }
 
     private fun today(): String =
         SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
-    val pinnedChordChartIds: Flow<List<Int>> = dataStore.data.map { prefs ->
+    val pinnedSongIds: Flow<List<Int>> = dataStore.data.map { prefs ->
         if (prefs[Keys.DATE] != today()) emptyList()
-        else prefs[Keys.CHORD_CHART_IDS].decodeIds()
+        else prefs[Keys.SONG_IDS].decodeIds()
     }
 
-    val pinnedLyricsIds: Flow<List<Int>> = dataStore.data.map { prefs ->
-        if (prefs[Keys.DATE] != today()) emptyList()
-        else prefs[Keys.LYRICS_IDS].decodeIds()
-    }
-
-    suspend fun toggleChordChart(id: Int) {
+    suspend fun toggleSong(songId: Int) {
         dataStore.edit { prefs ->
             ensureToday(prefs)
-            val updated = prefs[Keys.CHORD_CHART_IDS].decodeIds().toggle(id)
-            prefs[Keys.CHORD_CHART_IDS] = updated.encodeIds()
-        }
-    }
-
-    suspend fun toggleLyrics(id: Int) {
-        dataStore.edit { prefs ->
-            ensureToday(prefs)
-            val updated = prefs[Keys.LYRICS_IDS].decodeIds().toggle(id)
-            prefs[Keys.LYRICS_IDS] = updated.encodeIds()
+            val updated = prefs[Keys.SONG_IDS].decodeIds().toggle(songId)
+            prefs[Keys.SONG_IDS] = updated.encodeIds()
         }
     }
 
     private fun ensureToday(prefs: androidx.datastore.preferences.core.MutablePreferences) {
         val today = today()
         if (prefs[Keys.DATE] != today) {
-            prefs[Keys.DATE]            = today
-            prefs[Keys.CHORD_CHART_IDS] = ""
-            prefs[Keys.LYRICS_IDS]      = ""
+            prefs[Keys.DATE]     = today
+            prefs[Keys.SONG_IDS] = ""
         }
     }
 

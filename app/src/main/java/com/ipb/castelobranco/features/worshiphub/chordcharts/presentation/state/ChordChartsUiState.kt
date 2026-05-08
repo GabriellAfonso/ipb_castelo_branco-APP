@@ -10,6 +10,7 @@ data class ChordChartsUiState(
 
 data class ChordChartListItem(
     val id: Int,
+    val songId: Int,
     val songName: String,
     val tone: String,
     val instrument: String,
