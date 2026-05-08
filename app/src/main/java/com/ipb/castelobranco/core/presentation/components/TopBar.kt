@@ -30,7 +30,8 @@ fun TopBar(
     showBackArrow: Boolean = false,
     onMenuClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    onAccountClick: () -> Unit = {}
+    onAccountClick: () -> Unit = {},
+    extraActions: @Composable () -> Unit = {},
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -55,6 +56,7 @@ fun TopBar(
         },
         navigationIcon = { TopBarNavigation(showBackArrow, onMenuClick, onBackClick) },
         actions = {
+            extraActions()
             if (accountImageModel != null) {
                 TopBarActions(onAccountClick, accountImageModel)
             }

@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -84,6 +85,8 @@ fun BaseScreen(
     onAccountClick: (() -> Unit)? = null,
     showAccountAction: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.background,
+    extraActions: @Composable () -> Unit = {},
+    topBarExtension: @Composable (() -> Unit)? = null,
     content: @Composable (innerPadding: PaddingValues) -> Unit,
 ) {
     val context = LocalContext.current
@@ -147,15 +150,19 @@ fun BaseScreen(
         containerColor = containerColor,
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopBar(
-                tabName = tabName,
-                logo = logo,
-                accountImageModel = accountImageModel,
-                showBackArrow = showBackArrow,
-                onMenuClick = onMenuClick,
-                onBackClick = onBackClick,
-                onAccountClick = resolvedOnAccountClick
-            )
+            Column {
+                TopBar(
+                    tabName = tabName,
+                    logo = logo,
+                    accountImageModel = accountImageModel,
+                    showBackArrow = showBackArrow,
+                    onMenuClick = onMenuClick,
+                    onBackClick = onBackClick,
+                    onAccountClick = resolvedOnAccountClick,
+                    extraActions = extraActions,
+                )
+                topBarExtension?.invoke()
+            }
         }
     ) { innerPadding ->
         content(innerPadding)
