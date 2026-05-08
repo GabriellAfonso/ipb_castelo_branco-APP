@@ -19,12 +19,16 @@ App oficial da Igreja Presbiteriana de Castelo Branco. Centraliza a escala mensa
 - **Hinário Novo Cântico** — hinário oficial da Igreja Presbiteriana, com busca por número ou título e visualização completa da letra
 - **Hub para o ministério de Louvor** — letras, cifras e histórico dos louvores
 - **Tabela de músicas** — histórico de últimos cultos, repertório, músicas e tons mais usados
+- **Bíblia** — leitor offline com seleção de livro/capítulo, posição salva e download automático em background (WorkManager)
 - **Galeria** — álbuns de fotos organizados por evento, com sincronização em background via WorkManager (prioriza Wi-Fi)
 
 ### Conta de usuário
 - **Autenticação** — login com e-mail/senha ou Google (Credentials API / OAuth)
 - **Perfil** — edição de dados pessoais e foto com recorte integrado (UCrop)
 - **Configurações** — alternância de tema claro/escuro/sistema
+
+### Em desenvolvimento
+- **Estudos** — seção de estudos bíblicos (em breve)
 
 ### Área administrativa
 - **Painel admin** — dashboard de acesso rápido às ferramentas de gestão
@@ -115,6 +119,8 @@ app/src/main/java/com/ipb/castelobranco/
     ├── hymnal/         — hinário com busca
     ├── worshiphub/     — letras, cifras, tabelas de músicas
     ├── gallery/        — álbuns e galeria de fotos
+    ├── bible/          — leitor offline com WorkManager para download
+    ├── studies/        — em desenvolvimento
     ├── profile/        — perfil e foto do usuário
     ├── settings/       — tema do app
     └── admin/          — painel, editor de escala, cadastro de músicas
@@ -138,5 +144,5 @@ APIs públicas (auth) usam um `OkHttpClient` sem interceptor de token (`@AuthLes
 **Snapshot cache local**
 Dados de leitura frequente (hinário, músicas) são armazenados como JSON local via `JsonSnapshotStorage`. O app exibe dados cacheados enquanto busca atualizações em background — funcional mesmo com conexão instável.
 
-**WorkManager para galeria**
-A sincronização de fotos roda em background com `WorkManager`, com detecção de rede Wi-Fi para evitar consumo de dados móveis em downloads de imagens.
+**WorkManager para downloads em background**
+Galeria e Bíblia usam `WorkManager` para sincronização/download offline. Galeria prioriza Wi-Fi para evitar consumo de dados móveis; Bíblia baixa o conteúdo na primeira abertura via `BibleDownloadWorker`.

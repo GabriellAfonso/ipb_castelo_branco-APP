@@ -21,11 +21,12 @@ core/
 └── presentation/
     ├── CoreActivity.kt
     ├── viewmodel/CoreViewModel.kt
-    ├── screens/CoreView.kt
-    └── navigation/  — AppRoutes, AppNavHost, LocalAppNavigator
+    ├── base/BaseScreen.kt  — shared Scaffold+TopBar wrapper for all feature screens
+    ├── screens/CoreScreen.kt
+    └── navigation/  — AppRoutes, AppNavHost, LocalAppNavigator, AppNavExtensions
 features/
 ├── auth/ | profile/ | schedule/ | settings/
-└── gallery/ | hymnal/ | worshiphub/ | admin/
+└── gallery/ | hymnal/ | worshiphub/ | admin/ | bible/ | studies/
 ```
 
 **Rules:**
@@ -55,8 +56,9 @@ features/
 
 - Multiple screens → `NavGraphBuilder.xGraph()` in `XNavGraph.kt`.
 - Single screen → inline `composable {}` in `AppNavHost`.
-- Existing graphs: `authGraph`, `adminGraph`, `worshipHubGraph`, `hymnalGraph`, `galleryGraph`.
-- Register routes in `AppRoutes` before use.
+- Existing graphs: `authGraph`, `adminGraph`, `worshipHubGraph`, `hymnalGraph`, `galleryGraph`, `bibleGraph`, `studiesGraph`.
+- Top-level routes go in `AppRoutes`. Feature-internal routes use a local `XRoutes` object inside the nav graph file (e.g. `AdminRoutes`, `WorshipHubRoutes`).
+- Always use `navController.safePopBackStack()` (from `AppNavExtensions.kt`) — never raw `popBackStack()` (crashes if already at root).
 
 ## DI — Custom Qualifiers
 
@@ -115,3 +117,6 @@ Then in Android Studio: **File → Invalidate Caches → Invalidate and Restart*
 5. **Theme change:** `context.findActivity()?.recreate()` — called from Screen, never from ViewModel.
 6. **Auth/Logout:** Auth success via lambda `onAuthSuccess()` in `AppNavHost → authGraph`. Logout via `popUpTo(MAIN) { inclusive = true }`.
 7. **Share intents:** `navController.context.startActivity(Intent.createChooser(...))`.
+8. **worshiphub sub-graphs:** `worshipHubGraph` contains nested `chordChartsGraph` and `lyricsGraph` — add new screens inside the appropriate sub-graph, not directly in `worshipHubGraph`.
+9. **In-app updates:** `CoreActivity` enforces immediate Play Store updates on launch — if user cancels, app calls `finish()`. Do not remove `AppUpdateManager` logic.
+10. **`restartApp()`:** Use `activity.restartApp()` (extension in `CoreActivity.kt`) to fully restart the app — replaces manual Intent construction.
