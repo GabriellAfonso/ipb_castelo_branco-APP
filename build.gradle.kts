@@ -7,3 +7,13 @@ plugins {
     alias(libs.plugins.google.devtools.ksp) apply false
     alias(libs.plugins.dagger.hilt) apply false
 }
+
+// Redirect build output to a container-local path on Linux to avoid cross-platform cache conflicts.
+// Windows (Android Studio) keeps the default build/ dir inside the project (shared volume).
+// Linux (container) writes to /home/node/.gradle-builds/ which is NOT on the shared volume.
+val isLinux = System.getProperty("os.name").contains("Linux", ignoreCase = true)
+if (isLinux) {
+    allprojects {
+        layout.buildDirectory.set(file("/home/node/.gradle-builds/${rootProject.name}/${project.name}"))
+    }
+}
