@@ -88,7 +88,6 @@ class ScheduleViewModel @Inject constructor(
 
     init {
         logTime("ScheduleViewModel", "ViewModel criada e conectada ao fluxo reativo")
-        viewModelScope.launch { refreshMonthSchedule() }
     }
 
     fun refreshMonthSchedule(minDurationMs: Long = 600L) {
