@@ -13,4 +13,5 @@ object AppRoutes {
     const val GALLERY_GRAPH     = "graph/gallery"
     const val HYMNAL_GRAPH      = "graph/hymnal"
     const val BIBLE_GRAPH       = "graph/bible"
+    const val STUDIES_GRAPH     = "graph/studies"
 }

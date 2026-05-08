@@ -50,6 +50,7 @@ fun CoreView(
     onNavigateToGallery: () -> Unit,
     onNavigateToHymnal: () -> Unit,
     onNavigateToBible: () -> Unit,
+    onNavigateToStudies: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     onLogoutSuccess: () -> Unit,
@@ -89,6 +90,7 @@ fun CoreView(
         onNavigateToGallery    = onNavigateToGallery,
         onNavigateToHymnal     = onNavigateToHymnal,
         onNavigateToBible      = onNavigateToBible,
+        onNavigateToStudies    = onNavigateToStudies,
         onNavigateToSettings   = onNavigateToSettings,
         onNavigateToAdmin      = onNavigateToAdmin,
         authState              = authState,
@@ -105,6 +107,7 @@ fun CoreScreen(
     onNavigateToGallery: () -> Unit,
     onNavigateToHymnal: () -> Unit,
     onNavigateToBible: () -> Unit,
+    onNavigateToStudies: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     authState: UserAuthState,
@@ -140,6 +143,7 @@ fun CoreScreen(
                     onNavigateToGallery    = onNavigateToGallery,
                     onNavigateToHymnal     = onNavigateToHymnal,
                     onNavigateToBible      = onNavigateToBible,
+                    onNavigateToStudies    = onNavigateToStudies,
                 )
             }
         }
@@ -290,15 +294,16 @@ fun ButtonGrid(
     onNavigateToGallery: () -> Unit,
     onNavigateToHymnal: () -> Unit,
     onNavigateToBible: () -> Unit,
+    onNavigateToStudies: () -> Unit,
 ) {
     val iconColor = MaterialTheme.colorScheme.primaryContainer
     val buttons = listOf(
-        ButtonInfo(R.drawable.ic_worshiphub,     "Min. Louvor", iconColor, onNavigateToWorshipHub),
-        ButtonInfo(R.drawable.ic_schedule,       "Escala",      iconColor, onNavigateToSchedule),
-        ButtonInfo(R.drawable.ic_galery,         "Galeria",     iconColor, onNavigateToGallery),
-        ButtonInfo(R.drawable.ic_sarca_ipb,      "Hinário",     iconColor, onNavigateToHymnal),
-        ButtonInfo(R.drawable.ic_in_development, "Em Breve",    iconColor) { },
-        ButtonInfo(R.drawable.ic_bible,          "Bíblia",      iconColor, onNavigateToBible),
+        ButtonInfo(R.drawable.ic_worshiphub, "Min. Louvor", iconColor, onNavigateToWorshipHub),
+        ButtonInfo(R.drawable.ic_schedule,   "Escala",      iconColor, onNavigateToSchedule),
+        ButtonInfo(R.drawable.ic_galery,     "Galeria",     iconColor, onNavigateToGallery),
+        ButtonInfo(R.drawable.ic_sarca_ipb,  "Hinário",     iconColor, onNavigateToHymnal),
+        ButtonInfo(R.drawable.ic_studies,    "Estudos",     iconColor, onNavigateToStudies),
+        ButtonInfo(R.drawable.ic_bible,      "Bíblia",      iconColor, onNavigateToBible),
     )
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {

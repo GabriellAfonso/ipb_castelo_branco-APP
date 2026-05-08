@@ -21,6 +21,7 @@ import com.ipb.castelobranco.core.presentation.screens.CoreView
 import com.ipb.castelobranco.features.profile.presentation.screens.ProfileScreen
 import com.ipb.castelobranco.features.schedule.presentation.screens.MonthScheduleScreen
 import com.ipb.castelobranco.features.settings.presentation.screens.SettingsScreen
+import com.ipb.castelobranco.features.studies.presentation.navigation.studiesGraph
 import com.ipb.castelobranco.features.worshiphub.hub.presentation.navigation.worshipHubGraph
 
 @Composable
@@ -53,6 +54,7 @@ fun AppNavHost(navController: NavHostController) {
                     onNavigateToGallery    = { navController.navigate(AppRoutes.GALLERY_GRAPH) },
                     onNavigateToHymnal     = { navController.navigate(AppRoutes.HYMNAL_GRAPH) },
                     onNavigateToBible      = { navController.navigate(AppRoutes.BIBLE_GRAPH) },
+                    onNavigateToStudies    = { navController.navigate(AppRoutes.STUDIES_GRAPH) },
                     onNavigateToSettings   = { navController.navigate(AppRoutes.SETTINGS) },
                     onNavigateToAdmin      = { navController.navigate(AppRoutes.ADMIN_GRAPH) },
                     onLogoutSuccess        = {},
@@ -91,6 +93,8 @@ fun AppNavHost(navController: NavHostController) {
                     onNavigateToAuth = { navController.navigate(AppRoutes.AUTH_GRAPH) },
                 )
             }
+
+            studiesGraph(navController)
 
             composable(AppRoutes.SETTINGS) {
                 SettingsScreen(onBackClick = { navController.safePopBackStack() })
