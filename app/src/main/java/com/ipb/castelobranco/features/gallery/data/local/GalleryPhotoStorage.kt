@@ -13,10 +13,15 @@ import java.io.InputStream
 import javax.inject.Inject
 
 import android.util.Log
+import java.util.concurrent.ConcurrentHashMap
 
 class GalleryPhotoStorage(
     @ApplicationContext private val context: Context
 ) {
+
+    private val metadataCache = ConcurrentHashMap<String, GalleryPhotoDto>()
+
+    private fun cacheKey(albumId: Long, photoId: Long) = "$albumId/$photoId"
 
     private fun albumDir(albumId: Long): File =
         File(context.filesDir, "${StorageDirConstants.GALLERY}/$albumId")
@@ -45,16 +50,20 @@ class GalleryPhotoStorage(
         val jsonFile = File(dir, "$photoId.json")
         val json = Json.encodeToString(dto)
         jsonFile.writeText(json)
+        metadataCache[cacheKey(albumId, photoId)] = dto
     }
 
     fun getPhotoMetadata(
         albumId: Long,
         photoId: Long
     ): GalleryPhotoDto? {
+        val key = cacheKey(albumId, photoId)
+        metadataCache[key]?.let { return it }
+
         val jsonFile = File(albumDir(albumId), "$photoId.json")
         if (!jsonFile.exists()) return null
         return try {
-            Json.decodeFromString(jsonFile.readText())
+            Json.decodeFromString<GalleryPhotoDto>(jsonFile.readText()).also { metadataCache[key] = it }
         } catch (e: Exception) {
             Log.w("GalleryPhotoStorage", "Failed to parse metadata for photo $photoId in album $albumId", e)
             null
@@ -77,6 +86,7 @@ class GalleryPhotoStorage(
         albumDir(albumId)
             .listFiles()
             ?.forEach { it.delete() }
+        metadataCache.keys.removeAll { it.startsWith("$albumId/") }
     }
 
     fun listAllPhotos(): List<File> {
@@ -94,6 +104,7 @@ class GalleryPhotoStorage(
         if (root.exists()) {
             root.deleteRecursively()
         }
+        metadataCache.clear()
     }
 
     fun listAlbums(): List<Pair<Long, String>> {
