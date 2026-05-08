@@ -10,16 +10,29 @@ import com.ipb.castelobranco.features.settings.domain.repository.SettingsReposit
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+enum class ResetAction { GALLERY, BIBLE }
 
 data class SettingsUiState(
     val darkMode: Boolean? = null,
-    val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM
+    val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,
+    val pendingConfirmation: ResetAction? = null,
+    val galleryCleared: Boolean = false,
+    val bibleCleared: Boolean = false,
+)
+
+private data class ExtraState(
+    val pendingConfirmation: ResetAction? = null,
+    val galleryCleared: Boolean = false,
+    val bibleCleared: Boolean = false,
 )
 
 @HiltViewModel
@@ -29,35 +42,54 @@ class SettingsViewModel @Inject constructor(
     private val deleteAndRedownloadBible: DeleteAndRedownloadBibleUseCase,
 ) : ViewModel() {
 
-    val uiState: StateFlow<SettingsUiState> = repository.themeModeFlow
-        .map { mode ->
-            SettingsUiState(
-                themeMode = mode,
-                darkMode = when (mode) {
-                    ThemeMode.FOLLOW_SYSTEM -> null
-                    ThemeMode.DARK -> true
-                    ThemeMode.LIGHT -> false
-                }
-            )
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = SettingsUiState()
+    private val _extra = MutableStateFlow(ExtraState())
+
+    val uiState: StateFlow<SettingsUiState> = combine(
+        repository.themeModeFlow,
+        _extra,
+    ) { mode, extra ->
+        SettingsUiState(
+            themeMode = mode,
+            darkMode = when (mode) {
+                ThemeMode.FOLLOW_SYSTEM -> null
+                ThemeMode.DARK -> true
+                ThemeMode.LIGHT -> false
+            },
+            pendingConfirmation = extra.pendingConfirmation,
+            galleryCleared = extra.galleryCleared,
+            bibleCleared = extra.bibleCleared,
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = SettingsUiState()
+    )
 
     private val _events = MutableSharedFlow<Unit>()
     val events = _events.asSharedFlow()
 
-    fun clearGallery() {
-        viewModelScope.launch {
-            galleryRepository.clearAllPhotos()
-        }
+    fun requestReset(action: ResetAction) {
+        _extra.update { it.copy(pendingConfirmation = action) }
     }
 
-    fun clearAndRedownloadBible() {
+    fun dismissConfirmation() {
+        _extra.update { it.copy(pendingConfirmation = null) }
+    }
+
+    fun confirmReset() {
+        val action = _extra.value.pendingConfirmation ?: return
+        _extra.update { it.copy(pendingConfirmation = null) }
         viewModelScope.launch {
-            deleteAndRedownloadBible()
+            when (action) {
+                ResetAction.GALLERY -> {
+                    galleryRepository.clearAllPhotos()
+                    _extra.update { it.copy(galleryCleared = true) }
+                }
+                ResetAction.BIBLE -> {
+                    deleteAndRedownloadBible()
+                    _extra.update { it.copy(bibleCleared = true) }
+                }
+            }
         }
     }
 
