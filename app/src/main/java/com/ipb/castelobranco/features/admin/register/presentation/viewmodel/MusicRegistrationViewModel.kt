@@ -10,7 +10,10 @@ import com.ipb.castelobranco.features.admin.register.domain.validation.MusicRegi
 import com.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationEvent
 import com.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationUiState
 import com.ipb.castelobranco.features.admin.register.presentation.state.RegistrationType
-import com.ipb.castelobranco.features.admin.register.presentation.util.SundayRowManager
+import com.ipb.castelobranco.features.admin.register.presentation.util.addRow
+import com.ipb.castelobranco.features.admin.register.presentation.util.removeRow
+import com.ipb.castelobranco.features.admin.register.presentation.util.selectSong
+import com.ipb.castelobranco.features.admin.register.presentation.util.updateTone
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -137,28 +140,28 @@ class MusicRegistrationViewModel @Inject constructor(
 
     private fun selectSong(position: Int, song: Song) {
         _uiState.update { state ->
-            state.copy(sundayRows = SundayRowManager.selectSong(state.sundayRows, position, song))
+            state.copy(sundayRows = selectSong(state.sundayRows, position, song))
                 .recomputeSundayErrors()
         }
     }
 
     private fun updateTone(position: Int, tone: String) {
         _uiState.update { state ->
-            state.copy(sundayRows = SundayRowManager.updateTone(state.sundayRows, position, tone))
+            state.copy(sundayRows = updateTone(state.sundayRows, position, tone))
                 .recomputeSundayErrors()
         }
     }
 
     private fun addRow() {
         _uiState.update { state ->
-            state.copy(sundayRows = SundayRowManager.addRow(state.sundayRows))
+            state.copy(sundayRows = addRow(state.sundayRows))
                 .recomputeSundayErrors()
         }
     }
 
     private fun removeRow(position: Int) {
         _uiState.update { state ->
-            state.copy(sundayRows = SundayRowManager.removeRow(state.sundayRows, position))
+            state.copy(sundayRows = removeRow(state.sundayRows, position))
                 .recomputeSundayErrors()
         }
     }
