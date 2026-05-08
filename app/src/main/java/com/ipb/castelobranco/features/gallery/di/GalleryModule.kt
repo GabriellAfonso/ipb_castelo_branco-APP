@@ -3,6 +3,7 @@ package com.ipb.castelobranco.features.gallery.di
 import android.content.Context
 import androidx.work.WorkManager
 import com.ipb.castelobranco.core.di.AuthedRetrofit
+import com.ipb.castelobranco.core.domain.startup.Preloadable
 import com.ipb.castelobranco.features.gallery.data.api.GalleryApi
 import com.ipb.castelobranco.features.gallery.data.local.GalleryPhotoStorage
 import com.ipb.castelobranco.features.gallery.data.repository.GalleryRepositoryImpl
@@ -13,6 +14,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
@@ -42,5 +44,8 @@ abstract class GalleryModule {
         fun provideWorkManager(
             @ApplicationContext context: Context
         ): WorkManager = WorkManager.getInstance(context)
+
+        @Provides @IntoSet
+        fun bindGalleryPreloadable(r: GalleryRepository): Preloadable = Preloadable { r.preload() }
     }
 }

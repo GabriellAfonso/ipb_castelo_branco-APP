@@ -1,6 +1,8 @@
 package com.ipb.castelobranco.core.domain.usecase
 
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.ipb.castelobranco.core.domain.startup.Preloadable
+import com.ipb.castelobranco.core.domain.startup.Refreshable
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.features.hymnal.domain.repository.HymnalRepository
 import com.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
@@ -54,14 +56,26 @@ class PreloadDataUseCaseTest {
         coEvery { chordChartRepository.refresh() } returns RefreshResult.Updated
         coEvery { lyricsRepository.refresh() } returns RefreshResult.Updated
 
-        useCase = PreloadDataUseCase(
-            songsRepository,
-            hymnalRepository,
-            scheduleRepository,
-            galleryRepository,
-            chordChartRepository,
-            lyricsRepository,
+        val preloadables = setOf(
+            Preloadable { songsRepository.preload() },
+            Preloadable { scheduleRepository.preload() },
+            Preloadable { galleryRepository.preload() },
+            Preloadable { chordChartRepository.preload() },
+            Preloadable { lyricsRepository.preload() },
         )
+        val refreshables = setOf(
+            Refreshable { songsRepository.refreshAllSongs() },
+            Refreshable { songsRepository.refreshSongsBySunday() },
+            Refreshable { songsRepository.refreshTopSongs() },
+            Refreshable { songsRepository.refreshTopTones() },
+            Refreshable { songsRepository.refreshSuggestedSongs() },
+            Refreshable { hymnalRepository.refreshHymnal() },
+            Refreshable { scheduleRepository.refreshMonthSchedule() },
+            Refreshable { chordChartRepository.refresh() },
+            Refreshable { lyricsRepository.refresh() },
+        )
+
+        useCase = PreloadDataUseCase(preloadables, refreshables)
     }
 
     // region preload phase — all repos called

@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.hymnal.di
 
 import com.ipb.castelobranco.core.di.AuthLessRetrofit
+import com.ipb.castelobranco.core.domain.startup.Refreshable
 import com.ipb.castelobranco.features.hymnal.data.api.HymnalApi
 import com.ipb.castelobranco.features.hymnal.data.repository.HymnalRepositoryImpl
 import com.ipb.castelobranco.features.hymnal.domain.repository.HymnalRepository
@@ -9,6 +10,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
 import javax.inject.Singleton
 import retrofit2.Retrofit
 
@@ -26,5 +28,8 @@ abstract class HymnalModule {
         fun provideHymnalApi(
             @AuthLessRetrofit retrofit: Retrofit
         ): HymnalApi = retrofit.create(HymnalApi::class.java)
+
+        @Provides @IntoSet
+        fun bindHymnalRefreshable(r: HymnalRepository): Refreshable = Refreshable { r.refreshHymnal() }
     }
 }
