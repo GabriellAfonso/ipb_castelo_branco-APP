@@ -5,15 +5,10 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <!-- Auth tokens must never be backed up — restoring them on another device = active session without password -->
+        <exclude domain="file" path="datastore/auth_prefs.preferences_pb"/>
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="file" path="datastore/auth_prefs.preferences_pb"/>
     </device-transfer>
-    -->
 </data-extraction-rules>

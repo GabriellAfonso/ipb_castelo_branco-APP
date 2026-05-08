@@ -6,8 +6,6 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Auth tokens must never be backed up — restoring them on another device = active session without password -->
+    <exclude domain="file" path="datastore/auth_prefs.preferences_pb"/>
 </full-backup-content>
