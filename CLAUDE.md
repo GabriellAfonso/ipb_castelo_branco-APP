@@ -86,6 +86,13 @@ Stack: `JUnit4` + `MockK` + `kotlinx-coroutines-test` + `turbine`. Minimum: happ
 
 **Gradle cache — never use** `clean`, `--rerun-tasks`, or `--no-daemon` before running tests (destroys KSP cache, turns seconds into 15+ min). Use `clean` only for unexplainable build errors.
 
+**Cross-platform cache (Windows host + Linux container):** `build/` and `.gradle/` inside the project are shared via volume mount. Compiled artifacts are platform-specific — running Gradle on both environments corrupts the cache. **Rule: always build/test inside the container only.** If Android Studio (Windows) needs to run, clean first:
+```bash
+./gradlew clean
+rm -rf .gradle
+```
+Then in Android Studio: **File → Invalidate Caches → Invalidate and Restart**. Whoever ran last "owns" the cache — switching environments always requires cleaning first. If tests fail with inexplicable KSP/compilation errors, this cross-platform cache conflict is the likely cause.
+
 `sdk.dir` in `local.properties` → `/home/node/.local/android-sdk`
 
 ## Code
