@@ -56,26 +56,35 @@ class ScheduleViewModel @Inject constructor(
         )
 
     private fun findNextSection(sections: List<ScheduleSectionUi>): ScheduleSectionUi? {
-        // Dias que existem: TUESDAY=3, THURSDAY=5, SUNDAY=1
-        // Calendar.DAY_OF_WEEK: Dom=1, Seg=2, Ter=3, Qua=4, Qui=5, Sex=6, Sab=7
-        val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+        val calendar = Calendar.getInstance()
+        val today = calendar.get(Calendar.DAY_OF_WEEK)
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
-        // Para cada dia da semana, qual é o próximo culto?
-        // Ex: Seg(2)->Ter(3), Ter(3)->Qui(5), Qua(4)->Qui(5), Qui(5)->Dom(1), Sex(6)->Dom(1), Sab(7)->Dom(1), Dom(1)->Ter(3)
-        val nextMeetingKeyword = when (today) {
-            Calendar.MONDAY -> "Terça"
-            Calendar.TUESDAY -> "Quinta"  // Após a terça, próximo é quinta
-            Calendar.WEDNESDAY -> "Quinta"
-            Calendar.THURSDAY -> "Domingo" // Após quinta, próximo é domingo
-            Calendar.FRIDAY, Calendar.SATURDAY -> "Domingo"
-            Calendar.SUNDAY -> "Terça"   // Após domingo, próximo é terça
-            else -> "Terça"
+        // If today is a meeting day and the meeting hasn't started yet, show today's section
+        val todayKeyword = when (today) {
+            Calendar.TUESDAY  -> "Terça"
+            Calendar.THURSDAY -> "Quinta"
+            Calendar.SUNDAY   -> "Domingo"
+            else              -> null
+        }
+        if (todayKeyword != null && currentHour < 22) {
+            val todaySection = sections.firstOrNull { it.title.contains(todayKeyword, ignoreCase = true) }
+            if (todaySection != null) return todaySection
         }
 
-        return sections.firstOrNull { section ->
-            section.title.contains(nextMeetingKeyword, ignoreCase = true)
+        val nextKeyword = when (today) {
+            Calendar.MONDAY              -> "Terça"
+            Calendar.TUESDAY             -> "Quinta"
+            Calendar.WEDNESDAY           -> "Quinta"
+            Calendar.THURSDAY            -> "Domingo"
+            Calendar.FRIDAY,
+            Calendar.SATURDAY            -> "Domingo"
+            Calendar.SUNDAY              -> "Terça"
+            else                         -> "Terça"
         }
+        return sections.firstOrNull { it.title.contains(nextKeyword, ignoreCase = true) }
     }
+
 
     init {
         logTime("ScheduleViewModel", "ViewModel criada e conectada ao fluxo reativo")
