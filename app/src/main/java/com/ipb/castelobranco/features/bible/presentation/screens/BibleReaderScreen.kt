@@ -107,17 +107,25 @@ fun BibleReaderScreen(
 
     Scaffold(
         topBar = {
-            BibleReaderToolbar(
-                bookName = book?.name ?: "Bíblia",
-                chapter = state.position.chapter,
-                activeTranslation = state.activeTranslation,
-                cachedTranslations = state.cachedTranslations,
-                onBack = onBack,
-                onBookClick = { onOpenIndex("book") },
-                onChapterClick = { onOpenIndex("chapter") },
-                onTranslationSelected = viewModel::setActiveTranslation,
-                onFontSizeClick = { showFontBar = !showFontBar },
-            )
+            Column {
+                BibleReaderToolbar(
+                    bookName = book?.name ?: "Bíblia",
+                    chapter = state.position.chapter,
+                    activeTranslation = state.activeTranslation,
+                    cachedTranslations = state.cachedTranslations,
+                    onBack = onBack,
+                    onBookClick = { onOpenIndex("book") },
+                    onChapterClick = { onOpenIndex("chapter") },
+                    onTranslationSelected = viewModel::setActiveTranslation,
+                    onFontSizeClick = { showFontBar = !showFontBar },
+                )
+                if (showFontBar) {
+                    BibleFontSizeBar(
+                        fontSizeSp = state.fontSize,
+                        onFontSizeChange = viewModel::setFontSize,
+                    )
+                }
+            }
         },
         bottomBar = {
             if (state.selectedVerses.isNotEmpty()) {
@@ -125,11 +133,6 @@ fun BibleReaderScreen(
                     onCopy = viewModel::copySelected,
                     onShare = viewModel::shareSelected,
                     onCancel = viewModel::clearSelection,
-                )
-            } else if (showFontBar) {
-                BibleFontSizeBar(
-                    fontSizeSp = state.fontSize,
-                    onFontSizeChange = viewModel::setFontSize,
                 )
             }
         },
