@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
-import com.ipb.castelobranco.core.domain.snapshot.logTime
 import com.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
 import com.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
 import com.ipb.castelobranco.features.schedule.presentation.components.ScheduleSectionUi
@@ -85,10 +84,6 @@ class ScheduleViewModel @Inject constructor(
         return sections.firstOrNull { it.title.contains(nextKeyword, ignoreCase = true) }
     }
 
-
-    init {
-        logTime("ScheduleViewModel", "ViewModel criada e conectada ao fluxo reativo")
-    }
 
     fun refreshMonthSchedule(minDurationMs: Long = 600L) {
         if (_isRefreshing.value) return

@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ipb.castelobranco.core.domain.snapshot.logTime
 
 @Immutable
 data class ScheduleRowUi(
@@ -46,7 +45,6 @@ fun MonthScheduleTable(
 
     if (sections.isEmpty()) {
         EmptyScheduleState(modifier = modifier.fillMaxWidth())
-        logTime("EmptyScheduleState", "EmptyScheduleState exibido")
         return
     }
 
@@ -54,11 +52,9 @@ fun MonthScheduleTable(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp) // reduzido de 12.dp
     ) {
-        logTime("schedule", "Vai carregar a schedule")
         sections.forEach { section ->
             SectionCard(section = section)
         }
-        logTime("schedule", "carregou a schedule")
     }
 }
 

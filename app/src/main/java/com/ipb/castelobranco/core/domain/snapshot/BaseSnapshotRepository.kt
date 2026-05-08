@@ -1,7 +1,5 @@
 package com.ipb.castelobranco.core.domain.snapshot
 
-import android.os.SystemClock
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -10,9 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-inline fun logTime(tag: String, message: String) {
-    Log.d(tag, "[${SystemClock.elapsedRealtime()} ms] $message")
-}
 abstract class BaseSnapshotRepository<Dto, Domain>(
     private val cache: SnapshotCache<Dto>,
     private val fetcher: SnapshotFetcher<Dto>,
