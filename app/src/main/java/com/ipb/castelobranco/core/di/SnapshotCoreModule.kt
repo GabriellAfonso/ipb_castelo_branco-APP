@@ -32,17 +32,12 @@ object SnapshotCoreModule {
     ): SnapshotStorage =
         JsonSnapshotStorage(context)
 
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object SnapshotFactoryModule {
-
-        @Provides
-        @Singleton
-        fun provideSnapshotCacheFactory(
-            storage: SnapshotStorage,
-            json: Json
-        ): SnapshotCacheFactory =
-            SnapshotCacheFactory(storage, json)
-    }
+    @Provides
+    @Singleton
+    fun provideSnapshotCacheFactory(
+        storage: SnapshotStorage,
+        json: Json
+    ): SnapshotCacheFactory =
+        SnapshotCacheFactory(storage, json)
 
 }
