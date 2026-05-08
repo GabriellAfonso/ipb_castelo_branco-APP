@@ -21,4 +21,6 @@ class FetchProfileUseCase @Inject constructor(
     fun getLocalPhoto(): File? = repository.getLocalProfilePhoto()
 
     suspend fun clearLocalPhoto(): Result<Unit> = repository.clearLocalProfilePhoto()
+
+    suspend fun clearSnapshot() = repository.clearProfileSnapshot()
 }

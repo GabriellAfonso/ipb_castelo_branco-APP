@@ -118,6 +118,7 @@ class CoreViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             fetchProfileUseCase.clearLocalPhoto()
+            fetchProfileUseCase.clearSnapshot()
             scheduleRepository.clearScheduleCache()
             logoutUseCase()
             _events.trySend(CoreEvent.LogoutSuccess)

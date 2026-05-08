@@ -23,5 +23,7 @@ interface ProfileRepository {
 
     suspend fun clearLocalProfilePhoto(): Result<Unit>
 
+    suspend fun clearProfileSnapshot()
+
     fun getLocalProfilePhoto(): File?
 }
