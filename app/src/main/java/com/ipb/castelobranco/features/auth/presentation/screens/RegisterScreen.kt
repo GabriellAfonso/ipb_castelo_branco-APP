@@ -76,7 +76,6 @@ fun RegisterScreen(
         logoRes = R.drawable.ic_auth_register,
         showBackArrow = true,
         onBackClick = onBackClick,
-        showAccountAction = false
     ) { innerPadding ->
         Column(
             modifier = Modifier

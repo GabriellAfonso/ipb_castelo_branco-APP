@@ -122,8 +122,9 @@ fun CoreScreen(
         onLogout             = onLogout,
     ) { openDrawer ->
         BaseScreen(
-            tabName     = stringResource(R.string.app_name),
-            onMenuClick = openDrawer,
+            tabName           = stringResource(R.string.app_name),
+            onMenuClick       = openDrawer,
+            showAccountAction = true,
         ) { innerPadding ->
             Column(
                 modifier            = Modifier

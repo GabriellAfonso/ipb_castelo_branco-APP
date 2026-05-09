@@ -142,7 +142,6 @@ fun AuthScreen(
         logoRes = R.drawable.ic_auth_login,
         showBackArrow = true,
         onBackClick = onBackClick,
-        showAccountAction = false
     ) { innerPadding ->
         Column(
             modifier = Modifier

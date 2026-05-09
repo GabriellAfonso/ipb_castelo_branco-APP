@@ -79,7 +79,6 @@ fun BibleIndexScreen(
         tabName = "Bíblia",
         showBackArrow = true,
         onBackClick = onBack,
-        showAccountAction = false,
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             TabRow(selectedTabIndex = selectedTab.ordinal) {

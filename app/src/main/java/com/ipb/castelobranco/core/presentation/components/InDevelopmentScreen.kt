@@ -29,7 +29,6 @@ fun InDevelopmentScreen(
         logoRes = R.drawable.ic_in_development,
         showBackArrow = true,
         onBackClick = onBack,
-        showAccountAction = true
     ) { innerPadding: PaddingValues ->
         Column(
             modifier = Modifier.fillMaxSize(),

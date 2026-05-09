@@ -112,7 +112,6 @@ fun SettingsContent(
         logoRes           = R.drawable.ic_sarca_ipb,
         showBackArrow     = true,
         onBackClick       = onBackClick,
-        showAccountAction = false,
     ) { innerPadding ->
         Column(
             modifier = Modifier

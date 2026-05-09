@@ -117,7 +117,6 @@ fun ProfileScreen(
         logoRes = R.drawable.ic_profile,
         showBackArrow = true,
         onBackClick = onBackClick,
-        showAccountAction = false
     ) { innerPadding ->
         Column(
             modifier = Modifier

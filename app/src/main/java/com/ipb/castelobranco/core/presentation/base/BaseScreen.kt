@@ -83,7 +83,7 @@ fun BaseScreen(
     onMenuClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
     onAccountClick: (() -> Unit)? = null,
-    showAccountAction: Boolean = true,
+    showAccountAction: Boolean = false,
     containerColor: Color = MaterialTheme.colorScheme.background,
     extraActions: @Composable () -> Unit = {},
     topBarExtension: @Composable (() -> Unit)? = null,
