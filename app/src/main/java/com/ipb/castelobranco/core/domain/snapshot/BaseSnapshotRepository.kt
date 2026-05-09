@@ -32,6 +32,10 @@ abstract class BaseSnapshotRepository<Dto, Domain>(
 
     fun getCurrentState(): SnapshotState<Domain> = _state.value
 
+    protected fun emitError(throwable: Throwable) {
+        _state.value = SnapshotState.Error(throwable)
+    }
+
     suspend fun clearCache() {
         withContext(Dispatchers.IO) { cache.clear() }
         _state.value = SnapshotState.Loading
