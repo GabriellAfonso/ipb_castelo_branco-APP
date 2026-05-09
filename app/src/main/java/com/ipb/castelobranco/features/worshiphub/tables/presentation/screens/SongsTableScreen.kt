@@ -16,11 +16,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,7 +48,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -89,8 +92,6 @@ fun WorshipSongsTableScreen(
     onBackClick: () -> Unit,
     viewModel: SongsTableViewModel
 ) {
-    LaunchedEffect(Unit) { viewModel.initialize() }
-
     val state = WorshipSongsUiState(
         sundays = viewModel.lastSundays.collectAsStateWithLifecycle().value,
         topSongs = viewModel.topSongs.collectAsStateWithLifecycle().value,
@@ -226,11 +227,9 @@ fun WorshipSongsTableContent(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
                             text = {
-                                Text(
+                                AutoSizeTabText(
                                     text = title,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = 13.sp,
-                                    softWrap = !isSingleWord,
                                     maxLines = if (isSingleWord) 1 else 2,
                                 )
                             }
@@ -296,16 +295,7 @@ private fun <T> SnapshotContent(
     content: @Composable (T) -> Unit,
 ) {
     when (state) {
-        is SnapshotState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        }
+        is SnapshotState.Loading -> {}
         is SnapshotState.Data -> content(state.value)
         is SnapshotState.Error -> {
             Box(
@@ -322,4 +312,33 @@ private fun <T> SnapshotContent(
             }
         }
     }
+}
+
+@Composable
+private fun AutoSizeTabText(
+    text: String,
+    color: Color,
+    maxLines: Int,
+    maxFontSize: TextUnit = 13.sp,
+    minFontSize: TextUnit = 9.sp,
+    stepSize: TextUnit = 0.5.sp,
+) {
+    var fontSize by remember(text) { mutableStateOf(maxFontSize) }
+    var readyToDraw by remember(text) { mutableStateOf(false) }
+
+    Text(
+        text = text,
+        color = color,
+        fontSize = fontSize,
+        maxLines = maxLines,
+        textAlign = TextAlign.Center,
+        onTextLayout = { result ->
+            if (result.hasVisualOverflow && fontSize > minFontSize) {
+                fontSize = (fontSize.value - stepSize.value).coerceAtLeast(minFontSize.value).sp
+            } else {
+                readyToDraw = true
+            }
+        },
+        modifier = Modifier.drawWithContent { if (readyToDraw) drawContent() },
+    )
 }
