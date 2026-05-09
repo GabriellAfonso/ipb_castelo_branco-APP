@@ -119,7 +119,7 @@ class BibleViewModel @Inject constructor(
         _selectedVerses,
     ) { base, font, status, selected ->
         base.copy(fontSize = font, download = status, selectedVerses = selected)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BibleUiState())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, BibleUiState())
 
     private val _events = Channel<BibleUiEvent>(capacity = Channel.BUFFERED)
     val events = _events.receiveAsFlow()

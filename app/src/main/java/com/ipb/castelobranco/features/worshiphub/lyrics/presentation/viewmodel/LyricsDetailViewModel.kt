@@ -51,13 +51,13 @@ class LyricsDetailViewModel @Inject constructor(
         }
     }.stateIn(
         scope        = viewModelScope,
-        started      = SharingStarted.WhileSubscribed(5_000),
+        started      = SharingStarted.Eagerly,
         initialValue = LyricsDetailUiState(isLoading = true),
     )
 
     val scrollMode: StateFlow<SongScrollMode> = themePreferences.songScrollModeFlow.stateIn(
         scope        = viewModelScope,
-        started      = SharingStarted.WhileSubscribed(5_000),
+        started      = SharingStarted.Eagerly,
         initialValue = SongScrollMode.HORIZONTAL,
     )
 

@@ -37,23 +37,23 @@ class SongsTableViewModel @Inject constructor(
 
     val allSongs: StateFlow<List<Song>> = repository.observeAllSongs()
         .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun refreshAllSongs() {
         viewModelScope.launch { runCatching { repository.refreshAllSongs() } }
     }
 
     val lastSundays: StateFlow<SnapshotState<List<SundaySet>>> = repository.observeSongsBySunday()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, SnapshotState.Loading)
 
     val topSongs: StateFlow<SnapshotState<List<TopSong>>> = repository.observeTopSongs()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, SnapshotState.Loading)
 
     val topTones: StateFlow<SnapshotState<List<TopTone>>> = repository.observeTopTones()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, SnapshotState.Loading)
 
     val suggestedSongs: StateFlow<SnapshotState<List<SuggestedSong>>> = repository.observeSuggestedSongs()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, SnapshotState.Loading)
 
     private val _isRefreshingSuggestedSongs = MutableStateFlow(false)
     val isRefreshingSuggestedSongs: StateFlow<Boolean> = _isRefreshingSuggestedSongs.asStateFlow()
