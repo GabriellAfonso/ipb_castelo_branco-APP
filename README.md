@@ -4,9 +4,9 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?style=flat&logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-BOM%202026.02-4285F4?style=flat&logo=jetpackcompose&logoColor=white)
 ![Min SDK](https://img.shields.io/badge/minSdk-24-brightgreen?style=flat)
-[![Play Store](https://img.shields.io/badge/Play%20Store-Disponível-34A853?style=flat&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=com.ipb.castelobranco)
+<a href="https://play.google.com/store/apps/details?id=com.ipb.castelobranco" target="_blank"><img src="https://img.shields.io/badge/Play%20Store-Disponível-34A853?style=flat&logo=googleplay&logoColor=white" alt="Play Store"></a>
 
-> **Em produção** — disponível publicamente na Google Play Store.
+> **Em produção** — <a href="https://play.google.com/store/apps/details?id=com.ipb.castelobranco" target="_blank">disponível publicamente na Google Play Store</a>.
 
 App oficial da Igreja Presbiteriana de Castelo Branco. Centraliza a escala mensal de responsabilidades, hinário, ferramentas de louvor e área administrativa em um único lugar — substituindo o uso disperso de planilhas, PDFs e grupos de mensagens.
 
@@ -58,12 +58,9 @@ App oficial da Igreja Presbiteriana de Castelo Branco. Centraliza a escala mensa
 
 ## Screenshots
 
-<!-- Adicione as imagens abaixo após capturar as telas no emulador/dispositivo -->
-<!--
-| Login | Agenda | Hub de Louvor | Galeria |
-|-------|--------|---------------|---------|
-| ![login](screenshots/login.png) | ![agenda](screenshots/schedule.png) | ![louvor](screenshots/worship.png) | ![galeria](screenshots/gallery.png) |
--->
+| Home | Tabelas | Bíblia | Hinário |
+|------|---------|--------|---------|
+| <img src="screenshots/home.jpeg" width="180"> | <img src="screenshots/tabelas.jpeg" width="180"> | <img src="screenshots/biblia.jpeg" width="180"> | <img src="screenshots/hinario.jpeg" width="180"> |
 
 ---
 
