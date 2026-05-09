@@ -24,9 +24,10 @@ fun GalleryScreen(
     nav: GalleryNav,
     viewModel: GalleryViewModel,
     albums: List<Album>,
+    isLoggedIn: Boolean,
     onNavigateToAuth: () -> Unit,
 ) {
-    GalleryContent(actions = nav, viewModel = viewModel, albums = albums, onNavigateToAuth = onNavigateToAuth)
+    GalleryContent(actions = nav, viewModel = viewModel, albums = albums, isLoggedIn = isLoggedIn, onNavigateToAuth = onNavigateToAuth)
 }
 
 @Composable
@@ -34,6 +35,7 @@ fun GalleryContent(
     viewModel: GalleryViewModel,
     actions: GalleryNav,
     albums: List<Album>,
+    isLoggedIn: Boolean = true,
     onNavigateToAuth: () -> Unit = {},
 ) {
     val downloadState by viewModel.downloadState.collectAsState()
@@ -50,6 +52,20 @@ fun GalleryContent(
                 .fillMaxSize()
                 .padding(padding),
         ) {
+            if (!isLoggedIn) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    PermissionErrorPlaceholder(
+                        message = "Faça login para acessar a galeria.",
+                        onLoginClick = onNavigateToAuth,
+                        showLoginButton = true,
+                    )
+                }
+                return@BaseScreen
+            }
+
             // Banner de progresso não-bloqueante (visível mesmo com álbuns na grid)
             when {
                 downloadState.error != null -> { /* tratado no bloco abaixo */ }

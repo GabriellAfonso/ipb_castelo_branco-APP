@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.ipb.castelobranco.core.presentation.navigation.safePopBackStack
+import com.ipb.castelobranco.core.presentation.viewmodel.CoreViewModel
 import com.ipb.castelobranco.features.gallery.presentation.screens.AlbumScreen
 import com.ipb.castelobranco.features.gallery.presentation.screens.GalleryScreen
 import com.ipb.castelobranco.features.gallery.presentation.screens.PhotoScreen
@@ -47,9 +48,12 @@ fun NavGraphBuilder.galleryGraph(
     ) {
         composable(GalleryRoutes.Gallery) { entry ->
             val graphEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.GALLERY_GRAPH) }
+            val coreEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.CORE) }
             val viewModel: GalleryViewModel = hiltViewModel(graphEntry)
+            val coreViewModel: CoreViewModel = hiltViewModel(coreEntry)
             val albums by viewModel.albums.collectAsState()
-            GalleryScreen(nav = nav(), viewModel = viewModel, albums = albums, onNavigateToAuth = onNavigateToAuth)
+            val isLoggedIn by coreViewModel.isLoggedIn.collectAsState()
+            GalleryScreen(nav = nav(), viewModel = viewModel, albums = albums, isLoggedIn = isLoggedIn, onNavigateToAuth = onNavigateToAuth)
         }
 
         composable(
