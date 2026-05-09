@@ -241,13 +241,14 @@ fun SundaySongRow(
                 value = state.tone,
                 onValueChange = { },
                 readOnly = true,
-                label = { Text("Tom") },
+                placeholder = { Text("Tom", style = MaterialTheme.typography.bodySmall) },
                 singleLine = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTone) },
                 colors = fieldColors,
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
+                    .height(48.dp)
             )
 
             ExposedDropdownMenu(
