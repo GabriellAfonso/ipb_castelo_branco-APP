@@ -31,6 +31,9 @@ class LyricsViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val pinnedSongs = setlistPreferences.pinnedSongIds
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     fun refresh(minDurationMs: Long = 600L) {
         if (_isRefreshing.value) return
         viewModelScope.launch {
@@ -46,7 +49,7 @@ class LyricsViewModel @Inject constructor(
     val uiState: StateFlow<LyricsUiState> = combine(
         getLyricsUseCase.observe(),
         songsRepository.observeAllSongs(),
-        setlistPreferences.pinnedSongIds,
+        pinnedSongs,
         _query,
     ) { lyricsState, songsState, pinnedSongIds, query ->
         val songMap = (songsState as? SnapshotState.Data)?.value

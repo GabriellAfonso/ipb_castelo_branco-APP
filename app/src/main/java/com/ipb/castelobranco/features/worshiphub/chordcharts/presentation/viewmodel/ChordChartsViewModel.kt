@@ -31,6 +31,9 @@ class ChordChartsViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val pinnedSongs = setlistPreferences.pinnedSongIds
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     fun refresh(minDurationMs: Long = 600L) {
         if (_isRefreshing.value) return
         viewModelScope.launch {
@@ -46,7 +49,7 @@ class ChordChartsViewModel @Inject constructor(
     val uiState: StateFlow<ChordChartsUiState> = combine(
         getChordChartsUseCase.observe(),
         songsRepository.observeAllSongs(),
-        setlistPreferences.pinnedSongIds,
+        pinnedSongs,
         _query,
     ) { chartsState, songsState, pinnedSongIds, query ->
         val songMap = (songsState as? SnapshotState.Data)?.value
