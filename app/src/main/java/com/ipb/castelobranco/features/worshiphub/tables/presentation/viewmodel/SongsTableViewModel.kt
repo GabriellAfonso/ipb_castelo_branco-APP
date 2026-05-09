@@ -85,13 +85,6 @@ class SongsTableViewModel @Inject constructor(
     )
     val repertoireRows: StateFlow<List<RepertoireRowState>> = _repertoireRows.asStateFlow()
 
-    fun initialize() {
-        viewModelScope.launch {
-            runCatching { repository.refreshSongsBySunday() }
-        }
-        refreshAllSongs()
-    }
-
     fun selectSong(position: Int, song: Song?) {
         val autoTone = song?.let { mostUsedToneFor(it) } ?: ""
         _repertoireRows.update { rows ->

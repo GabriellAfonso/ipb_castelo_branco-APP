@@ -494,21 +494,4 @@ class SongsTableViewModelTest {
 
     // endregion
 
-    // region initialize
-
-    @Test
-    fun `initialize calls refreshSongsBySunday`() = runTest {
-        viewModel.initialize()
-        advanceUntilIdle()
-        coVerify(atLeast = 1) { repository.refreshSongsBySunday() }
-    }
-
-    @Test
-    fun `initialize calls refreshAllSongs to populate dropdowns`() = runTest {
-        viewModel.initialize()
-        advanceUntilIdle()
-        coVerify(atLeast = 1) { repository.refreshAllSongs() }
-    }
-
-    // endregion
 }
