@@ -8,4 +8,5 @@ import kotlinx.coroutines.flow.Flow
 interface HymnalRepository {
     fun observeHymnal(): Flow<SnapshotState<List<Hymn>>>
     suspend fun refreshHymnal(): RefreshResult
+    suspend fun preload()
 }

@@ -30,4 +30,6 @@ class HymnalRepositoryImpl @Inject constructor(
     override fun observeHymnal(): Flow<SnapshotState<List<Hymn>>> = observe()
 
     override suspend fun refreshHymnal(): RefreshResult = refresh()
+
+    // preload() is inherited from BaseSnapshotRepository
 }

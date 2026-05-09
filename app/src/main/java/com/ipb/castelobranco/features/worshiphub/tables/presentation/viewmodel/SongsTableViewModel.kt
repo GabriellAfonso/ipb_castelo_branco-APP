@@ -43,21 +43,17 @@ class SongsTableViewModel @Inject constructor(
         viewModelScope.launch { runCatching { repository.refreshAllSongs() } }
     }
 
-    val lastSundays: StateFlow<List<SundaySet>> = repository.observeSongsBySunday()
-        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val lastSundays: StateFlow<SnapshotState<List<SundaySet>>> = repository.observeSongsBySunday()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
 
-    val topSongs: StateFlow<List<TopSong>> = repository.observeTopSongs()
-        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val topSongs: StateFlow<SnapshotState<List<TopSong>>> = repository.observeTopSongs()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
 
-    val topTones: StateFlow<List<TopTone>> = repository.observeTopTones()
-        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val topTones: StateFlow<SnapshotState<List<TopTone>>> = repository.observeTopTones()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
 
-    val suggestedSongs: StateFlow<List<SuggestedSong>> = repository.observeSuggestedSongs()
-        .map { state -> if (state is SnapshotState.Data) state.value else emptyList() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val suggestedSongs: StateFlow<SnapshotState<List<SuggestedSong>>> = repository.observeSuggestedSongs()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SnapshotState.Loading)
 
     private val _isRefreshingSuggestedSongs = MutableStateFlow(false)
     val isRefreshingSuggestedSongs: StateFlow<Boolean> = _isRefreshingSuggestedSongs.asStateFlow()
@@ -130,7 +126,8 @@ class SongsTableViewModel @Inject constructor(
     }
 
     private fun mostUsedToneFor(song: Song): String {
-        return lastSundays.value
+        val sundays = (lastSundays.value as? SnapshotState.Data)?.value ?: return ""
+        return sundays
             .flatMap { it.songs }
             .filter { it.title == song.title && it.artist == song.artist }
             .takeIf { it.isNotEmpty() }

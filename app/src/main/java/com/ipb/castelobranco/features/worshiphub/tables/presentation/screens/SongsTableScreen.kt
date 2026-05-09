@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
+import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
@@ -42,6 +43,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -62,9 +65,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 
 data class WorshipSongsUiState(
-    val sundays: List<SundaySet> = emptyList(),
-    val topSongs: List<TopSong> = emptyList(),
-    val topTones: List<TopTone> = emptyList(),
+    val sundays: SnapshotState<List<SundaySet>> = SnapshotState.Loading,
+    val topSongs: SnapshotState<List<TopSong>> = SnapshotState.Loading,
+    val topTones: SnapshotState<List<TopTone>> = SnapshotState.Loading,
     val repertoireRows: List<RepertoireRowState> = emptyList(),
     val allSongs: List<Song> = emptyList(),
     val isRefreshingSuggestions: Boolean = false,
@@ -237,9 +240,15 @@ fun WorshipSongsTableContent(
 
                 SelectionContainer {
                     when (selectedTabIndex) {
-                        0 -> LastSundaysTab(sundays = state.sundays, searchQuery = searchQuery)
-                        1 -> TopSongsTab(topSongs = state.topSongs)
-                        2 -> TopTonesTab(topTones = state.topTones)
+                        0 -> SnapshotContent(state.sundays) { data ->
+                            LastSundaysTab(sundays = data, searchQuery = searchQuery)
+                        }
+                        1 -> SnapshotContent(state.topSongs) { data ->
+                            TopSongsTab(topSongs = data)
+                        }
+                        2 -> SnapshotContent(state.topTones) { data ->
+                            TopTonesTab(topTones = data)
+                        }
                         3 -> DisableSelection {
                             RepertoireTab(
                                 rows = state.repertoireRows,
@@ -275,6 +284,40 @@ fun WorshipSongsTableContent(
                 Icon(
                     imageVector = if (showSearch) Icons.Default.Close else Icons.Default.Search,
                     contentDescription = "Buscar"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T> SnapshotContent(
+    state: SnapshotState<T>,
+    content: @Composable (T) -> Unit,
+) {
+    when (state) {
+        is SnapshotState.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is SnapshotState.Data -> content(state.value)
+        is SnapshotState.Error -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "Erro ao carregar dados",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
             }
         }

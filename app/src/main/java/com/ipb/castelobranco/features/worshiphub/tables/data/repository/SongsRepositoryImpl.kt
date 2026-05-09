@@ -66,7 +66,6 @@ class SongsRepositoryImpl @Inject constructor(
                 _suggestedSongsState.value = SnapshotState.Data(cached.toDomain())
             }
         }
-        _suggestedSongsState.value = SnapshotState.Loading
         return when (val result = suggestedSongsFetcher.fetch(fixedByPosition)) {
             is NetworkResult.Success -> {
                 suggestedSongsCache.save(result.body, result.etag)
@@ -88,6 +87,10 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun refreshAllSongs(): RefreshResult =
         allSongsSnapshot.refresh()
 
-    override suspend fun preload() =
+    override suspend fun preload() {
         allSongsSnapshot.preload()
+        songsBySundaySnapshot.preload()
+        topSongsSnapshot.preload()
+        topTonesSnapshot.preload()
+    }
 }
