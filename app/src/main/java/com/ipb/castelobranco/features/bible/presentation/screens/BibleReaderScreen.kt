@@ -109,7 +109,7 @@ fun BibleReaderScreen(
         topBar = {
             Column {
                 BibleReaderToolbar(
-                    bookName = book?.name ?: "Bíblia",
+                    bookName = book?.name.orEmpty(),
                     chapter = state.position.chapter,
                     activeTranslation = state.activeTranslation,
                     cachedTranslations = state.cachedTranslations,
