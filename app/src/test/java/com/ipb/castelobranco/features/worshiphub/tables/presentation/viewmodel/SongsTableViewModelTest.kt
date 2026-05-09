@@ -111,9 +111,9 @@ class SongsTableViewModelTest {
     // region lastSundays
 
     @Test
-    fun `lastSundays emits empty list when state is Loading`() = runTest {
+    fun `lastSundays emits Loading when state is Loading`() = runTest {
         advanceUntilIdle()
-        assertTrue(viewModel.lastSundays.value.isEmpty())
+        assertTrue(viewModel.lastSundays.value is SnapshotState.Loading)
     }
 
     @Test
@@ -125,7 +125,7 @@ class SongsTableViewModelTest {
         advanceUntilIdle()
         job.cancel()
 
-        assertEquals(fakeSundays, viewModel.lastSundays.value)
+        assertEquals(SnapshotState.Data(fakeSundays), viewModel.lastSundays.value)
     }
 
     // endregion
@@ -133,9 +133,9 @@ class SongsTableViewModelTest {
     // region topSongs
 
     @Test
-    fun `topSongs emits empty list when state is Loading`() = runTest {
+    fun `topSongs emits Loading when state is Loading`() = runTest {
         advanceUntilIdle()
-        assertTrue(viewModel.topSongs.value.isEmpty())
+        assertTrue(viewModel.topSongs.value is SnapshotState.Loading)
     }
 
     @Test
@@ -147,7 +147,7 @@ class SongsTableViewModelTest {
         advanceUntilIdle()
         job.cancel()
 
-        assertEquals(fakeTopSongs, viewModel.topSongs.value)
+        assertEquals(SnapshotState.Data(fakeTopSongs), viewModel.topSongs.value)
     }
 
     // endregion
@@ -155,9 +155,9 @@ class SongsTableViewModelTest {
     // region topTones
 
     @Test
-    fun `topTones emits empty list when state is Loading`() = runTest {
+    fun `topTones emits Loading when state is Loading`() = runTest {
         advanceUntilIdle()
-        assertTrue(viewModel.topTones.value.isEmpty())
+        assertTrue(viewModel.topTones.value is SnapshotState.Loading)
     }
 
     @Test
@@ -169,7 +169,7 @@ class SongsTableViewModelTest {
         advanceUntilIdle()
         job.cancel()
 
-        assertEquals(fakeTopTones, viewModel.topTones.value)
+        assertEquals(SnapshotState.Data(fakeTopTones), viewModel.topTones.value)
     }
 
     // endregion
@@ -177,9 +177,9 @@ class SongsTableViewModelTest {
     // region suggestedSongs
 
     @Test
-    fun `suggestedSongs emits empty list when state is Loading`() = runTest {
+    fun `suggestedSongs emits Loading when state is Loading`() = runTest {
         advanceUntilIdle()
-        assertTrue(viewModel.suggestedSongs.value.isEmpty())
+        assertTrue(viewModel.suggestedSongs.value is SnapshotState.Loading)
     }
 
     @Test
@@ -191,7 +191,7 @@ class SongsTableViewModelTest {
         advanceUntilIdle()
         job.cancel()
 
-        assertEquals(fakeSuggested, viewModel.suggestedSongs.value)
+        assertEquals(SnapshotState.Data(fakeSuggested), viewModel.suggestedSongs.value)
     }
 
     // endregion

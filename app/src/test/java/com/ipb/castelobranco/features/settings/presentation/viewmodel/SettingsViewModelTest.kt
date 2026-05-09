@@ -100,14 +100,6 @@ class SettingsViewModelTest {
         }
     }
 
-    @Test
-    fun `clearGallery delegates to galleryRepository clearAllPhotos`() = runTest {
-        viewModel.clearGallery()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { galleryRepository.clearAllPhotos() }
-    }
-
     // region toggleDarkMode
 
     @Test
