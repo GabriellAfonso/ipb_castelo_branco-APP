@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs
 
+import com.ipb.castelobranco.core.domain.util.normalize
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -187,8 +188,11 @@ private fun RepertoireRow(
     val filtered = remember(searchQuery, availableSongs) {
         val q = searchQuery.trim()
         if (q.isBlank()) availableSongs
-        else availableSongs.filter {
-            it.title.contains(q, ignoreCase = true) || it.artist.contains(q, ignoreCase = true)
+        else {
+            val nq = q.normalize()
+            availableSongs.filter {
+                it.title.normalize().contains(nq, ignoreCase = true) || it.artist.normalize().contains(nq, ignoreCase = true)
+            }
         }
     }
 

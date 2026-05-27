@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.worshiphub.tables.presentation.tabs
 
+import com.ipb.castelobranco.core.domain.util.normalize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,16 +41,18 @@ private val columns = listOf(
 fun LastSundaysTab(sundays: List<SundaySet>, searchQuery: String = "") {
     val filtered = remember(sundays, searchQuery) {
     if (searchQuery.isBlank()) sundays
-    else sundays.filter { sunday ->
-        val matchDate = sunday.date.contains(searchQuery, ignoreCase = true)
+    else {
+        val nq = searchQuery.normalize()
+        sundays.filter { sunday ->
+        val matchDate = sunday.date.contains(nq, ignoreCase = true)
         val hasMatchingSong = sunday.songs.any { song ->
-            song.title.contains(searchQuery, ignoreCase = true) ||
-            song.artist.contains(searchQuery, ignoreCase = true) ||
-            song.tone.contains(searchQuery, ignoreCase = true)
+            song.title.normalize().contains(nq, ignoreCase = true) ||
+            song.artist.normalize().contains(nq, ignoreCase = true) ||
+            song.tone.contains(nq, ignoreCase = true)
         }
         matchDate || hasMatchingSong
     }
-}
+}}
     Column(modifier = Modifier.fillMaxWidth()) {
         Header(columns)
 

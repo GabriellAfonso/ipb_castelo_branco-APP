@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.domain.util.normalize
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsListItem
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsUiState
@@ -71,7 +72,7 @@ class LyricsViewModel @Inject constructor(
                 }.sortedBy { pinOrder[it.songId] ?: Int.MAX_VALUE }
 
                 val filtered = if (query.isBlank()) sorted
-                else sorted.filter { it.songName.contains(query, ignoreCase = true) }
+                else sorted.filter { it.songName.normalize().contains(query.normalize(), ignoreCase = true) }
 
                 LyricsUiState(
                     lyrics         = sorted,

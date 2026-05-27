@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.bible.presentation.screens
 
+import com.ipb.castelobranco.core.domain.util.normalize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -280,9 +281,6 @@ private fun VerseGrid(
     }
 }
 
-private fun String.normalize(): String =
-    java.text.Normalizer.normalize(this, java.text.Normalizer.Form.NFD)
-        .replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
 
 @Composable
 private fun GridCell(text: String, onClick: () -> Unit) {

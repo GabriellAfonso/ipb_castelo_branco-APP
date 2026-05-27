@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.admin.schedule.presentation.components
 
+import com.ipb.castelobranco.core.domain.util.normalize
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -53,7 +54,7 @@ fun MemberSelectField(
 
     val filtered = remember(searchQuery, members) {
         if (searchQuery.isBlank()) members
-        else members.filter { it.name.contains(searchQuery, ignoreCase = true) }
+        else members.filter { it.name.normalize().contains(searchQuery.normalize(), ignoreCase = true) }
     }
 
     val triggerShape = if (expanded)

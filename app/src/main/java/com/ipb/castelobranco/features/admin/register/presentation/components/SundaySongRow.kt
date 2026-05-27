@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.admin.register.presentation.components
 
+import com.ipb.castelobranco.core.domain.util.normalize
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -71,7 +72,7 @@ fun SundaySongRow(
         val q = searchQuery.trim()
         if (q.isBlank()) availableSongs
         else availableSongs.filter {
-            it.title.contains(q, ignoreCase = true) || it.artist.contains(q, ignoreCase = true)
+            it.title.normalize().contains(q.normalize(), ignoreCase = true) || it.artist.normalize().contains(q.normalize(), ignoreCase = true)
         }
     }
 
