@@ -131,8 +131,8 @@ class SearchHymnsUseCaseTest {
 
     @Test
     fun `title query matching multiple hymns returns all matches`() {
-        // "o Senhor" appears in title of hymnPastor and hymnGrande but not in hymnSanto
-        val result = useCase(allHymns, "o Senhor")
+        // "é o" normalized to "e o" appears in title of hymnPastor and hymnGrande
+        val result = useCase(allHymns, "é o")
 
         assertEquals(listOf(hymnPastor, hymnGrande), result)
     }
@@ -198,6 +198,31 @@ class SearchHymnsUseCaseTest {
         val result = useCase(allHymns, "  Pastor  ")
 
         assertEquals(listOf(hymnPastor), result)
+    }
+
+    // endregion
+
+    // region accent and punctuation insensitive search
+
+    @Test
+    fun `title search ignores accents`() {
+        val result = useCase(allHymns, "e o Senhor")
+
+        assertEquals(listOf(hymnGrande), result)
+    }
+
+    @Test
+    fun `lyrics search ignores accents`() {
+        val result = useCase(allHymns, "gloria")
+
+        assertEquals(listOf(hymnSanto), result)
+    }
+
+    @Test
+    fun `lyrics search ignores punctuation`() {
+        val result = useCase(allHymns, "Santo Santo Santo")
+
+        assertEquals(listOf(hymnSanto), result)
     }
 
     // endregion

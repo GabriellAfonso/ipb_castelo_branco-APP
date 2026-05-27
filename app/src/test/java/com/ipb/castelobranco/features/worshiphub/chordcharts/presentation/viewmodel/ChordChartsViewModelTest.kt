@@ -212,6 +212,28 @@ class ChordChartsViewModelTest {
     }
 
     @Test
+    fun `onQueryChange matches accented song name with unaccented query`() = runTest {
+        val accentedSongs = listOf(
+            Song(id = 1, title = "Oceanos da Graça", artist = "Hillsong", categoryName = "Louvor"),
+            Song(id = 2, title = "Way Maker", artist = "Sinach", categoryName = "Adoração"),
+        )
+        every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
+        every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(accentedSongs))
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+
+        val job = launch { viewModel.uiState.collect { } }
+        advanceUntilIdle()
+
+        viewModel.onQueryChange("graca")
+        advanceUntilIdle()
+        job.cancel()
+
+        val filtered = viewModel.uiState.value.filteredCharts
+        assertEquals(1, filtered.size)
+        assertEquals(10, filtered.first().id)
+    }
+
+    @Test
     fun `onQueryChange with blank query returns all charts`() = runTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))

@@ -212,6 +212,28 @@ class LyricsViewModelTest {
     }
 
     @Test
+    fun `onQueryChange matches accented song name with unaccented query`() = runTest {
+        val accentedSongs = listOf(
+            Song(id = 1, title = "Oceanos da Graça", artist = "Hillsong", categoryName = "Louvor"),
+            Song(id = 2, title = "Way Maker", artist = "Sinach", categoryName = "Adoração"),
+        )
+        every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
+        every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(accentedSongs))
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+
+        val job = launch { viewModel.uiState.collect { } }
+        advanceUntilIdle()
+
+        viewModel.onQueryChange("graca")
+        advanceUntilIdle()
+        job.cancel()
+
+        val filtered = viewModel.uiState.value.filteredLyrics
+        assertEquals(1, filtered.size)
+        assertEquals(10, filtered.first().id)
+    }
+
+    @Test
     fun `onQueryChange with blank query returns all lyrics`() = runTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
