@@ -242,6 +242,7 @@ fun SundaySongRow(
                 value = state.tone,
                 onValueChange = { },
                 readOnly = true,
+                textStyle = MaterialTheme.typography.bodySmall,
                 placeholder = { Text("Tom", style = MaterialTheme.typography.bodySmall) },
                 singleLine = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTone) },
