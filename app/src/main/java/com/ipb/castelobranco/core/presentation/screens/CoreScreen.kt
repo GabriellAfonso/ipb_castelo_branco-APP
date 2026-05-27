@@ -299,7 +299,7 @@ fun ButtonGrid(
 ) {
     val iconColor = MaterialTheme.colorScheme.primaryContainer
     val buttons = listOf(
-        ButtonInfo(R.drawable.ic_worshiphub, "Min. Louvor", iconColor, onNavigateToWorshipHub),
+        ButtonInfo(R.drawable.ic_worshiphub, "Louvor", iconColor, onNavigateToWorshipHub),
         ButtonInfo(R.drawable.ic_schedule,   "Escala",      iconColor, onNavigateToSchedule),
         ButtonInfo(R.drawable.ic_galery,     "Galeria",     iconColor, onNavigateToGallery),
         ButtonInfo(R.drawable.ic_sarca_ipb,  "Hinário",     iconColor, onNavigateToHymnal),
