@@ -119,3 +119,58 @@ Both environments can build/test simultaneously without cleaning. First run on a
 8. **worshiphub sub-graphs:** `worshipHubGraph` contains nested `chordChartsGraph` and `lyricsGraph` — add new screens inside the appropriate sub-graph, not directly in `worshipHubGraph`.
 9. **In-app updates:** `CoreActivity` enforces immediate Play Store updates on launch — if user cancels, app calls `finish()`. Do not remove `AppUpdateManager` logic.
 10. **`restartApp()`:** Use `activity.restartApp()` (extension in `CoreActivity.kt`) to fully restart the app — replaces manual Intent construction.
+
+## 7. Specs Driven Development
+
+The project follows **Specs Driven Development**: the spec is the source of truth — code reflects the spec, not the other way around.
+
+### 7.1 Structure
+
+```
+specs/                          # project root, outside server/
+├── constitution.md             # rules no domain can break
+├── flows/                      # complex flows crossing domains
+│   └── {flow}.md
+└── {domain}/                   # e.g., songs, accounts, schedule
+    ├── spec.md                 # what the domain is — complete, including unimplemented parts
+    ├── plan.md                 # how it will be implemented — technical decisions
+    └── tasks.md                # what still needs to be implemented
+```
+
+### 7.2 Workflow
+
+**Before coding:**
+- Always read the domain spec before implementing anything
+- If no spec exists, create one before coding
+- If the spec is outdated, update it before coding
+
+**When making a change:**
+- Update the spec first, then the code
+- Spec and code go together in the same commit
+- Never update only the code without updating the spec
+
+**When creating something new:**
+- Write the complete domain spec — including what doesn't exist yet
+- Create `tasks.md` only with what still needs to be implemented
+- Use `plan.md` for technical decisions and implementation order
+
+**When encountering code without a spec:**
+- Create the spec for the current state before making any changes
+- Only then apply the change to both spec and code
+
+### 7.3 What each file answers
+
+- **`spec.md`** — What does this domain do? Which endpoints? Which data models? Which business rules? Which errors?
+- **`plan.md`** — How will it be implemented? Which technical decisions? In what order?
+- **`tasks.md`** — What still needs to be implemented?
+- **`constitution.md`** — Global rules no domain can break (auth, security, architecture)
+- **`flows/{flow}.md`** — Flows crossing multiple domains
+
+### 7.4 Never do
+
+- Don't code without reading the domain spec
+- Don't make changes without updating the spec
+- Don't create refactoring specs — specs describe the destination, not the path
+- Don't repeat in the spec what's already in `constitution.md`
+
+---
