@@ -11,8 +11,9 @@ fun SongsBySundayDto.toDomain(): SundaySet =
             SundaySetItem(
                 position = s.position,
                 title = s.title,
+                songId = s.songId,
                 artist = s.artist,
-                tone = s.tone
+                tone = s.tone,
             )
         }
     )

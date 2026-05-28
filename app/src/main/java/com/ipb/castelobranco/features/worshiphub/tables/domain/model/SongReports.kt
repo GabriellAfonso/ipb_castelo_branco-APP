@@ -9,12 +9,14 @@ data class SundaySetItem(
     val position: Int,
     val title: String,
     val artist: String,
-    val tone: String
+    val tone: String,
+    val songId: Int = 0,
 )
 
 data class TopSong(
     val title: String,
-    val playCount: Int
+    val playCount: Int,
+    val songId: Int = 0,
 )
 
 data class TopTone(

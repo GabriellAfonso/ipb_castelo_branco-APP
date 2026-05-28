@@ -9,5 +9,6 @@ data class AllSongDto(
     val id: Int,
     val title: String,
     val artist: String,
-    @SerialName("category") val categoryName: String = ""
+    @SerialName("category") val categoryName: String = "",
+    @SerialName("youtube_link") val youtubeLink: String? = null,
 )

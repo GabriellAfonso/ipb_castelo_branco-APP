@@ -14,13 +14,15 @@ data class SundaySongDto(
     val position: Int,
     @SerialName("song") val title: String,
     val artist: String,
-    val tone: String
+    val tone: String,
+    @SerialName("song_id") val songId: Int = 0,
 )
 
 @Serializable
 data class TopSongDto(
     @SerialName("song__title") val title: String,
-    @SerialName("play_count") val playCount: Int
+    @SerialName("play_count") val playCount: Int,
+    @SerialName("song_id") val songId: Int = 0,
 )
 
 @Serializable

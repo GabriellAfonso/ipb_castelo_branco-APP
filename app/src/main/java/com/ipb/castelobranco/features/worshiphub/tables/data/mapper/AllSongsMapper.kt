@@ -8,7 +8,8 @@ fun AllSongDto.toDomain(): Song =
         id = id,
         title = title,
         artist = artist,
-        categoryName = categoryName
+        categoryName = categoryName,
+        youtubeLink = youtubeLink,
     )
 
 fun List<AllSongDto>.toDomain(): List<Song> = map { it.toDomain() }
