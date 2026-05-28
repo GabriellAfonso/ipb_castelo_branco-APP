@@ -242,6 +242,59 @@ SongDetailScreen precisa navegar para rotas de outros sub-graphs. Possivel porqu
 
 ---
 
+## 9. Navegacao das Tabelas para SongDetail
+
+### 9.1 Contexto
+
+Tabs "Ultimos Domingos" e "Mais Tocadas" ja possuem `songId` nos modelos (`SundaySetItem.songId`, `TopSong.songId`). Tab "Repertorio" tem `Song.id` no select. Objetivo: tornar titulos clicaveis para navegar ao `SongDetailScreen`.
+
+### 9.2 Callback chain
+
+`navController` nao e passado para tabs. Propagacao via lambda:
+
+```
+WorshipHubNavGraph (navController)
+  → WorshipSongsTableScreen (onSongClick: (Int) -> Unit)
+    → WorshipSongsTableContent (onSongClick)
+      → LastSundaysTab (onSongClick)
+      → TopSongsTab (onSongClick)
+      → RepertoireTab (onSongInfoClick)
+```
+
+No NavGraph: `onSongClick = { songId -> navController.navigate(SongsRoutes.detail(songId)) }`.
+
+Funciona porque Tables e SongsGraph estao dentro do mesmo `worshipHubGraph`.
+
+### 9.3 Ultimos Domingos
+
+`SundaySongRow`: titulo (coluna "Nome") vira `Text` com `Modifier.clickable` + ripple padrao. Recebe `onSongClick(songId)`.
+
+### 9.4 Mais Tocadas
+
+`TopSongsRow`: titulo (coluna "Nome") vira `Text` com `Modifier.clickable` + ripple padrao. Recebe `onSongClick(songId)`.
+
+### 9.5 Repertorio — Icone Info
+
+Dentro de `RepertoireRow`, quando `selectedSong != null`:
+- Icone `Icons.Outlined.Info` (ou `Icons.Default.Info`) posicionado com `Box` overlay no canto direito do select
+- `AnimatedVisibility(visible = selectedSong != null, enter = fadeIn + scaleIn, exit = fadeOut + scaleOut)`
+- `IconButton(onClick = { onSongInfoClick(selectedSong.id) })`
+- Tamanho pequeno (20-24dp) para nao cobrir demais o select
+
+### 9.6 Top Tons
+
+Sem alteracao — nao possui `songId`.
+
+### 9.7 Ordem de implementacao
+
+1. Adicionar `onSongClick` callback em `WorshipSongsTableScreen` e `WorshipSongsTableContent`
+2. Propagar para `LastSundaysTab` e `TopSongsTab` — tornar titulo clicavel
+3. Adicionar `onSongInfoClick` em `RepertoireTab` — icone info overlay
+4. Conectar no `WorshipHubNavGraph` com navegacao para `SongsRoutes.detail(songId)`
+5. Importar `SongsRoutes` (do `SongsNavGraph`) no NavGraph
+
+---
+
 ## 8. Decisoes tecnicas
 
 - **Sem repositorio novo:** use case combina 3 repos existentes. Evita duplicacao.
@@ -252,3 +305,5 @@ SongDetailScreen precisa navegar para rotas de outros sub-graphs. Possivel porqu
 - **Novos campos com default:** `songId` e `youtubeLink` adicionados no final das data classes com default (0 e null) para manter compatibilidade com construtores existentes nos testes.
 - **Icone YouTube:** usa `Icons.Filled.PlayArrow` (Material Icons) pois `ic_youtube` nao existe no projeto. Pode ser substituido por drawable custom futuramente.
 - **Ultimos domingos:** `take(3)` direto (API ja retorna cronologicamente, mais recente primeiro). Sem reversed.
+- **Navegacao Tables→SongDetail:** callback lambda chain, nao CompositionLocal. Simples, explicito, testavel. Todas tabs dentro de `worshipHubGraph`, rota acessivel diretamente.
+- **Icone info Repertorio:** overlay com `AnimatedVisibility` sobre select. Nao usa gesto novo — e tap separado em area distinta. Sem conflito com select (tap) e fixar (long press).

@@ -27,6 +27,8 @@ Tela com 4 tabs horizontais e busca global via FAB.
 
 Lista agrupada por data (`dd/MM/yyyy`). Cada domingo mostra as musicas tocadas com posicao, titulo, artista e tom.
 
+**Click no titulo:** titulo da musica e clicavel (ripple padrao Material). Navega para `SongDetailScreen` usando `songId`. Apenas o texto do titulo e clicavel, nao a row inteira.
+
 **Busca:** filtra por data, titulo, artista ou tom (accent-insensitive via `normalize()`).
 
 **Dados:** `GET songs-by-sunday/`
@@ -40,6 +42,8 @@ Lista agrupada por data (`dd/MM/yyyy`). Cada domingo mostra as musicas tocadas c
 ### 2.2 Mais Tocadas
 
 Ranking de musicas por numero de vezes tocadas aos domingos. Lista ordenada por `play_count` decrescente.
+
+**Click no titulo:** mesmo comportamento de Ultimos Domingos — titulo clicavel com ripple, navega para `SongDetailScreen` usando `songId`.
 
 **Dados:** `GET top-songs/`
 ```
@@ -60,6 +64,8 @@ Ranking global de tons mais utilizados. Lista ordenada por `tone_count` decresce
 Gera sugestao de 4 musicas para o proximo domingo, priorizando musicas nao tocadas nos ultimos 90 dias. Permite fixar musicas em posicoes especificas e re-gerar as demais.
 
 **Tom automatico:** ao selecionar uma musica, o tom mais usado historicamente para aquela musica e preenchido automaticamente (calculado client-side a partir de `songsBySunday`).
+
+**Icone de detalhe:** quando uma musica esta selecionada no select, aparece icone `(i)` flutuante sobrepondo o canto direito do select (overlay). Tap no icone navega para `SongDetailScreen` usando `songId`. Icone aparece com `AnimatedVisibility` (fade+scale) e some quando select esta vazio. Nao conflita com tap (selecionar) nem long press (fixar).
 
 **Dados:** `GET suggested-songs/?fixed=1:12,3:45`
 ```

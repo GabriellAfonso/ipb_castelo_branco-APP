@@ -44,3 +44,13 @@ Tarefas para implementacao da feature "Musicas". Tabelas, Cifras e Letras ja exi
 - [x] `GetSongDetailUseCaseTest` — happy path (musica com tudo), musica sem cifra/letra/youtube, musica nunca tocada
 - [x] `SongsListViewModelTest` — lista carrega, busca filtra, busca accent-insensitive
 - [x] `SongDetailViewModelTest` — carrega detalhe, estados loading/error
+
+## 6. Navegacao Tables → SongDetail
+
+- [x] `WorshipSongsTableScreen`: adicionar parametro `onSongClick: (Int) -> Unit`
+- [x] `WorshipSongsTableContent`: propagar `onSongClick`
+- [x] `LastSundaysTab`: receber `onSongClick`, tornar titulo clicavel com ripple
+- [x] `TopSongsTab`: receber `onSongClick`, tornar titulo clicavel com ripple
+- [x] `RepertoireTab`: receber `onSongInfoClick`, icone info overlay no select (AnimatedVisibility, aparece com musica selecionada)
+- [x] `WorshipHubNavGraph`: conectar `onSongClick` → `navController.navigate(SongsRoutes.detail(songId))`
+- [x] Previews: atualizar previews das tabs com novo parametro
