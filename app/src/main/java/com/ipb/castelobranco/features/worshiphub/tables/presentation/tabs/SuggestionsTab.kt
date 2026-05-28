@@ -4,6 +4,10 @@ import com.ipb.castelobranco.core.domain.util.normalize
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -29,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +42,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -73,7 +80,8 @@ fun RepertoireTab(
     onSongSelect: (position: Int, song: Song?) -> Unit,
     onToneChange: (position: Int, tone: String) -> Unit,
     onToggleFixed: (position: Int) -> Unit,
-    onGenerateClick: () -> Unit
+    onGenerateClick: () -> Unit,
+    onSongInfoClick: (songId: Int) -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -121,7 +129,8 @@ fun RepertoireTab(
                 enabled = !isRefreshing,
                 onSongSelect = { song -> onSongSelect(row.position, song) },
                 onToneChange = { tone -> onToneChange(row.position, tone) },
-                onToggleFixed = { onToggleFixed(row.position) }
+                onToggleFixed = { onToggleFixed(row.position) },
+                onSongInfoClick = onSongInfoClick,
             )
         }
 
@@ -179,7 +188,8 @@ private fun RepertoireRow(
     enabled: Boolean,
     onSongSelect: (Song?) -> Unit,
     onToneChange: (String) -> Unit,
-    onToggleFixed: () -> Unit
+    onToggleFixed: () -> Unit,
+    onSongInfoClick: (songId: Int) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
     var expandedTone by remember { mutableStateOf(false) }
@@ -232,40 +242,65 @@ private fun RepertoireRow(
         Spacer(modifier = Modifier.width(8.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(triggerShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .combinedClickable(
-                        enabled = enabled,
-                        onClick = { expanded = !expanded },
-                        onLongClick = {
-                            if (row.selectedSong != null) onToggleFixed()
-                        }
+            Box {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(triggerShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                        .combinedClickable(
+                            enabled = enabled,
+                            onClick = { expanded = !expanded },
+                            onLongClick = {
+                                if (row.selectedSong != null) onToggleFixed()
+                            }
+                        )
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val label = row.selectedSong?.let { formatSongLabel(it) }
+                    Text(
+                        text = label ?: "Música",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (label != null)
+                            MaterialTheme.colorScheme.onSurface
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val label = row.selectedSong?.let { formatSongLabel(it) }
-                Text(
-                    text = label ?: "Música",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (label != null)
-                        MaterialTheme.colorScheme.onSurface
-                    else
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = if (expanded) Green else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    modifier = Modifier.size(18.dp)
-                )
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = if (expanded) Green else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = row.selectedSong != null && !expanded,
+                    enter = fadeIn() + scaleIn(),
+                    exit = fadeOut() + scaleOut(),
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 28.dp)
+                ) {
+                    IconButton(
+                        onClick = { row.selectedSong?.let { onSongInfoClick(it.id) } },
+                        modifier = Modifier.size(24.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "Detalhes da música",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
 
             AnimatedVisibility(

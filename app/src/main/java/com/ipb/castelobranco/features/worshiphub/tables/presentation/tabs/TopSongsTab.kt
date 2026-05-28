@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.components.ColumnAlignment
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.components.Header
@@ -27,7 +28,7 @@ private val columns = listOf(
     TableColumn("Vezes", 0.5f,ColumnAlignment.Center),
 )
 @Composable
-fun TopSongsTab(topSongs: List<TopSong>) {
+fun TopSongsTab(topSongs: List<TopSong>, onSongClick: (songId: Int) -> Unit = {}) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Header(columns)
         LazyColumn(
@@ -38,7 +39,8 @@ fun TopSongsTab(topSongs: List<TopSong>) {
             itemsIndexed(topSongs) { index, song ->
                 TopSongsRow(
                     index = index,
-                    song = song
+                    song = song,
+                    onSongClick = onSongClick,
                 )
 
             }
@@ -50,7 +52,8 @@ fun TopSongsTab(topSongs: List<TopSong>) {
 @Composable
 fun TopSongsRow(
     index: Int,
-    song: TopSong
+    song: TopSong,
+    onSongClick: (songId: Int) -> Unit = {},
 ) {
     val textColor = MaterialTheme.colorScheme.onSurfaceVariant
     Row(modifier = Modifier
@@ -67,10 +70,10 @@ fun TopSongsRow(
         Box(Modifier.weight(columns[1].weight)) {
             Text(
                 text = song.title,
-                color = textColor,
+                color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable { onSongClick(song.songId) }
             )
         }
         Box(Modifier.weight(columns[2].weight), contentAlignment = Alignment.Center) {

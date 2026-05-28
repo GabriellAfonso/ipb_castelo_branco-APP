@@ -14,7 +14,7 @@ import com.ipb.castelobranco.features.worshiphub.songs.presentation.screens.Song
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.viewmodel.SongDetailViewModel
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.viewmodel.SongsListViewModel
 
-private object SongsRoutes {
+internal object SongsRoutes {
     const val List   = "songs_list"
     const val Detail = "song_detail/{songId}"
 

@@ -85,11 +85,13 @@ data class WorshipSongsActions(
     val onToneChange: (position: Int, tone: String) -> Unit,
     val onToggleFixed: (position: Int) -> Unit,
     val onRefreshCurrentTab: (tabIndex: Int) -> Unit = {},
+    val onSongClick: (songId: Int) -> Unit = {},
 )
 
 @Composable
 fun WorshipSongsTableScreen(
     onBackClick: () -> Unit,
+    onSongClick: (songId: Int) -> Unit,
     viewModel: SongsTableViewModel
 ) {
     val state = WorshipSongsUiState(
@@ -109,6 +111,7 @@ fun WorshipSongsTableScreen(
         onToneChange = viewModel::onToneChange,
         onToggleFixed = viewModel::toggleFixed,
         onRefreshCurrentTab = viewModel::refreshCurrentTab,
+        onSongClick = onSongClick,
     )
 
     WorshipSongsTableContent(
@@ -240,10 +243,17 @@ fun WorshipSongsTableContent(
                 SelectionContainer {
                     when (selectedTabIndex) {
                         0 -> SnapshotContent(state.sundays) { data ->
-                            LastSundaysTab(sundays = data, searchQuery = searchQuery)
+                            LastSundaysTab(
+                                sundays = data,
+                                searchQuery = searchQuery,
+                                onSongClick = actions.onSongClick,
+                            )
                         }
                         1 -> SnapshotContent(state.topSongs) { data ->
-                            TopSongsTab(topSongs = data)
+                            TopSongsTab(
+                                topSongs = data,
+                                onSongClick = actions.onSongClick,
+                            )
                         }
                         2 -> SnapshotContent(state.topTones) { data ->
                             TopTonesTab(topTones = data)
@@ -256,7 +266,8 @@ fun WorshipSongsTableContent(
                                 onSongSelect = actions.onSongSelect,
                                 onToneChange = actions.onToneChange,
                                 onToggleFixed = actions.onToggleFixed,
-                                onGenerateClick = actions.onGenerateClick
+                                onGenerateClick = actions.onGenerateClick,
+                                onSongInfoClick = actions.onSongClick,
                             )
                         }
                     }

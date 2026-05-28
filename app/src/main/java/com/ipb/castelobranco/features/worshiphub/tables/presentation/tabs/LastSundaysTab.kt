@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySetItem
+import androidx.compose.foundation.clickable
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.components.ColumnAlignment
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.components.TableColumn
 
@@ -38,7 +39,11 @@ private val columns = listOf(
 )
 
 @Composable
-fun LastSundaysTab(sundays: List<SundaySet>, searchQuery: String = "") {
+fun LastSundaysTab(
+    sundays: List<SundaySet>,
+    searchQuery: String = "",
+    onSongClick: (songId: Int) -> Unit = {},
+) {
     val filtered = remember(sundays, searchQuery) {
     if (searchQuery.isBlank()) sundays
     else {
@@ -61,8 +66,8 @@ fun LastSundaysTab(sundays: List<SundaySet>, searchQuery: String = "") {
             contentPadding = PaddingValues(0.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            items(filtered) { sunday ->  // ← era `sundays`, agora é `filtered`
-                SundaySection(sunday = sunday)
+            items(filtered) { sunday ->
+                SundaySection(sunday = sunday, onSongClick = onSongClick)
             }
         }
     }
@@ -71,7 +76,7 @@ fun LastSundaysTab(sundays: List<SundaySet>, searchQuery: String = "") {
 
 
 @Composable
-fun SundaySection(sunday: SundaySet) {
+fun SundaySection(sunday: SundaySet, onSongClick: (songId: Int) -> Unit = {}) {
 
     Column(
         modifier = Modifier
@@ -95,6 +100,7 @@ fun SundaySection(sunday: SundaySet) {
             val isLast = index == sunday.songs.lastIndex
             SundaySongRow(
                 song = song,
+                onSongClick = onSongClick,
                 modifier = Modifier.padding(bottom = if (isLast) 15.dp else 0.dp)
             )
         }
@@ -104,6 +110,7 @@ fun SundaySection(sunday: SundaySet) {
 @Composable
 fun SundaySongRow(
     song: SundaySetItem,
+    onSongClick: (songId: Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val textColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -125,9 +132,10 @@ fun SundaySongRow(
         ) {
             Text(
                 song.title,
-                color = textColor,
+                color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable { onSongClick(song.songId) }
             )
         }
 

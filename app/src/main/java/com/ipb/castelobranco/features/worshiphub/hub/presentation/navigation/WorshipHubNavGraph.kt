@@ -12,6 +12,7 @@ import com.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.navigation.chordChartsGraph
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.navigation.lyricsGraph
+import com.ipb.castelobranco.features.worshiphub.songs.presentation.navigation.SongsRoutes
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.navigation.songsGraph
 import com.ipb.castelobranco.features.worshiphub.hub.presentation.screens.WorshipHubScreen
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.screens.WorshipSongsTableScreen
@@ -68,6 +69,7 @@ fun NavGraphBuilder.worshipHubGraph(navController: NavHostController) {
             val viewModel: SongsTableViewModel = hiltViewModel()
             WorshipSongsTableScreen(
                 onBackClick = { navController.safePopBackStack() },
+                onSongClick = { songId -> navController.navigate(SongsRoutes.detail(songId)) },
                 viewModel   = viewModel,
             )
         }
