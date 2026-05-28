@@ -70,7 +70,7 @@ fun TopSongsRow(
         Box(Modifier.weight(columns[1].weight)) {
             Text(
                 text = song.title,
-                color = MaterialTheme.colorScheme.primary,
+                color = textColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.clickable { onSongClick(song.songId) }
