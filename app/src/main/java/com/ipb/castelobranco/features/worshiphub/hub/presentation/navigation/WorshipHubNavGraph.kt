@@ -12,6 +12,7 @@ import com.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.navigation.chordChartsGraph
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.navigation.lyricsGraph
+import com.ipb.castelobranco.features.worshiphub.songs.presentation.navigation.songsGraph
 import com.ipb.castelobranco.features.worshiphub.hub.presentation.screens.WorshipHubScreen
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.screens.WorshipSongsTableScreen
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.SongsTableViewModel
@@ -71,10 +72,10 @@ fun NavGraphBuilder.worshipHubGraph(navController: NavHostController) {
             )
         }
 
+        songsGraph(navController)
         chordChartsGraph(navController)
         lyricsGraph(navController)
 
-        composable(WorshipHubRoutes.Songs)   { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
         composable(WorshipHubRoutes.Button5) { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
         composable(WorshipHubRoutes.Button6) { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
         composable(WorshipHubRoutes.Button7) { InDevelopmentScreen(onBack = { navController.safePopBackStack() }) }
