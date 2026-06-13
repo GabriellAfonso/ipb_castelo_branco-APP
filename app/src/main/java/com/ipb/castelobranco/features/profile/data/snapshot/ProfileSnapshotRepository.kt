@@ -8,7 +8,9 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.ipb.castelobranco.features.profile.data.dto.MeProfileDto
 import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ProfileSnapshotRepository @Inject constructor(
     cache: SnapshotCache<MeProfileDto>,
     fetcher: SnapshotFetcher<MeProfileDto>,
