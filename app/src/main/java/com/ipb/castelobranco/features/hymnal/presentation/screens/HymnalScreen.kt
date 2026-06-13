@@ -46,7 +46,6 @@ import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewMo
 data class HymnalUiState(
     val hymns: List<Hymn> = emptyList(),
     val filteredHymns: List<Hymn> = emptyList(),
-    val query: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -63,6 +62,7 @@ fun HymnalScreen(
     onBackClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val query by viewModel.query.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     val actions = HymnalActions(
@@ -72,6 +72,7 @@ fun HymnalScreen(
 
     HymnalContent(
         state = state,
+        query = query,
         actions = actions,
         isRefreshing = isRefreshing,
         onRefresh = viewModel::refresh,
@@ -82,6 +83,7 @@ fun HymnalScreen(
 @Composable
 fun HymnalContent(
     state: HymnalUiState,
+    query: String = "",
     actions: HymnalActions,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
@@ -111,7 +113,7 @@ fun HymnalContent(
             val filteredHymns = state.filteredHymns
 
             SearchCard(
-                query = state.query,
+                query = query,
                 onQueryChange = actions.onQueryChange,
                 resultsCount = filteredHymns.size,
                 onSearchClick = {}

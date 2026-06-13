@@ -8,13 +8,18 @@ import com.ipb.castelobranco.features.hymnal.domain.usecase.ObserveHymnsUseCase
 import com.ipb.castelobranco.features.hymnal.domain.usecase.SearchHymnsUseCase
 import com.ipb.castelobranco.features.hymnal.presentation.screens.HymnalUiState
 import com.ipb.castelobranco.features.settings.domain.repository.SettingsRepository
+import com.ipb.castelobranco.core.di.DefaultDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,9 +29,11 @@ class HymnalViewModel @Inject constructor(
     private val observeHymnsUseCase: ObserveHymnsUseCase,
     private val searchHymnsUseCase: SearchHymnsUseCase,
     private val settingsRepository: SettingsRepository,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -54,16 +61,16 @@ class HymnalViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setHymnalFontSize(size) }
     }
 
+    @OptIn(FlowPreview::class)
     val uiState: StateFlow<HymnalUiState> = combine(
         observeHymnsUseCase(),
-        _query
+        _query.debounce(200)
     ) { state, query ->
         when (state) {
             is SnapshotState.Loading -> HymnalUiState(isLoading = true, error = null)
             is SnapshotState.Data -> HymnalUiState(
                 hymns = state.value,
                 filteredHymns = searchHymnsUseCase(state.value, query),
-                query = query,
                 isLoading = false,
                 error = null
             )
@@ -72,7 +79,8 @@ class HymnalViewModel @Inject constructor(
                 error = state.throwable.message ?: "Erro ao carregar hinário"
             )
         }
-    }.stateIn(
+    }.flowOn(defaultDispatcher)
+    .stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
         initialValue = HymnalUiState(isLoading = true)

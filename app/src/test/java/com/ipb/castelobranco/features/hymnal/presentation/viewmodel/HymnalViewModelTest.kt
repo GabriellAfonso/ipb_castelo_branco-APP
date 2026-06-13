@@ -59,7 +59,7 @@ class HymnalViewModelTest {
         every { searchHymnsUseCase(any(), any()) } returns emptyList()
         coEvery { observeHymnsUseCase.refresh() } returns RefreshResult.Updated
 
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
     }
 
     @After
@@ -87,7 +87,7 @@ class HymnalViewModelTest {
     fun `uiState populates hymns when observe emits Data`() = runTest {
         every { observeHymnsUseCase() } returns flowOf(SnapshotState.Data(fakeHymns))
         every { searchHymnsUseCase(fakeHymns, "") } returns fakeHymns
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
 
         subscribeAndAdvance()
 
@@ -98,7 +98,7 @@ class HymnalViewModelTest {
     @Test
     fun `uiState sets error when observe emits Error`() = runTest {
         every { observeHymnsUseCase() } returns flowOf(SnapshotState.Error(RuntimeException("fetch failed")))
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
 
         subscribeAndAdvance()
 
@@ -109,7 +109,7 @@ class HymnalViewModelTest {
     @Test
     fun `uiState uses default error message when Error throwable has no message`() = runTest {
         every { observeHymnsUseCase() } returns flowOf(SnapshotState.Error(RuntimeException()))
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
 
         subscribeAndAdvance()
 
@@ -125,13 +125,13 @@ class HymnalViewModelTest {
         val hymnsFlow = MutableStateFlow<SnapshotState<List<Hymn>>>(SnapshotState.Data(fakeHymns))
         every { observeHymnsUseCase() } returns hymnsFlow
         every { searchHymnsUseCase(fakeHymns, any()) } answers { emptyList() }
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
         subscribeAndAdvance()
 
         viewModel.onQueryChange("Quão")
         advanceUntilIdle()
 
-        assertEquals("Quão", viewModel.uiState.value.query)
+        assertEquals("Quão", viewModel.query.value)
     }
 
     @Test
@@ -140,7 +140,7 @@ class HymnalViewModelTest {
         every { observeHymnsUseCase() } returns hymnsFlow
         every { searchHymnsUseCase(fakeHymns, "Quão") } returns listOf(fakeHymns[0])
         every { searchHymnsUseCase(fakeHymns, "") } returns fakeHymns
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
         subscribeAndAdvance()
 
         viewModel.onQueryChange("Quão")
@@ -156,7 +156,7 @@ class HymnalViewModelTest {
         val filtered = listOf(fakeHymns[0])
         every { searchHymnsUseCase(fakeHymns, "Quão") } returns filtered
         every { searchHymnsUseCase(fakeHymns, "") } returns fakeHymns
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
         subscribeAndAdvance()
 
         viewModel.onQueryChange("Quão")
@@ -203,7 +203,7 @@ class HymnalViewModelTest {
     @Test
     fun `hymnalFontSize reflects value from settingsRepository`() = runTest {
         every { settingsRepository.hymnalFontSizeFlow } returns flowOf(20f)
-        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository)
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
 
         val job = launch { viewModel.hymnalFontSize.collect { } }
         advanceUntilIdle()
