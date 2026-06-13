@@ -4,7 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.data.local.ThemePreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
+import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordChart
+import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.usecase.GetChordChartsUseCase
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
@@ -37,8 +40,10 @@ class ChordChartDetailViewModelTest {
     private val testScope = TestScope(testDispatcher)
 
     private lateinit var getChordChartsUseCase: GetChordChartsUseCase
+    private lateinit var chordChartRepository: ChordChartRepository
     private lateinit var songsRepository: SongsRepository
     private lateinit var themePreferences: ThemePreferences
+    private lateinit var profileSnapshot: ProfileSnapshotRepository
 
     private val fakeSongs = listOf(
         Song(id = 10, title = "Oceans", artist = "Hillsong", categoryName = "Louvor"),
@@ -52,10 +57,15 @@ class ChordChartDetailViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         getChordChartsUseCase = mockk()
+        chordChartRepository = mockk()
         songsRepository = mockk()
         themePreferences = mockk()
+        profileSnapshot = mockk()
 
         every { themePreferences.songScrollModeFlow } returns flowOf(SongScrollMode.HORIZONTAL)
+        every { profileSnapshot.observe() } returns MutableStateFlow(SnapshotState.Data(
+            MeProfile(name = "Test", active = true, isMember = true, isAdmin = false, photoUrl = null)
+        ))
     }
 
     @After
@@ -65,7 +75,7 @@ class ChordChartDetailViewModelTest {
 
     private fun createViewModel(chordChartId: Int = 1): ChordChartDetailViewModel {
         val savedStateHandle = SavedStateHandle(mapOf("chordChartId" to chordChartId))
-        return ChordChartDetailViewModel(savedStateHandle, getChordChartsUseCase, songsRepository, themePreferences)
+        return ChordChartDetailViewModel(savedStateHandle, getChordChartsUseCase, chordChartRepository, songsRepository, themePreferences, profileSnapshot)
     }
 
     // region uiState

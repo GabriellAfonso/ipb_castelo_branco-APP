@@ -9,4 +9,6 @@ interface LyricsRepository {
     fun observe(): Flow<SnapshotState<List<Lyrics>>>
     suspend fun preload()
     suspend fun refresh(): RefreshResult
+    suspend fun createLyrics(songId: Int, content: String): Result<Unit>
+    suspend fun updateContent(id: Int, content: String): Result<Unit>
 }

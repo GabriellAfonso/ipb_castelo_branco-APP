@@ -3,6 +3,7 @@ package com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewm
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordChart
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.usecase.GetChordChartsUseCase
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
@@ -13,6 +14,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -38,6 +40,7 @@ class ChordChartsViewModelTest {
     private lateinit var getChordChartsUseCase: GetChordChartsUseCase
     private lateinit var songsRepository: SongsRepository
     private lateinit var setlistPreferences: SetlistPreferences
+    private lateinit var profileSnapshot: ProfileSnapshotRepository
     private lateinit var viewModel: ChordChartsViewModel
 
     private val fakeSongs = listOf(
@@ -55,14 +58,16 @@ class ChordChartsViewModelTest {
         getChordChartsUseCase = mockk()
         songsRepository = mockk()
         setlistPreferences = mockk()
+        profileSnapshot = mockk()
 
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Loading)
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Loading)
         every { setlistPreferences.pinnedSongIds } returns flowOf(emptyList())
+        every { profileSnapshot.observe() } returns MutableStateFlow(SnapshotState.Loading)
         coEvery { getChordChartsUseCase.refresh() } returns RefreshResult.Updated
         coEvery { setlistPreferences.toggleSong(any()) } returns Unit
 
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
     }
 
     @After
@@ -97,7 +102,7 @@ class ChordChartsViewModelTest {
     @Test
     fun `uiState sets error when observe emits Error`() = runTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Error(RuntimeException("network error")))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -118,7 +123,7 @@ class ChordChartsViewModelTest {
     fun `uiState populates charts with song names resolved from songsRepository`() = runTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -133,7 +138,7 @@ class ChordChartsViewModelTest {
         val chartsWithUnknownSong = listOf(ChordChart(id = 20, songId = 99, content = "...", tone = "A", instrument = "violão"))
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(chartsWithUnknownSong))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -145,7 +150,7 @@ class ChordChartsViewModelTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
         every { setlistPreferences.pinnedSongIds } returns flowOf(listOf(2))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -164,7 +169,7 @@ class ChordChartsViewModelTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(charts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
         every { setlistPreferences.pinnedSongIds } returns flowOf(listOf(1, 2))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -181,7 +186,7 @@ class ChordChartsViewModelTest {
     fun `onQueryChange updates query in uiState`() = runTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()
@@ -197,7 +202,7 @@ class ChordChartsViewModelTest {
     fun `onQueryChange filters charts by song name case-insensitively`() = runTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()
@@ -219,7 +224,7 @@ class ChordChartsViewModelTest {
         )
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(accentedSongs))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()
@@ -237,7 +242,7 @@ class ChordChartsViewModelTest {
     fun `onQueryChange with blank query returns all charts`() = runTest {
         every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeCharts))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences)
+        viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()

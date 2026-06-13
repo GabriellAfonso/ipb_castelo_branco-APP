@@ -175,13 +175,29 @@ Lista de todas as cifras cadastradas. Cada item mostra nome da musica, tom e ins
 
 Nome da musica vem do cruzamento com `AllSongs` por `song_id`.
 
-### 4.2 Detalhe da Cifra
+### 4.2 Criacao de Cifra (admin)
+
+Na tela de lista de cifras, usuarios admin veem menu overflow (⋮) na TopBar com item "Nova Cifra". Tap navega para tela `ChordChartCreateScreen`.
+
+**Tela de criacao:**
+- Campo de busca de musica (filtra `AllSongs` em tempo real, accent-insensitive)
+- Selecionar musica da lista preenche o campo e fecha a lista
+- Campos de tom e instrumento (singleLine)
+- Campo multiline para digitar a cifra (fonte monospace)
+- Botao "Salvar" (desabilitado se musica, tom, instrumento ou cifra vazios)
+- Apos salvar com sucesso, volta automaticamente para a lista
+
+**Envio:** `POST api/chord-charts/` com `{"song_id": int, "content": string, "tone": string, "instrument": string}` via API autenticada (`IsAdminUser`).
+
+### 4.3 Detalhe da Cifra
 
 Exibe cifra em formato ChordPro parseado. Conteudo dividido em blocos (Intro, Verso, Coro, etc.) com acordes posicionados acima das letras correspondentes.
 
 **Parser:** `ChordProParser` converte string ChordPro em `List<ChordBlock>`, cada bloco com titulo e linhas de `ChordLine` contendo `LineToken.Chord` e `LineToken.Lyrics`.
 
 **Paginacao:** `BlockPaginator` divide blocos em paginas que cabem na tela, com navegacao por swipe/botoes.
+
+**Edicao (admin):** usuarios admin veem menu overflow (⋮) na TopBar. Menu normal: "Editar". Em modo edicao: "Salvar" e "Cancelar". Conteudo vira `TextField` editavel com fonte monospace. Apenas `content` e editavel (nao tom/instrumento). Salvar envia `PATCH api/chord-charts/{id}/` com `{"content": "..."}` via API autenticada.
 
 ---
 
@@ -207,9 +223,24 @@ Lista de todas as letras cadastradas. Cada item mostra nome da musica.
 
 Nome da musica vem do cruzamento com `AllSongs` por `song_id`.
 
-### 5.2 Detalhe da Letra
+### 5.2 Criacao de Letra (admin)
+
+Na tela de lista de letras, usuarios admin veem menu overflow (⋮) na TopBar com item "Nova Letra". Tap navega para tela `LyricsCreateScreen`.
+
+**Tela de criacao:**
+- Campo de busca de musica (filtra `AllSongs` em tempo real, accent-insensitive)
+- Selecionar musica da lista preenche o campo e fecha a lista
+- Campo multiline para digitar a letra (fonte monospace)
+- Botao "Salvar" (desabilitado se musica ou letra nao selecionada)
+- Apos salvar com sucesso, volta automaticamente para a lista
+
+**Envio:** `POST api/lyrics/` com `{"song_id": int, "content": string}` via API autenticada (`IsAdminUser`).
+
+### 5.3 Detalhe da Letra
 
 Exibe letra dividida em estrofes. `LyricsParser` separa o texto em `List<LyricsStanza>`, cada estrofe com suas linhas.
+
+**Edicao (admin):** mesmo mecanismo de edicao das cifras. Menu overflow (⋮) com "Editar"/"Salvar"/"Cancelar". Apenas `content` editavel. Salvar envia `PATCH api/lyrics/{id}/` com `{"content": "..."}` via API autenticada.
 
 ---
 
@@ -292,9 +323,11 @@ worshipHubGraph (AppRoutes.WORSHIP_HUB_GRAPH)
 │   └── SongDetailScreen (detalhe da musica)
 ├── chordChartsGraph (sub-graph existente)
 │   ├── ChordChartsScreen (lista com busca)
+│   ├── ChordChartCreateScreen (criacao de cifra — admin)
 │   └── ChordChartDetailScreen (detalhe da cifra)
 └── lyricsGraph (sub-graph existente)
     ├── LyricsScreen (lista com busca)
+    ├── LyricsCreateScreen (criacao de letra — admin)
     └── LyricsDetailScreen (detalhe da letra)
 ```
 
@@ -307,7 +340,7 @@ Navegacao entre features a partir de SongDetailScreen:
 
 ## 8. Endpoints (API)
 
-Todos publicos (`AllowAny`), sem autenticacao.
+Publicos (`AllowAny`), sem autenticacao:
 
 | Metodo | Path | Descricao |
 |--------|------|-----------|
@@ -320,6 +353,17 @@ Todos publicos (`AllowAny`), sem autenticacao.
 | GET | `lyrics/` | Todas as letras |
 
 Todos suportam `If-None-Match` / ETag para cache (exceto `suggested-songs`).
+
+Autenticados (`IsAdminUser`):
+
+| Metodo | Path | Descricao |
+|--------|------|-----------|
+| POST | `chord-charts/` | Cria nova cifra |
+| PATCH | `chord-charts/{id}/` | Atualiza `content` de uma cifra |
+| POST | `lyrics/` | Cria nova letra |
+| PATCH | `lyrics/{id}/` | Atualiza `content` de uma letra existente |
+
+`PATCH` body: `{"content": "..."}`. `POST chord-charts/` body: `{"song_id": int, "content": string, "tone": string, "instrument": string}`. `POST lyrics/` body: `{"song_id": int, "content": string}`. Retorna o objeto criado/atualizado. 401 se nao autenticado, 403 se nao admin, 404 se nao encontrado.
 
 ---
 

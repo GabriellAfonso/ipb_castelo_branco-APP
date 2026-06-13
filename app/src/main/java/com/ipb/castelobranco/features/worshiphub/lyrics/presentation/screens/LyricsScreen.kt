@@ -17,11 +17,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +35,9 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +59,7 @@ private val Accent = Color(0xFF1565C0)
 fun LyricsScreen(
     viewModel: LyricsViewModel,
     onLyricsClick: (id: Int) -> Unit,
+    onCreateClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,6 +72,7 @@ fun LyricsScreen(
         onQueryChange = viewModel::onQueryChange,
         onLyricsClick = onLyricsClick,
         onTogglePin   = viewModel::onTogglePin,
+        onCreateClick = onCreateClick,
         onBackClick   = onBackClick,
     )
 }
@@ -76,6 +85,7 @@ private fun LyricsContent(
     onQueryChange: (String) -> Unit,
     onLyricsClick: (id: Int) -> Unit,
     onTogglePin: (id: Int) -> Unit,
+    onCreateClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     BaseScreen(
@@ -83,6 +93,11 @@ private fun LyricsContent(
         logoRes       = R.drawable.ic_sarca_ipb,
         showBackArrow = true,
         onBackClick   = onBackClick,
+        extraActions  = {
+            if (state.isAdmin) {
+                AdminOverflowMenu(onCreateClick = onCreateClick)
+            }
+        },
     ) { innerPadding ->
         ElasticPullToRefresh(
             isRefreshing = isRefreshing,
@@ -235,5 +250,38 @@ private fun EmptyState() {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
+    }
+}
+
+@Composable
+private fun AdminOverflowMenu(onCreateClick: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector        = Icons.Default.MoreVert,
+                contentDescription = "Menu",
+                tint               = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        DropdownMenu(
+            expanded         = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            DropdownMenuItem(
+                text    = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector        = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier           = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Adicionar Letra")
+                    }
+                },
+                onClick = { expanded = false; onCreateClick() },
+            )
+        }
     }
 }

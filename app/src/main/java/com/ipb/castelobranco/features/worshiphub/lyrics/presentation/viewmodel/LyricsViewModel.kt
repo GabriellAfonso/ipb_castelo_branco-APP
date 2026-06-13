@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.util.normalize
+import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsListItem
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsUiState
@@ -25,6 +26,7 @@ class LyricsViewModel @Inject constructor(
     private val getLyricsUseCase: GetLyricsUseCase,
     private val songsRepository: SongsRepository,
     private val setlistPreferences: SetlistPreferences,
+    private val profileSnapshot: ProfileSnapshotRepository,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -34,6 +36,11 @@ class LyricsViewModel @Inject constructor(
 
     private val pinnedSongs = setlistPreferences.pinnedSongIds
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private val profileState = profileSnapshot.observe()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, profileSnapshot.observe().value)
+
+    private val queryAndAdmin = combine(_query, profileState) { q, p -> q to p }
 
     fun refresh(minDurationMs: Long = 600L) {
         if (_isRefreshing.value) return
@@ -51,15 +58,17 @@ class LyricsViewModel @Inject constructor(
         getLyricsUseCase.observe(),
         songsRepository.observeAllSongs(),
         pinnedSongs,
-        _query,
-    ) { lyricsState, songsState, pinnedSongIds, query ->
+        queryAndAdmin,
+    ) { lyricsState, songsState, pinnedSongIds, (query, profileState) ->
         val songMap = (songsState as? SnapshotState.Data)?.value
             .orEmpty()
             .associateBy { it.id }
 
+        val isAdmin = (profileState as? SnapshotState.Data)?.value?.isAdmin == true
+
         when (lyricsState) {
-            is SnapshotState.Loading -> LyricsUiState(isLoading = true)
-            is SnapshotState.Error   -> LyricsUiState(error = lyricsState.throwable.message)
+            is SnapshotState.Loading -> LyricsUiState(isLoading = true, isAdmin = isAdmin)
+            is SnapshotState.Error   -> LyricsUiState(error = lyricsState.throwable.message, isAdmin = isAdmin)
             is SnapshotState.Data    -> {
                 val pinOrder = pinnedSongIds.withIndex().associate { (index, songId) -> songId to index }
                 val sorted = lyricsState.value.map { lyrics ->
@@ -78,6 +87,7 @@ class LyricsViewModel @Inject constructor(
                     lyrics         = sorted,
                     filteredLyrics = filtered,
                     query          = query,
+                    isAdmin        = isAdmin,
                 )
             }
         }

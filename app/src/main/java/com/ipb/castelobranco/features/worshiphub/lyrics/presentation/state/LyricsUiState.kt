@@ -6,6 +6,7 @@ data class LyricsUiState(
     val query: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
+    val isAdmin: Boolean = false,
 )
 
 data class LyricsListItem(

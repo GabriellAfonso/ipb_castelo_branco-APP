@@ -9,4 +9,6 @@ interface ChordChartRepository {
     fun observe(): Flow<SnapshotState<List<ChordChart>>>
     suspend fun preload()
     suspend fun refresh(): RefreshResult
+    suspend fun createChordChart(songId: Int, content: String, tone: String, instrument: String): Result<Unit>
+    suspend fun updateContent(id: Int, content: String): Result<Unit>
 }

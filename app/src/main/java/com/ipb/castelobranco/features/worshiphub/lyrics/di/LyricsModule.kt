@@ -1,9 +1,11 @@
 package com.ipb.castelobranco.features.worshiphub.lyrics.di
 
 import com.ipb.castelobranco.core.di.AuthLessRetrofit
+import com.ipb.castelobranco.core.di.AuthedRetrofit
 import com.ipb.castelobranco.core.domain.startup.Preloadable
 import com.ipb.castelobranco.core.domain.startup.Refreshable
 import com.ipb.castelobranco.features.worshiphub.lyrics.data.api.LyricsApi
+import com.ipb.castelobranco.features.worshiphub.lyrics.data.api.LyricsEditApi
 import com.ipb.castelobranco.features.worshiphub.lyrics.data.repository.LyricsRepositoryImpl
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
 import dagger.Binds
@@ -29,6 +31,12 @@ abstract class LyricsModule {
         fun provideLyricsApi(
             @AuthLessRetrofit retrofit: Retrofit
         ): LyricsApi = retrofit.create(LyricsApi::class.java)
+
+        @Provides
+        @Singleton
+        fun provideLyricsEditApi(
+            @AuthedRetrofit retrofit: Retrofit
+        ): LyricsEditApi = retrofit.create(LyricsEditApi::class.java)
 
         @Provides @IntoSet
         fun bindLyricsPreloadable(r: LyricsRepository): Preloadable = Preloadable { r.preload() }

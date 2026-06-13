@@ -1,0 +1,66 @@
+package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.domain.util.normalize
+import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
+import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsCreateUiState
+import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class LyricsCreateViewModel @Inject constructor(
+    private val lyricsRepository: LyricsRepository,
+    private val songsRepository: SongsRepository,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(LyricsCreateUiState())
+    val uiState: StateFlow<LyricsCreateUiState> = _uiState.asStateFlow()
+
+    init {
+        songsRepository.observeAllSongs()
+            .onEach { state ->
+                val songs = (state as? SnapshotState.Data)?.value.orEmpty()
+                _uiState.update { it.copy(allSongs = songs, filteredSongs = filter(songs, it.songQuery)) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun onSongQueryChange(query: String) {
+        _uiState.update { it.copy(songQuery = query, filteredSongs = filter(it.allSongs, query)) }
+    }
+
+    fun onSongSelected(song: Song) {
+        _uiState.update { it.copy(selectedSong = song, songQuery = song.title, filteredSongs = emptyList()) }
+    }
+
+    fun onContentChange(content: String) {
+        _uiState.update { it.copy(content = content) }
+    }
+
+    fun onSave() {
+        val state = _uiState.value
+        val song = state.selectedSong ?: return
+        if (state.content.isBlank()) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true, saveError = null) }
+            lyricsRepository.createLyrics(song.id, state.content)
+                .onSuccess { _uiState.update { it.copy(isSaving = false, savedSuccessfully = true) } }
+                .onFailure { e -> _uiState.update { it.copy(isSaving = false, saveError = e.message) } }
+        }
+    }
+
+    private fun filter(songs: List<Song>, query: String): List<Song> =
+        if (query.isBlank()) songs
+        else songs.filter { it.title.normalize().contains(query.normalize(), ignoreCase = true) }
+}

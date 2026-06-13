@@ -3,6 +3,7 @@ package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.model.Lyrics
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
@@ -13,6 +14,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -38,6 +40,7 @@ class LyricsViewModelTest {
     private lateinit var getLyricsUseCase: GetLyricsUseCase
     private lateinit var songsRepository: SongsRepository
     private lateinit var setlistPreferences: SetlistPreferences
+    private lateinit var profileSnapshot: ProfileSnapshotRepository
     private lateinit var viewModel: LyricsViewModel
 
     private val fakeSongs = listOf(
@@ -55,14 +58,16 @@ class LyricsViewModelTest {
         getLyricsUseCase = mockk()
         songsRepository = mockk()
         setlistPreferences = mockk()
+        profileSnapshot = mockk()
 
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Loading)
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Loading)
         every { setlistPreferences.pinnedSongIds } returns flowOf(emptyList())
+        every { profileSnapshot.observe() } returns MutableStateFlow(SnapshotState.Loading)
         coEvery { getLyricsUseCase.refresh() } returns RefreshResult.Updated
         coEvery { setlistPreferences.toggleSong(any()) } returns Unit
 
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
     }
 
     @After
@@ -97,7 +102,7 @@ class LyricsViewModelTest {
     @Test
     fun `uiState sets error when observe emits Error`() = runTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Error(RuntimeException("fetch failed")))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -118,7 +123,7 @@ class LyricsViewModelTest {
     fun `uiState populates lyrics with song names resolved from songsRepository`() = runTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -133,7 +138,7 @@ class LyricsViewModelTest {
         val lyricsWithUnknownSong = listOf(Lyrics(id = 20, songId = 99, content = "..."))
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(lyricsWithUnknownSong))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -145,7 +150,7 @@ class LyricsViewModelTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
         every { setlistPreferences.pinnedSongIds } returns flowOf(listOf(2))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -164,7 +169,7 @@ class LyricsViewModelTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(lyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
         every { setlistPreferences.pinnedSongIds } returns flowOf(listOf(1, 2))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
@@ -181,7 +186,7 @@ class LyricsViewModelTest {
     fun `onQueryChange updates query in uiState`() = runTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()
@@ -197,7 +202,7 @@ class LyricsViewModelTest {
     fun `onQueryChange filters lyrics by song name case-insensitively`() = runTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()
@@ -219,7 +224,7 @@ class LyricsViewModelTest {
         )
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(accentedSongs))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()
@@ -237,7 +242,7 @@ class LyricsViewModelTest {
     fun `onQueryChange with blank query returns all lyrics`() = runTest {
         every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Data(fakeLyrics))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
-        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences)
+        viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         val job = launch { viewModel.uiState.collect { } }
         advanceUntilIdle()

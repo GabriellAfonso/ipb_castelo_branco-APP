@@ -4,7 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.data.local.ThemePreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
+import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.model.Lyrics
+import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
@@ -37,8 +40,10 @@ class LyricsDetailViewModelTest {
     private val testScope = TestScope(testDispatcher)
 
     private lateinit var getLyricsUseCase: GetLyricsUseCase
+    private lateinit var lyricsRepository: LyricsRepository
     private lateinit var songsRepository: SongsRepository
     private lateinit var themePreferences: ThemePreferences
+    private lateinit var profileSnapshot: ProfileSnapshotRepository
 
     private val fakeSongs = listOf(
         Song(id = 10, title = "Oceans", artist = "Hillsong", categoryName = "Louvor"),
@@ -52,10 +57,15 @@ class LyricsDetailViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         getLyricsUseCase = mockk()
+        lyricsRepository = mockk()
         songsRepository = mockk()
         themePreferences = mockk()
+        profileSnapshot = mockk()
 
         every { themePreferences.songScrollModeFlow } returns flowOf(SongScrollMode.HORIZONTAL)
+        every { profileSnapshot.observe() } returns MutableStateFlow(SnapshotState.Data(
+            MeProfile(name = "Test", active = true, isMember = true, isAdmin = false, photoUrl = null)
+        ))
     }
 
     @After
@@ -65,7 +75,7 @@ class LyricsDetailViewModelTest {
 
     private fun createViewModel(lyricsId: Int = 1): LyricsDetailViewModel {
         val savedStateHandle = SavedStateHandle(mapOf("lyricsId" to lyricsId))
-        return LyricsDetailViewModel(savedStateHandle, getLyricsUseCase, songsRepository, themePreferences)
+        return LyricsDetailViewModel(savedStateHandle, getLyricsUseCase, lyricsRepository, songsRepository, themePreferences, profileSnapshot)
     }
 
     // region uiState

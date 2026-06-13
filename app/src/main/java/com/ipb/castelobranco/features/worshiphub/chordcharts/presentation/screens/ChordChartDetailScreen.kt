@@ -19,15 +19,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -62,10 +68,14 @@ fun ChordChartDetailScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollMode by viewModel.scrollMode.collectAsStateWithLifecycle()
     ChordChartDetailContent(
-        state          = state,
-        scrollMode     = scrollMode,
-        onToggleScroll = viewModel::toggleScrollMode,
-        onBackClick    = onBackClick,
+        state              = state,
+        scrollMode         = scrollMode,
+        onToggleScroll     = viewModel::toggleScrollMode,
+        onBackClick        = onBackClick,
+        onEnterEdit        = viewModel::enterEditMode,
+        onEditContentChange = viewModel::onEditContentChange,
+        onCancelEdit       = viewModel::cancelEdit,
+        onSaveEdit         = viewModel::saveEdit,
     )
 }
 
@@ -75,16 +85,38 @@ private fun ChordChartDetailContent(
     scrollMode: SongScrollMode,
     onToggleScroll: () -> Unit,
     onBackClick: () -> Unit,
+    onEnterEdit: () -> Unit,
+    onEditContentChange: (String) -> Unit,
+    onCancelEdit: () -> Unit,
+    onSaveEdit: () -> Unit,
 ) {
     BaseScreen(
         tabName       = state.songName.ifEmpty { "Chord Chart" },
         logoRes       = R.drawable.ic_sarca_ipb,
         showBackArrow = true,
         onBackClick   = onBackClick,
+        extraActions  = {
+            if (state.isAdmin) {
+                EditOverflowMenu(
+                    isEditing  = state.isEditing,
+                    isSaving   = state.isSaving,
+                    onEdit     = onEnterEdit,
+                    onSave     = onSaveEdit,
+                    onCancel   = onCancelEdit,
+                )
+            }
+        },
     ) { innerPadding ->
         when {
-            state.isLoading        -> LoadingState(Modifier.padding(innerPadding))
-            state.error != null    -> ErrorState(state.error, Modifier.padding(innerPadding))
+            state.isLoading -> LoadingState(Modifier.padding(innerPadding))
+            state.error != null -> ErrorState(state.error, Modifier.padding(innerPadding))
+            state.isEditing -> EditContent(
+                editContent     = state.editContent,
+                isSaving        = state.isSaving,
+                saveError       = state.saveError,
+                onContentChange = onEditContentChange,
+                modifier        = Modifier.padding(innerPadding),
+            )
             state.blocks.isEmpty() -> ErrorState("No content available", Modifier.padding(innerPadding))
             scrollMode == SongScrollMode.VERTICAL -> ChordVerticalContent(
                 blocks         = state.blocks,
@@ -460,6 +492,88 @@ private fun PageDotIndicator(
                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
             ) {}
         }
+    }
+}
+
+@Composable
+private fun EditOverflowMenu(
+    isEditing: Boolean,
+    isSaving: Boolean,
+    onEdit: () -> Unit,
+    onSave: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector        = Icons.Default.MoreVert,
+                contentDescription = "Menu",
+                tint               = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            if (isEditing) {
+                DropdownMenuItem(
+                    text    = { Text("Salvar") },
+                    onClick = { expanded = false; onSave() },
+                    enabled = !isSaving,
+                )
+                DropdownMenuItem(
+                    text    = { Text("Cancelar") },
+                    onClick = { expanded = false; onCancel() },
+                    enabled = !isSaving,
+                )
+            } else {
+                DropdownMenuItem(
+                    text    = { Text("Editar") },
+                    onClick = { expanded = false; onEdit() },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EditContent(
+    editContent: String,
+    isSaving: Boolean,
+    saveError: String?,
+    onContentChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+    ) {
+        if (isSaving) {
+            Box(
+                modifier         = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            }
+        }
+        if (saveError != null) {
+            Text(
+                text     = saveError,
+                color    = MaterialTheme.colorScheme.error,
+                style    = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
+        OutlinedTextField(
+            value         = editContent,
+            onValueChange = onContentChange,
+            modifier      = Modifier
+                .fillMaxSize()
+                .weight(1f),
+            enabled       = !isSaving,
+            textStyle     = MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+            ),
+        )
     }
 }
 
