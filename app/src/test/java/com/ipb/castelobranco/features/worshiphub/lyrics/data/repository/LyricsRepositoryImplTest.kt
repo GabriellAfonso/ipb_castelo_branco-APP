@@ -8,6 +8,7 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.lyrics.data.api.LyricsEditApi
 import com.ipb.castelobranco.features.worshiphub.lyrics.data.dto.LyricsDto
+import com.ipb.castelobranco.core.domain.error.AppError
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -87,13 +88,14 @@ class LyricsRepositoryImplTest {
     }
 
     @Test
-    fun `createLyrics failure returns error with message`() = runTest {
+    fun `createLyrics failure returns AppError Server with correct code`() = runTest {
         coEvery { editApi.createLyrics(any()) } returns Response.error(400, "".toResponseBody())
 
         val result = repository.createLyrics(songId = 1, content = "Nova letra")
 
         assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull()!!.message!!.contains("400"))
+        val error = result.exceptionOrNull() as AppError.Server
+        assertEquals(400, error.code)
     }
 
     // endregion

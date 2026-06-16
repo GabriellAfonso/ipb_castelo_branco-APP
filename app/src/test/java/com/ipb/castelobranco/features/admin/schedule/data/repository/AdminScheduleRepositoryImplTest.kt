@@ -249,7 +249,28 @@ class AdminScheduleRepositoryImplTest {
     }
 
     @Test
-    fun `saveSchedule server error returns AppError Server with correct code and message`() = runTest {
+    fun `saveSchedule server error with new API format returns detail as message`() = runTest {
+        val errorBody = mockk<ResponseBody> {
+            every { string() } returns """{"error_code":"DUPLICATE","detail":"Escala já existe para este mês"}"""
+        }
+        val response = mockk<Response<Unit>> {
+            every { isSuccessful } returns false
+            every { code() } returns 422
+            every { errorBody() } returns errorBody
+        }
+        coEvery { api.saveSchedule(any()) } returns response
+
+        val result = repository.saveSchedule(2026, 4, emptyList())
+
+        assertTrue(result.isFailure)
+        val error = result.exceptionOrNull() as AppError.Server
+        assertEquals(422, error.code)
+        assertEquals("Escala já existe para este mês", error.message)
+        assertEquals("DUPLICATE", error.errorCode)
+    }
+
+    @Test
+    fun `saveSchedule server error with legacy format uses raw body as message`() = runTest {
         val errorBody = mockk<ResponseBody> {
             every { string() } returns """{"error":"Escala já existe para este mês"}"""
         }
@@ -265,7 +286,7 @@ class AdminScheduleRepositoryImplTest {
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull() as AppError.Server
         assertEquals(422, error.code)
-        assertEquals("Escala já existe para este mês", error.message)
+        assertEquals("""{"error":"Escala já existe para este mês"}""", error.message)
     }
 
     @Test
@@ -288,7 +309,7 @@ class AdminScheduleRepositoryImplTest {
     }
 
     @Test
-    fun `saveSchedule server error with null body uses default message`() = runTest {
+    fun `saveSchedule server error with null body uses HTTP code as message`() = runTest {
         val response = mockk<Response<Unit>> {
             every { isSuccessful } returns false
             every { code() } returns 500
@@ -299,7 +320,7 @@ class AdminScheduleRepositoryImplTest {
         val result = repository.saveSchedule(2026, 4, emptyList())
 
         val error = result.exceptionOrNull() as AppError.Server
-        assertEquals("Erro desconhecido do servidor", error.message)
+        assertEquals("HTTP 500", error.message)
     }
 
     @Test

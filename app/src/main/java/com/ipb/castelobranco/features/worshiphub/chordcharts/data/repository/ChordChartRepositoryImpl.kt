@@ -11,6 +11,7 @@ import com.ipb.castelobranco.features.worshiphub.chordcharts.data.dto.ChordChart
 import com.ipb.castelobranco.features.worshiphub.chordcharts.data.mapper.toDomain
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordChart
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
+import com.ipb.castelobranco.core.network.error.toAppError
 import javax.inject.Inject
 
 class ChordChartRepositoryImpl @Inject constructor(
@@ -34,17 +35,13 @@ class ChordChartRepositoryImpl @Inject constructor(
         instrument: String,
     ): Result<Unit> = runCatching {
         val response = editApi.createChordChart(CreateChordChartRequest(songId, content, tone, instrument))
-        if (!response.isSuccessful) {
-            error("Erro ao criar cifra: ${response.code()}")
-        }
+        if (!response.isSuccessful) throw response.toAppError()
         refresh()
     }
 
     override suspend fun updateContent(id: Int, content: String): Result<Unit> = runCatching {
         val response = editApi.updateContent(id, UpdateContentRequest(content))
-        if (!response.isSuccessful) {
-            error("Erro ao salvar cifra: ${response.code()}")
-        }
+        if (!response.isSuccessful) throw response.toAppError()
         refresh()
     }
 }

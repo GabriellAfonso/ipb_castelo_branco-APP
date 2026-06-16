@@ -11,6 +11,7 @@ import com.ipb.castelobranco.features.worshiphub.lyrics.data.dto.LyricsDto
 import com.ipb.castelobranco.features.worshiphub.lyrics.data.mapper.toDomain
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.model.Lyrics
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
+import com.ipb.castelobranco.core.network.error.toAppError
 import javax.inject.Inject
 
 class LyricsRepositoryImpl @Inject constructor(
@@ -29,17 +30,13 @@ class LyricsRepositoryImpl @Inject constructor(
 
     override suspend fun createLyrics(songId: Int, content: String): Result<Unit> = runCatching {
         val response = editApi.createLyrics(CreateLyricsRequest(songId, content))
-        if (!response.isSuccessful) {
-            error("Erro ao criar letra: ${response.code()}")
-        }
+        if (!response.isSuccessful) throw response.toAppError()
         refresh()
     }
 
     override suspend fun updateContent(id: Int, content: String): Result<Unit> = runCatching {
         val response = editApi.updateContent(id, UpdateContentRequest(content))
-        if (!response.isSuccessful) {
-            error("Erro ao salvar letra: ${response.code()}")
-        }
+        if (!response.isSuccessful) throw response.toAppError()
         refresh()
     }
 }

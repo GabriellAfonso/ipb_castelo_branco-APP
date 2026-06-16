@@ -148,4 +148,52 @@ class AuthErrorMapperTest {
     }
 
     // endregion
+
+    // region new API format
+
+    @Test
+    fun `parseLoginError with new API format returns detail`() {
+        val result = parseLoginError("""{"error_code":"INVALID_CREDENTIALS","detail":"Usuário ou senha inválidos"}""")
+        assertEquals("Usuário ou senha inválidos", result)
+    }
+
+    @Test
+    fun `parseLoginError with new API format and blank detail falls back to original`() {
+        val input = """{"error_code":"UNKNOWN","detail":""}"""
+        val result = parseLoginError(input)
+        assertEquals(input, result)
+    }
+
+    @Test
+    fun `parseRegisterError with new API format VALIDATION_ERROR maps field_errors`() {
+        val input = """{"error_code":"VALIDATION_ERROR","detail":"Dados inválidos","field_errors":{"username":["Nome em uso."],"password":["Muito fraca."]}}"""
+        val result = parseRegisterError(input)
+        assertEquals("Nome em uso.", result.username)
+        assertEquals("Muito fraca.", result.password)
+        assertNull(result.general)
+    }
+
+    @Test
+    fun `parseRegisterError with new API format without field_errors uses detail as general`() {
+        val input = """{"error_code":"THROTTLED","detail":"Muitas requisições."}"""
+        val result = parseRegisterError(input)
+        assertEquals("Muitas requisições.", result.general)
+        assertNull(result.username)
+    }
+
+    @Test
+    fun `parseRegisterError with new API format empty field_errors uses detail as general`() {
+        val input = """{"error_code":"VALIDATION_ERROR","detail":"Erro geral.","field_errors":{}}"""
+        val result = parseRegisterError(input)
+        assertEquals("Erro geral.", result.general)
+    }
+
+    @Test
+    fun `parseRegisterError with new API format maps first_name from field_errors`() {
+        val input = """{"error_code":"VALIDATION_ERROR","detail":"Erro","field_errors":{"first_name":["Obrigatório."]}}"""
+        val result = parseRegisterError(input)
+        assertEquals("Obrigatório.", result.firstName)
+    }
+
+    // endregion
 }

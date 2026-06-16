@@ -9,9 +9,8 @@ import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleItem
 import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleType
 import com.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
-import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.error.mapError
-import org.json.JSONObject
+import com.ipb.castelobranco.core.network.error.toAppError
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,13 +51,7 @@ class AdminScheduleRepositoryImpl @Inject constructor(
         )
         val response = api.saveSchedule(body)
         if (!response.isSuccessful) {
-            val errorBody = response.errorBody()?.string()
-            val errorMessage = try {
-                JSONObject(errorBody).getString("error")
-            } catch (e: Exception) {
-                errorBody ?: "Erro desconhecido do servidor"
-            }
-            throw AppError.Server(code = response.code(), message = errorMessage)
+            throw response.toAppError()
         }
     }.mapError()
 }

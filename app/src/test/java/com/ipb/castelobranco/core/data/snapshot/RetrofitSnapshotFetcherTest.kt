@@ -80,7 +80,7 @@ class RetrofitSnapshotFetcherTest {
     // region http errors
 
     @Test
-    fun `fetch returns Failure with HTTP error message on 4xx or 5xx response`() = runTest {
+    fun `fetch returns Failure with HTTP error message on 5xx response with empty body`() = runTest {
         val fetcher = RetrofitSnapshotFetcher<String> {
             buildRawResponse(code = 500)
         }
@@ -145,7 +145,7 @@ class RetrofitSnapshotFetcherTest {
     }
 
     @Test
-    fun `fetch falls back to HTTP code message when error body is not valid JSON on 401`() = runTest {
+    fun `fetch uses raw body as message when error body is not valid JSON on 401`() = runTest {
         val fetcher = RetrofitSnapshotFetcher<String> {
             buildErrorResponse(code = 401, body = "Unauthorized plain text")
         }
@@ -155,7 +155,7 @@ class RetrofitSnapshotFetcherTest {
         val failure = result as NetworkResult.Failure
         val ex = failure.throwable as HttpPermissionException
         assertEquals(401, ex.code)
-        assertEquals("HTTP 401", ex.message)
+        assertEquals("Unauthorized plain text", ex.message)
     }
 
     // endregion

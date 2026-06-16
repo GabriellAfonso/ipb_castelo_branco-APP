@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.auth.data.mapper
 
+import com.ipb.castelobranco.core.network.error.parseApiError
 import com.ipb.castelobranco.features.auth.domain.model.RegisterErrors
 import org.json.JSONArray
 import org.json.JSONObject
@@ -11,6 +12,10 @@ fun parseLoginError(message: String): String {
         val trimmed = message.trim()
         if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return message
 
+        // New API format: { "error_code": "...", "detail": "..." }
+        parseApiError(trimmed)?.let { return it.detail.ifBlank { message } }
+
+        // Fallback: legacy format
         val json = JSONObject(trimmed)
 
         for (k in LOGIN_ERROR_KEY_PRIORITY) {
@@ -36,6 +41,28 @@ fun parseRegisterError(message: String): RegisterErrors {
             return RegisterErrors(general = message)
         }
 
+        // New API format: { "error_code": "VALIDATION_ERROR", "detail": "...", "field_errors": {...} }
+        parseApiError(trimmed)?.let { apiError ->
+            val fieldErrors = apiError.fieldErrors
+            if (fieldErrors.isNullOrEmpty()) {
+                return RegisterErrors(general = apiError.detail.ifBlank { message })
+            }
+            var errors = RegisterErrors()
+            for ((key, msgs) in fieldErrors) {
+                val msg = msgs.firstOrNull() ?: continue
+                errors = when (key) {
+                    "username" -> errors.copy(username = msg)
+                    "first_name", "firstName" -> errors.copy(firstName = msg)
+                    "last_name", "lastName" -> errors.copy(lastName = msg)
+                    "password" -> errors.copy(password = msg)
+                    "password_confirm", "passwordConfirm" -> errors.copy(passwordConfirm = msg)
+                    else -> errors.copy(general = (errors.general?.let { "$it\n$msg" } ?: msg))
+                }
+            }
+            return if (errors == RegisterErrors()) RegisterErrors(general = apiError.detail.ifBlank { message }) else errors
+        }
+
+        // Fallback: legacy format
         val json = JSONObject(trimmed)
         var errors = RegisterErrors()
 

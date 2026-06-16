@@ -5,6 +5,7 @@ import com.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.ipb.castelobranco.core.di.ApiBaseUrl
 import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.error.mapError
+import com.ipb.castelobranco.core.network.error.toAppError
 import com.ipb.castelobranco.features.profile.data.api.ProfileApi
 import com.ipb.castelobranco.features.profile.data.local.ProfilePhotoBus
 import com.ipb.castelobranco.features.profile.data.local.ProfilePhotoCacheStorage
@@ -37,15 +38,7 @@ class ProfilePhotoDataSource @Inject constructor(
             )
 
             val response = api.uploadProfilePhoto(part)
-            if (!response.isSuccessful) {
-                val errorBody = response.errorBody()?.string()
-                val code = response.code()
-                if (code == 401 || code == 403) {
-                    throw AppError.Auth(message = errorBody ?: "HTTP $code")
-                } else {
-                    throw AppError.Server(code = code, message = errorBody ?: "HTTP $code")
-                }
-            }
+            if (!response.isSuccessful) throw response.toAppError()
 
             response.body()?.photoUrl
         }.mapError()
@@ -53,15 +46,7 @@ class ProfilePhotoDataSource @Inject constructor(
     suspend fun delete(): Result<Unit> =
         runCatching {
             val response = api.deleteProfilePhoto()
-            if (!response.isSuccessful) {
-                val errorBody = response.errorBody()?.string()
-                val code = response.code()
-                if (code == 401 || code == 403) {
-                    throw AppError.Auth(message = errorBody ?: "HTTP $code")
-                } else {
-                    throw AppError.Server(code = code, message = errorBody ?: "HTTP $code")
-                }
-            }
+            if (!response.isSuccessful) throw response.toAppError()
             Unit
         }.mapError().also { result ->
             if (result.isSuccess) {
@@ -98,15 +83,7 @@ class ProfilePhotoDataSource @Inject constructor(
 
                     response.code() == 304 -> findLastLocalPhotoOrNull()
 
-                    !response.isSuccessful -> {
-                        val err = response.errorBody()?.string()?.trim().orEmpty()
-                        val code = response.code()
-                        if (code == 401 || code == 403) {
-                            throw AppError.Auth(message = err.ifBlank { "HTTP $code" })
-                        } else {
-                            throw AppError.Server(code = code, message = err.ifBlank { "HTTP $code" })
-                        }
-                    }
+                    !response.isSuccessful -> throw response.toAppError()
 
                     else -> {
                         val body = response.body()

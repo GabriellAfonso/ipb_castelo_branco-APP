@@ -26,6 +26,7 @@ sealed class AppError(message: String?, cause: Throwable?) : Exception(message, 
         val code: Int,
         message: String? = "Erro no servidor ($code)",
         cause: Throwable? = null,
+        val errorCode: String? = null,
     ) : AppError(message, cause)
 
     /** An unexpected error that does not fit the categories above. */

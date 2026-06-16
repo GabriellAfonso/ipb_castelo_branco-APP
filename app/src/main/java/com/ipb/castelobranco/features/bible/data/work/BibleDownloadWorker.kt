@@ -14,6 +14,7 @@ import com.ipb.castelobranco.features.bible.domain.model.BibleTranslation
 import com.ipb.castelobranco.features.bible.domain.repository.BibleRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import com.ipb.castelobranco.core.network.error.parseApiError
 import org.json.JSONObject
 
 /**
@@ -55,12 +56,12 @@ class BibleDownloadWorker @AssistedInject constructor(
                     val response = api.getBibleRaw(translation.code, ifNoneMatch = null)
                     if (!response.isSuccessful) {
                         val code = response.code()
-                        val errorMessage = try {
-                            val raw = response.errorBody()?.string()
-                            raw?.let { JSONObject(it).optString("detail", it) } ?: "HTTP $code"
-                        } catch (_: Exception) {
-                            "HTTP $code"
-                        }
+                        val raw = response.errorBody()?.string()
+                        val parsed = parseApiError(raw)
+                        val errorMessage = parsed?.detail?.ifBlank { null }
+                            ?: raw?.let { try { JSONObject(it).optString("detail", "").ifBlank { null } } catch (_: Exception) { null } }
+                            ?: raw?.ifBlank { null }
+                            ?: "HTTP $code"
                         if (code == 401 || code == 403) {
                             return Result.failure(workDataOf(KEY_ERROR to errorMessage, KEY_ERROR_CODE to code))
                         }

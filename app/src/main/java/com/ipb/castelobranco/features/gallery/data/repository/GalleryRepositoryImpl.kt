@@ -7,6 +7,7 @@ import com.ipb.castelobranco.features.gallery.domain.model.Album
 import com.ipb.castelobranco.core.domain.download.DownloadProgress
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.core.domain.error.AppError
+import com.ipb.castelobranco.core.network.error.toAppError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,9 +67,7 @@ class GalleryRepositoryImpl @Inject constructor(
     override fun downloadAllPhotos(): Flow<DownloadProgress> = flow {
         val response = api.getAllPhotos()
 
-        if (!response.isSuccessful) {
-            throw AppError.Server(response.code())
-        }
+        if (!response.isSuccessful) throw response.toAppError()
 
         val photos = response.body() ?: emptyList()
         emitAll(processDownload(photos))
@@ -86,7 +85,7 @@ class GalleryRepositoryImpl @Inject constructor(
             if (!storage.exists(photo.albumId, photo.id)) {
                 val response = api.downloadFile(photo.imageUrl)
                 if (response.isSuccessful) {
-                    val body = response.body() ?: throw AppError.Server(response.code(), "Body nulo")
+                    val body = response.body() ?: throw response.toAppError()
                     storage.save(photo.albumId, photo.id, photo.fileExtension(), body.byteStream())
                     storage.savePhotoMetadata(photo.albumId, photo.id, photo)
                 }

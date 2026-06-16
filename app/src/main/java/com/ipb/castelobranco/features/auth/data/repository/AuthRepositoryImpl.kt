@@ -11,6 +11,7 @@ import com.ipb.castelobranco.features.auth.data.local.TokenStorage
 import com.ipb.castelobranco.features.auth.domain.repository.AuthRepository
 import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.error.mapError
+import com.ipb.castelobranco.core.network.error.toAppError
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -70,14 +71,8 @@ class AuthRepositoryImpl @Inject constructor(
             if (BuildConfig.DEBUG) Log.d("GoogleSignIn", "Response code: ${response.code()}")
 
             if (!response.isSuccessful) {
-                val errorBody = response.errorBody()?.string()
-                if (BuildConfig.DEBUG) Log.e("GoogleSignIn", "Erro do servidor: $errorBody")
-                val code = response.code()
-                if (code == 401 || code == 403) {
-                    throw AppError.Auth(message = errorBody ?: "HTTP $code")
-                } else {
-                    throw AppError.Server(code = code, message = errorBody ?: "HTTP $code")
-                }
+                if (BuildConfig.DEBUG) Log.e("GoogleSignIn", "Erro do servidor: ${response.code()}")
+                throw response.toAppError()
             }
 
             val tokens = response.body()
