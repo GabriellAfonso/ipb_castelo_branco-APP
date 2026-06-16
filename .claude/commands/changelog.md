@@ -27,13 +27,17 @@ Se não houver argumento, use a **versão atual do app** lida acima de `app/buil
 
 | Escopos dos commits                            | Seção no changelog                                                              |
 |------------------------------------------------|---------------------------------------------------------------------------------|
-| `hymnal`, `chord`, `cifra`                     | **Cifras** ou **Cifras e Letras** (use "Cifras e Letras" se afeta letra também) |
-| `worshiphub`, `repertorio`, `lyrics`           | **Repertório**                                                                  |
+| `hymnal`, `hinario`                            | **Hinário**                                                                     |
+| `chord`, `cifra`, `lyrics`, `letra`            | **Cifras e Letras**                                                             |
+| `worshiphub`, `repertorio`                     | **Repertório**                                                                  |
 | `gallery`, `galeria`                           | **Galeria**                                                                     |
 | `bible`, `biblia`                              | **Bíblia**                                                                      |
 | `schedule`, `agenda`                           | **Agenda**                                                                      |
-| `auth`, `profile`, `settings`, `core`, `admin` | **Geral**                                                                       |
+| `studies`, `estudos`                           | **Estudos**                                                                     |
+| `auth`, `profile`, `settings`, `core`          | **Geral**                                                                       |
 | Sem escopo reconhecível                        | **Geral**                                                                       |
+
+> **Atenção — escopo `admin`:** commits com escopo `admin` devem ser classificados pela feature que afetam (leia o body do commit). Ex: `feat(admin): add chord chart creation` → **Cifras e Letras**, não Geral. Só use Geral se o commit for sobre o painel admin em si.
 
 ---
 
@@ -93,10 +97,11 @@ Confirme a criação com: `echo "✅ Salvo em changelogs/<versão-alvo>.md"`
 
 ### Regras gerais
 
-1. **Traduza e humanize** — não copie mensagens de commit cruas. `feat(hymnal): add vertical scroll mode` → `Novo modo de rolagem vertical`.
-2. **Agrupe semanticamente** — múltiplos commits da mesma funcionalidade viram uma linha.
-3. **Omita** chore, test, docs, bump de versão e refactors internos — só o que o usuário final percebe.
-4. **Ordem das seções:** mais mudanças primeiro; "Geral" sempre por último.
-5. **Sem seções vazias** — omita seções sem mudanças visíveis ao usuário.
-6. **Versão Play Store:** máximo **500 caracteres** (incluindo espaços). Se não couber tudo, priorize as mudanças mais impactantes. Informe a contagem ao final: `(XXX/500 caracteres)`.
-7. O bloco Play Store deve ser a **última seção do arquivo**, separada por `---`, para fácil localização e cópia.
+1. **Leia o body dos commits** — o título sozinho não basta. Use o body (disponível no log completo acima) para entender *o que* a mudança faz e *onde* ela se aplica. Não assuma a seção só pelo escopo do título.
+2. **Traduza e humanize** — não copie mensagens de commit cruas. `feat(hymnal): add vertical scroll mode` → `Novo modo de rolagem vertical`.
+3. **Agrupe semanticamente** — múltiplos commits da mesma funcionalidade viram uma linha.
+4. **Omita** chore, test, docs, bump de versão e refactors internos — só o que o usuário final percebe.
+5. **Ordem das seções:** mais mudanças primeiro; "Geral" sempre por último.
+6. **Sem seções vazias** — omita seções sem mudanças visíveis ao usuário.
+7. **Versão Play Store:** máximo **500 caracteres** (incluindo espaços). Se não couber tudo, priorize as mudanças mais impactantes. Informe a contagem ao final: `(XXX/500 caracteres)`.
+8. O bloco Play Store deve ser a **última seção do arquivo**, separada por `---`, para fácil localização e cópia.
