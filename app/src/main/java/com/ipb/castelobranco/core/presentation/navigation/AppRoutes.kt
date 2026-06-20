@@ -5,6 +5,7 @@ object AppRoutes {
     const val SCHEDULE = "schedule"
     const val SETTINGS = "settings"
     const val PROFILE = "profile"
+    const val LOG_VIEWER = "log_viewer"
 
     // Nested graph parent routes
     const val AUTH_GRAPH        = "graph/auth"

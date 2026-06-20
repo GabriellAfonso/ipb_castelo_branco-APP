@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -45,6 +46,7 @@ import com.ipb.castelobranco.features.settings.presentation.viewmodel.SettingsVi
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {},
+    onNavigateToLogViewer: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -73,6 +75,7 @@ fun SettingsScreen(
         onDismissConfirmation = { viewModel.dismissConfirmation() },
         galleryCleared        = uiState.galleryCleared,
         bibleCleared          = uiState.bibleCleared,
+        onNavigateToLogViewer = onNavigateToLogViewer,
     )
 }
 
@@ -88,6 +91,7 @@ fun SettingsContent(
     onDismissConfirmation: () -> Unit,
     galleryCleared: Boolean,
     bibleCleared: Boolean,
+    onNavigateToLogViewer: () -> Unit = {},
 ) {
     if (pendingConfirmation != null) {
         val (title, message) = when (pendingConfirmation) {
@@ -146,6 +150,16 @@ fun SettingsContent(
                 tint        = MaterialTheme.colorScheme.error,
                 done        = bibleCleared,
                 onClick     = onRequestResetBible,
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsSectionHeader("Diagnóstico")
+            SettingsActionRow(
+                icon        = Icons.Filled.BugReport,
+                title       = "Logs do app",
+                description = "Visualizar logs em tempo real",
+                onClick     = onNavigateToLogViewer,
             )
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
