@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextOverflow
+import com.ipb.castelobranco.core.domain.model.Birthday
 import com.ipb.castelobranco.features.schedule.presentation.components.ScheduleSectionUi
 
 // ─── Main Highlight Carousel ────────────────────────────────────────────────
@@ -197,13 +198,124 @@ fun HighlightScheduleUnavailable() {
 }
 
 @Composable
-fun HighlightBirthdays() {
-    HighlightPlaceholder(
-        icon = "🎂",
-        title = "Aniversariantes do Mês",
-        message = "Nenhum aniversariante esse mês"
-    )
+fun HighlightBirthdays(birthdays: List<Birthday>) {
+    if (birthdays.isEmpty()) {
+        HighlightPlaceholder(
+            icon = "\uD83C\uDF82",
+            title = "Aniversariantes do M\u00EAs",
+            message = "Nenhum aniversariante esse m\u00EAs"
+        )
+        return
+    }
+
+    val columns = when {
+        birthdays.size <= 5 -> 1
+        birthdays.size <= 12 -> 2
+        else -> 3
+    }
+    val badgeSize = when (columns) {
+        1 -> 30.dp
+        2 -> 26.dp
+        else -> 22.dp
+    }
+    val badgeRadius = when (columns) {
+        1 -> 8.dp
+        else -> 6.dp
+    }
+    val verticalPad = when {
+        birthdays.size <= 3 -> 6.dp
+        birthdays.size <= 6 -> 4.dp
+        birthdays.size <= 10 -> 3.dp
+        else -> 2.dp
+    }
+    val nameStyle = when (columns) {
+        1 -> MaterialTheme.typography.bodyMedium
+        2 -> MaterialTheme.typography.bodySmall
+        else -> MaterialTheme.typography.labelSmall
+    }
+    val badgeTextStyle = when (columns) {
+        1 -> MaterialTheme.typography.labelLarge
+        2 -> MaterialTheme.typography.labelMedium
+        else -> MaterialTheme.typography.labelSmall
+    }
+
+    // Split birthdays across columns
+    val columnItems = List(columns) { col ->
+        val chunkSize = (birthdays.size + columns - 1) / columns
+        birthdays.drop(col * chunkSize).take(chunkSize)
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "\uD83C\uDF82",
+                fontSize = 18.sp,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text(
+                text = "Aniversariantes do M\u00EAs",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+
+        // Adaptive grid
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            columnItems.forEach { colItems ->
+                Column(modifier = Modifier.weight(1f)) {
+                    colItems.forEach { birthday ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = verticalPad),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(badgeSize)
+                                    .clip(RoundedCornerShape(badgeRadius))
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = String.format(
+                                        java.util.Locale.getDefault(), "%02d", birthday.day
+                                    ),
+                                    style = badgeTextStyle,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = birthday.name,
+                                style = nameStyle,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+
 
 @Composable
 fun HighlightEvents() {
@@ -254,10 +366,93 @@ private fun HighlightPreview() {
     Highlight(
         pages = listOf(
             { HighlightScheduleUnavailable() },
-            { HighlightBirthdays() },
+            { HighlightBirthdays(birthdays = emptyList()) },
             { HighlightEvents() }
         )
     )
+}
+
+@Preview(showBackground = true, name = "Card - 4 birthdays (1 col)")
+@Composable
+private fun HighlightBirthdaysPreview() {
+    Highlight(pages = listOf {
+        HighlightBirthdays(
+            birthdays = listOf(
+                Birthday(name = "Ana Silva", day = 3),
+                Birthday(name = "Carlos Oliveira", day = 10),
+                Birthday(name = "Maria Santos", day = 15),
+                Birthday(name = "Pedro Almeida", day = 22),
+            )
+        )
+    })
+}
+
+@Preview(showBackground = true, name = "Card - empty")
+@Composable
+private fun HighlightBirthdaysEmptyPreview() {
+    Highlight(pages = listOf { HighlightBirthdays(birthdays = emptyList()) })
+}
+
+@Preview(showBackground = true, name = "Card - 6 birthdays (2 cols)")
+@Composable
+private fun HighlightBirthdays6Preview() {
+    Highlight(pages = listOf {
+        HighlightBirthdays(
+            birthdays = listOf(
+                Birthday(name = "Ana Silva", day = 1),
+                Birthday(name = "Carlos Oliveira", day = 5),
+                Birthday(name = "Maria Santos", day = 8),
+                Birthday(name = "Pedro Almeida", day = 14),
+                Birthday(name = "Juliana Costa", day = 20),
+                Birthday(name = "Fernando Souza", day = 27),
+            )
+        )
+    })
+}
+
+@Preview(showBackground = true, name = "Card - 10 birthdays (2 cols + same day)")
+@Composable
+private fun HighlightBirthdays10Preview() {
+    Highlight(pages = listOf {
+        HighlightBirthdays(
+            birthdays = listOf(
+                Birthday(name = "Ana Silva", day = 1),
+                Birthday(name = "Carlos Oliveira", day = 3),
+                Birthday(name = "Dinalva Souza", day = 3),
+                Birthday(name = "Maria Santos", day = 5),
+                Birthday(name = "Pedro Almeida", day = 8),
+                Birthday(name = "Juliana Costa", day = 10),
+                Birthday(name = "Fernando Souza", day = 10),
+                Birthday(name = "Beatriz Ferreira", day = 17),
+                Birthday(name = "Gabriela Martins de Albuquerque", day = 25),
+                Birthday(name = "Rafael Pereira", day = 29),
+            )
+        )
+    })
+}
+
+@Preview(showBackground = true, name = "Card - 13 birthdays (3 cols)")
+@Composable
+private fun HighlightBirthdays13Preview() {
+    Highlight(pages = listOf {
+        HighlightBirthdays(
+            birthdays = listOf(
+                Birthday(name = "Ana paula", day = 1),
+                Birthday(name = "Bruno perico arruda", day = 2),
+                Birthday(name = "Carla", day = 3),
+                Birthday(name = "Diego", day = 5),
+                Birthday(name = "Elena", day = 7),
+                Birthday(name = "Fabio", day = 9),
+                Birthday(name = "Gisele", day = 11),
+                Birthday(name = "Hugo", day = 13),
+                Birthday(name = "Iris", day = 15),
+                Birthday(name = "Jorge", day = 18),
+                Birthday(name = "Karen", day = 21),
+                Birthday(name = "Leo", day = 24),
+                Birthday(name = "Marta", day = 28),
+            )
+        )
+    })
 }
 
 // ─── Edge drawing ─────────────────────────────────────────────────────────────

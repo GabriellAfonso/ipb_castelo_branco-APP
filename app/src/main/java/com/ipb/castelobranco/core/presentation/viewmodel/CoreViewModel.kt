@@ -3,7 +3,10 @@ package com.ipb.castelobranco.core.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.auth.AuthEventBus
+import com.ipb.castelobranco.core.domain.model.Birthday
+import com.ipb.castelobranco.core.domain.repository.MembersRepository
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.domain.usecase.GetMonthlyBirthdaysUseCase
 import com.ipb.castelobranco.core.domain.usecase.PreloadDataUseCase
 import com.ipb.castelobranco.features.auth.data.local.AuthSession
 import com.ipb.castelobranco.features.auth.domain.usecase.LogoutUseCase
@@ -33,6 +36,8 @@ class CoreViewModel @Inject constructor(
     private val bibleAutoDownload: BibleAutoDownloadUseCase,
     private val bibleRepository: com.ipb.castelobranco.features.bible.domain.repository.BibleRepository,
     private val scheduleRepository: ScheduleRepository,
+    private val getMonthlyBirthdaysUseCase: GetMonthlyBirthdaysUseCase,
+    private val membersRepository: MembersRepository,
 ) : ViewModel() {
 
     sealed interface CoreEvent {
@@ -48,6 +53,9 @@ class CoreViewModel @Inject constructor(
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
+    private val _birthdays = MutableStateFlow<List<Birthday>>(emptyList())
+    val birthdays: StateFlow<List<Birthday>> = _birthdays.asStateFlow()
+
     fun initialize() {
         // Observa estado de login
         viewModelScope.launch {
@@ -61,6 +69,16 @@ class CoreViewModel @Inject constructor(
             authEventBus.events.collect { event ->
                 if (event is AuthEventBus.Event.LoginSuccess) {
                     refreshProfileOnAppOpen()
+                }
+            }
+        }
+
+        // Observa aniversariantes
+        viewModelScope.launch {
+            getMonthlyBirthdaysUseCase.observe().collect { state ->
+                _birthdays.value = when (state) {
+                    is SnapshotState.Data -> state.value
+                    else -> emptyList()
                 }
             }
         }
@@ -123,6 +141,7 @@ class CoreViewModel @Inject constructor(
             fetchProfileUseCase.clearLocalPhoto()
             fetchProfileUseCase.clearSnapshot()
             scheduleRepository.clearScheduleCache()
+            membersRepository.clearBirthdaysCache()
             logoutUseCase()
             Timber.d("Logout completed")
             _events.trySend(CoreEvent.LogoutSuccess)

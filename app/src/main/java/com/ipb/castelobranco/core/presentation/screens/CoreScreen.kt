@@ -19,6 +19,7 @@ import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.core.presentation.components.CustomButton
 import com.ipb.castelobranco.core.presentation.components.Highlight
+import com.ipb.castelobranco.core.domain.model.Birthday
 import com.ipb.castelobranco.core.presentation.components.HighlightBirthdays
 import com.ipb.castelobranco.core.presentation.components.HighlightEvents
 import com.ipb.castelobranco.core.presentation.components.HighlightScheduleUnavailable
@@ -64,6 +65,7 @@ fun CoreView(
     val isLoggedIn      by viewModel.isLoggedIn.collectAsStateWithLifecycle()
     val profileUiState  by profileViewModel.uiState.collectAsStateWithLifecycle()
     val nextSection     by scheduleViewModel.nextSection.collectAsStateWithLifecycle()
+    val birthdays       by viewModel.birthdays.collectAsStateWithLifecycle()
 
     val authState = UserAuthState(
         isLoggedIn = isLoggedIn,
@@ -95,6 +97,7 @@ fun CoreView(
         onNavigateToAdmin      = onNavigateToAdmin,
         authState              = authState,
         nextSection            = nextSection,
+        birthdays              = birthdays,
         onLogout               = viewModel::logout,
     )
 }
@@ -112,6 +115,7 @@ fun CoreScreen(
     onNavigateToAdmin: () -> Unit,
     authState: UserAuthState,
     nextSection: ScheduleSectionUi?,
+    birthdays: List<Birthday>,
     onLogout: () -> Unit,
 ) {
     NavigationDrawer(
@@ -135,7 +139,7 @@ fun CoreScreen(
             ) {
                 Spacer(modifier = Modifier.height(60.dp))
 
-                Highlight(pages = buildHighlightPages(nextSection))
+                Highlight(pages = buildHighlightPages(nextSection, birthdays))
 
                 Spacer(modifier = Modifier.height(60.dp))
                 ButtonGrid(
@@ -153,8 +157,9 @@ fun CoreScreen(
 
 private fun buildHighlightPages(
     nextSection: ScheduleSectionUi?,
+    birthdays: List<Birthday> = emptyList(),
 ): List<@Composable () -> Unit> = buildList {
-    add { HighlightBirthdays() }
+    add { HighlightBirthdays(birthdays) }
 
     if (nextSection != null) {
         add { HighlightSundaySchedule(section = nextSection) }
