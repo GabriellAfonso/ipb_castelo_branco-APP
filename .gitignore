@@ -16,3 +16,4 @@ app/build
 .kotlin/errors
 claude-docs/
 feature_based_problems.md
+app/google-services.json

@@ -6,6 +6,9 @@ plugins {
     // Use o alias que definimos no TOML para o KSP
     alias(libs.plugins.google.devtools.ksp) apply false
     alias(libs.plugins.dagger.hilt) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
+
 }
 
 // Redirect build output to a container-local path on Linux to avoid cross-platform cache conflicts.
