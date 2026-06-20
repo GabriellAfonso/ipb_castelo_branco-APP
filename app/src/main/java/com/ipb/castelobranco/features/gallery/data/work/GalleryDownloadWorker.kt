@@ -12,6 +12,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import com.ipb.castelobranco.core.network.error.parseApiError
 import org.json.JSONObject
+import timber.log.Timber
 
 @HiltWorker
 class GalleryDownloadWorker @AssistedInject constructor(
@@ -73,6 +74,7 @@ class GalleryDownloadWorker @AssistedInject constructor(
 
             Result.success()
         } catch (e: Exception) {
+            Timber.e(e, "Gallery download failed (attempt=%d)", runAttemptCount)
             if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
         }
     }

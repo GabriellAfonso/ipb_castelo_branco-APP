@@ -4,6 +4,7 @@ import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 import javax.inject.Inject
 
 class UploadProfilePhotoUseCase @Inject constructor(
@@ -34,6 +35,7 @@ class UploadProfilePhotoUseCase @Inject constructor(
 
             Result.Success
         } catch (t: Throwable) {
+            Timber.w(t, "Failed to upload profile photo")
             Result.Failure(t.message ?: "Falha ao enviar imagem")
         }
     }

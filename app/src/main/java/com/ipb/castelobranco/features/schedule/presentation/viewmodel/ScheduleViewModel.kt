@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import timber.log.Timber
 import javax.inject.Inject
 
 sealed interface ScheduleUiState {
@@ -94,6 +95,8 @@ class ScheduleViewModel @Inject constructor(
 
             try {
                 repository.refreshMonthSchedule()
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to refresh month schedule")
             } finally {
                 val elapsed = System.currentTimeMillis() - startTime
                 if (elapsed < minDurationMs) {

@@ -1,7 +1,7 @@
 // app/src/main/java/com/gabrielafonso/ipb/castelobranco/ui/screens/auth/AuthView.kt
 package com.ipb.castelobranco.features.auth.presentation.screens
 
-import android.util.Log
+import timber.log.Timber
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -96,7 +96,7 @@ fun AuthScreen(
     }
 
     suspend fun launchGoogleSignIn() {
-        Log.d("GoogleSignIn", "Iniciando fluxo Google Sign-In")
+        Timber.d("Starting Google Sign-In flow")
         isCredentialPending = true
         val credentialManager = CredentialManager.create(context)
         val googleIdOption = GetGoogleIdOption.Builder()
@@ -109,13 +109,10 @@ fun AuthScreen(
             .build()
 
         try {
-            Log.d("GoogleSignIn", "Chamando credentialManager.getCredential...")
+            Timber.d("Calling credentialManager.getCredential...")
             val response = credentialManager.getCredential(context, request)
             val credential = response.credential
-            Log.d(
-                "GoogleSignIn",
-                "Credential recebida: ${credential::class.simpleName} - type: ${credential.type}"
-            )
+            Timber.d("Credential received: %s - type: %s", credential::class.simpleName, credential.type)
 
             if (credential is GoogleIdTokenCredential) {
                 isCredentialPending = false
@@ -124,15 +121,15 @@ fun AuthScreen(
                 credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {
                 val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                if (BuildConfig.DEBUG) Log.d("GoogleSignIn", "idToken extraído: ${googleCredential.idToken.take(20)}")
+                if (BuildConfig.DEBUG) Timber.d("idToken extracted: %s", googleCredential.idToken.take(20))
                 isCredentialPending = false
                 viewModel.signInWithGoogle(googleCredential.idToken)
             } else {
-                Log.w("GoogleSignIn", "Tipo de credential não reconhecido: ${credential.type}")
+                Timber.w("Unrecognized credential type: %s", credential.type)
                 isCredentialPending = false
             }
         } catch (e: Exception) {
-            Log.e("GoogleSignIn", "Erro: ${e::class.simpleName} - ${e.message}", e)
+            Timber.e(e, "Google Sign-In failed")
             isCredentialPending = false
         }
     }

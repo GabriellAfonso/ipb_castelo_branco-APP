@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -70,6 +71,7 @@ class CoreViewModel @Inject constructor(
 
     private fun startAppInitialization() {
         viewModelScope.launch {
+            Timber.d("App initialization started")
             _isPreloading.value = true
 
             // 1 & 2. PRELOAD (disk) + REFRESH (network) delegated to use case
@@ -77,6 +79,7 @@ class CoreViewModel @Inject constructor(
 
             // Bíblia: preload do cache + auto-download se faltar tradução (WiFi only)
             runCatching { bibleRepository.preload() }
+                .onFailure { Timber.w(it, "Bible preload failed") }
             bibleAutoDownload.triggerIfNeeded()
 
             // Auto-download da galeria se estiver vazia (somente via WiFi)
@@ -86,6 +89,7 @@ class CoreViewModel @Inject constructor(
             refreshProfileOnAppOpen()
 
             _isPreloading.value = false
+            Timber.d("App initialization completed")
         }
     }
 
@@ -94,10 +98,8 @@ class CoreViewModel @Inject constructor(
             if (!authSession.isLoggedIn()) return@launch
 
             runCatching {
-                // Atualiza dados do perfil
                 fetchProfileUseCase.refresh()
 
-                // Tenta pegar a foto se o perfil estiver em estado Data
                 val profileState = fetchProfileUseCase.observe().first()
                 if (profileState is SnapshotState.Data) {
                     val url = profileState.value.photoUrl
@@ -105,7 +107,7 @@ class CoreViewModel @Inject constructor(
                         fetchProfileUseCase.downloadAndPersistPhoto(url)
                     }
                 }
-            }
+            }.onFailure { Timber.w(it, "Profile refresh on app open failed") }
         }
     }
 
@@ -117,10 +119,12 @@ class CoreViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            Timber.d("Logout started")
             fetchProfileUseCase.clearLocalPhoto()
             fetchProfileUseCase.clearSnapshot()
             scheduleRepository.clearScheduleCache()
             logoutUseCase()
+            Timber.d("Logout completed")
             _events.trySend(CoreEvent.LogoutSuccess)
         }
     }

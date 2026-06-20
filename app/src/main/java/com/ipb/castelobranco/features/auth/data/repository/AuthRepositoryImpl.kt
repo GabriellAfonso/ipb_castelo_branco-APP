@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.features.auth.data.repository
 
-import android.util.Log
+import timber.log.Timber
 import com.ipb.castelobranco.BuildConfig
 import com.ipb.castelobranco.features.auth.data.api.AuthApi
 import com.ipb.castelobranco.features.auth.data.api.GoogleLoginRequest
@@ -31,7 +31,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
 
     override suspend fun signInWithGoogle(idToken: String): Result<AuthTokens> {
-        if (BuildConfig.DEBUG) Log.d("GoogleSignIn", "Enviando idToken para o backend: ${idToken.take(20)}...")
+        if (BuildConfig.DEBUG) Timber.d("Sending idToken to backend: %s...", idToken.take(20))
         return authenticate {
             api.loginWithGoogle(GoogleLoginRequest(id_token = idToken))
         }
@@ -68,10 +68,10 @@ class AuthRepositoryImpl @Inject constructor(
     ): Result<AuthTokens> =
         runCatching {
             val response = call()
-            if (BuildConfig.DEBUG) Log.d("GoogleSignIn", "Response code: ${response.code()}")
+            if (BuildConfig.DEBUG) Timber.d("Response code: %d", response.code())
 
             if (!response.isSuccessful) {
-                if (BuildConfig.DEBUG) Log.e("GoogleSignIn", "Erro do servidor: ${response.code()}")
+                if (BuildConfig.DEBUG) Timber.e("Server error: %d", response.code())
                 throw response.toAppError()
             }
 

@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.features.admin.register.presentation.viewmodel
 
-import android.util.Log
+import timber.log.Timber
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
@@ -29,10 +29,6 @@ class MusicRegistrationViewModel @Inject constructor(
     private val observeSongsUseCase: ObserveSongsUseCase,
     private val submitSundayPlaysUseCase: SubmitSundayPlaysUseCase
 ) : ViewModel() {
-
-    companion object {
-        private const val TAG = "MusicRegistrationViewModel"
-    }
 
     private val _uiState = MutableStateFlow(MusicRegistrationUiState())
     val uiState: StateFlow<MusicRegistrationUiState> = _uiState.asStateFlow()
@@ -99,7 +95,7 @@ class MusicRegistrationViewModel @Inject constructor(
             try {
                 observeSongsUseCase.refresh()
             } catch (e: Throwable) {
-                Log.w(TAG, "Failed to refresh songs", e)
+                Timber.w(e, "Failed to refresh songs")
                 _uiState.update { it.copy(snackbarMessage = "Falha ao atualizar músicas.") }
             } finally {
                 _uiState.update { it.copy(isLoadingSongs = false) }

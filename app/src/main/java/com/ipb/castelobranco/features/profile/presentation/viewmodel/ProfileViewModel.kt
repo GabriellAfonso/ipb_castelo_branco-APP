@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,6 +92,7 @@ class ProfileViewModel @Inject constructor(
                     else -> Unit
                 }
             } catch (t: Throwable) {
+                Timber.w(t, "Failed to refresh profile from server")
                 _uiState.update { it.copy(error = t.message ?: "Falha ao atualizar perfil") }
                 refreshLocalPhotoPathAndBump()
             }

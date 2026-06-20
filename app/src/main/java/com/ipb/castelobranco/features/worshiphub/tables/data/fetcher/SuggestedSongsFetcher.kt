@@ -4,6 +4,7 @@ import com.ipb.castelobranco.core.domain.snapshot.NetworkResult
 import com.ipb.castelobranco.features.worshiphub.tables.data.api.SongsTableApi
 import com.ipb.castelobranco.features.worshiphub.tables.data.api.SuggestedSongsFixedEncoder
 import com.ipb.castelobranco.features.worshiphub.tables.data.dto.SuggestedSongDto
+import timber.log.Timber
 import javax.inject.Inject
 
 class SuggestedSongsFetcher @Inject constructor(
@@ -30,6 +31,7 @@ class SuggestedSongsFetcher @Inject constructor(
                 }
             }
         } catch (t: Throwable) {
+            Timber.w(t, "Failed to fetch suggested songs")
             NetworkResult.Failure(t)
         }
     }

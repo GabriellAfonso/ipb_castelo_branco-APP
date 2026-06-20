@@ -12,7 +12,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import javax.inject.Inject
 
-import android.util.Log
+import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 
 class GalleryPhotoStorage(
@@ -65,7 +65,7 @@ class GalleryPhotoStorage(
         return try {
             Json.decodeFromString<GalleryPhotoDto>(jsonFile.readText()).also { metadataCache[key] = it }
         } catch (e: Exception) {
-            Log.w("GalleryPhotoStorage", "Failed to parse metadata for photo $photoId in album $albumId", e)
+            Timber.w(e, "Failed to parse metadata for photo %d in album %d", photoId, albumId)
             null
         }
     }

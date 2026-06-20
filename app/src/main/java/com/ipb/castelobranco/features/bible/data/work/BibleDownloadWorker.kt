@@ -1,7 +1,7 @@
 package com.ipb.castelobranco.features.bible.data.work
 
 import android.content.Context
-import android.util.Log
+import timber.log.Timber
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -86,13 +86,12 @@ class BibleDownloadWorker @AssistedInject constructor(
 
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Bible download failed (attempt=$runAttemptCount)", e)
+            Timber.e(e, "Bible download failed (attempt=%d)", runAttemptCount)
             if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
         }
     }
 
     companion object {
-        private const val TAG          = "BibleDownloadWorker"
         const val WORK_NAME      = "bible_auto_download"
         const val KEY_DOWNLOADED = "downloaded"
         const val KEY_TOTAL      = "total"

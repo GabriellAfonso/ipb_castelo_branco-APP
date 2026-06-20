@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.features.auth.presentation.viewmodel
 
-import android.util.Log
+import timber.log.Timber
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.features.auth.data.mapper.parseLoginError
@@ -23,10 +23,6 @@ class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val registerUseCase: RegisterUseCase,
 ) : ViewModel() {
-
-    companion object {
-        private const val TAG = "AuthViewModel"
-    }
 
     sealed class AuthEvent {
         data object RegisterSuccess : AuthEvent()
@@ -58,19 +54,19 @@ class AuthViewModel @Inject constructor(
             _loginError.value = null
             when (val result = loginUseCase.withCredentials(username, password)) {
                 LoginUseCase.Result.Success -> {
-                    Log.d(TAG, "Login sucesso")
+                    Timber.d("Login successful")
                     _events.tryEmit(AuthEvent.LoginSuccess)
                 }
                 is LoginUseCase.Result.Failure -> {
                     _loginError.value = parseLoginError(result.rawMessage)
-                    Log.e(TAG, "Falha no login")
+                    Timber.e("Login failed")
                 }
             }
         }
     }
 
     fun signInWithGoogle(idToken: String) {
-        Log.d("GoogleSignIn", "signInWithGoogle chamado")
+        Timber.d("signInWithGoogle called")
         viewModelScope.launch {
             _isGoogleLoading.value = true
             _loginError.value = null
@@ -79,7 +75,7 @@ class AuthViewModel @Inject constructor(
                     LoginUseCase.Result.Success -> _events.tryEmit(AuthEvent.LoginSuccess)
                     is LoginUseCase.Result.Failure -> {
                         _loginError.value = result.rawMessage
-                        Log.e(TAG, "Falha no login com Google")
+                        Timber.e("Google sign-in failed")
                     }
                 }
             } finally {
@@ -99,12 +95,12 @@ class AuthViewModel @Inject constructor(
             _registerErrors.value = RegisterErrors()
             when (val result = registerUseCase(username, firstName, lastName, password, passwordConfirm)) {
                 RegisterUseCase.Result.Success -> {
-                    Log.d(TAG, "Registro sucesso")
+                    Timber.d("Registration successful")
                     _events.tryEmit(AuthEvent.RegisterSuccess)
                 }
                 is RegisterUseCase.Result.Failure -> {
                     _registerErrors.value = parseRegisterError(result.rawMessage)
-                    Log.e(TAG, "Falha no registro")
+                    Timber.e("Registration failed")
                 }
             }
         }

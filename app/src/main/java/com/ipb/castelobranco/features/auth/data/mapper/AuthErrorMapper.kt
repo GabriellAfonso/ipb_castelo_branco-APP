@@ -3,6 +3,7 @@ package com.ipb.castelobranco.features.auth.data.mapper
 import com.ipb.castelobranco.core.network.error.parseApiError
 import com.ipb.castelobranco.features.auth.domain.model.RegisterErrors
 import org.json.JSONArray
+import timber.log.Timber
 import org.json.JSONObject
 
 private val LOGIN_ERROR_KEY_PRIORITY = listOf("detail", "message", "error", "non_field_errors")
@@ -29,7 +30,8 @@ fun parseLoginError(message: String): String {
         }
 
         message
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to parse login error")
         message
     }
 }
@@ -87,7 +89,8 @@ fun parseRegisterError(message: String): RegisterErrors {
         }
 
         if (errors == RegisterErrors()) RegisterErrors(general = message) else errors
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to parse register error")
         RegisterErrors(general = message)
     }
 }

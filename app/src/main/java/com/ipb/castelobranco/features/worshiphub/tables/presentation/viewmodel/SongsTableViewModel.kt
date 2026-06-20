@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 data class RepertoireRowState(
@@ -40,7 +41,10 @@ class SongsTableViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun refreshAllSongs() {
-        viewModelScope.launch { runCatching { repository.refreshAllSongs() } }
+        viewModelScope.launch {
+            runCatching { repository.refreshAllSongs() }
+                .onFailure { Timber.w(it, "Failed to refresh all songs") }
+        }
     }
 
     val lastSundays: StateFlow<SnapshotState<List<SundaySet>>> = repository.observeSongsBySunday()
@@ -73,7 +77,7 @@ class SongsTableViewModel @Inject constructor(
                     1 -> repository.refreshTopSongs()
                     2 -> repository.refreshTopTones()
                 }
-            }
+            }.onFailure { Timber.w(it, "Failed to refresh tab %d", tabIndex) }
             val elapsed = System.currentTimeMillis() - start
             if (elapsed < minDurationMs) delay(minDurationMs - elapsed)
             _isRefreshing.value = false
@@ -148,8 +152,8 @@ class SongsTableViewModel @Inject constructor(
                 minTimeJob.await()
 
                 syncRepertoireFromSuggestions()
-            } catch (_: Exception) {
-                // network errors are non-fatal; the observer will surface cached data
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to refresh suggested songs")
             } finally {
                 _isRefreshingSuggestedSongs.value = false
             }

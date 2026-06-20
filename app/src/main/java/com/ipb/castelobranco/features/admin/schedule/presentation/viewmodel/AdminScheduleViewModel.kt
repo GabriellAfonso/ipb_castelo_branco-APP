@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -49,7 +50,8 @@ class AdminScheduleViewModel @Inject constructor(
                 .onSuccess { members ->
                     _uiState.update { it.copy(members = members, isLoadingMembers = false) }
                 }
-                .onFailure {
+                .onFailure { e ->
+                    Timber.w(e, "Failed to load members")
                     _uiState.update {
                         it.copy(
                             isLoadingMembers = false,
@@ -104,7 +106,8 @@ class AdminScheduleViewModel @Inject constructor(
                         )
                     }
                 }
-                .onFailure {
+                .onFailure { e ->
+                    Timber.w(e, "Failed to generate schedule")
                     _uiState.update {
                         it.copy(
                             isGenerating = false,
@@ -140,6 +143,7 @@ class AdminScheduleViewModel @Inject constructor(
                     }
                 }
                 .onFailure { error ->
+                    Timber.e(error, "Failed to save schedule")
                     val message = error.message ?: "Falha ao salvar escala."
                     _uiState.update {
                         it.copy(

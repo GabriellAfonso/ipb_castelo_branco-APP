@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 abstract class BaseSnapshotRepository<Dto, Domain>(
     private val cache: SnapshotCache<Dto>,
@@ -73,6 +74,7 @@ abstract class BaseSnapshotRepository<Dto, Domain>(
                 }
             }
         } catch (t: Throwable) {
+            Timber.w(t, "Snapshot refresh failed for %s", tag)
             RefreshResult.Error(t)
         }
     }

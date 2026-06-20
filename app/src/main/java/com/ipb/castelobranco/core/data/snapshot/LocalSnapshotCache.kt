@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.core.data.snapshot
 
-import android.util.Log
+import timber.log.Timber
 import com.ipb.castelobranco.core.data.local.SnapshotStorage
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 
@@ -17,7 +17,7 @@ class LocalSnapshotCache<T>(
         } catch (e: Exception) {
             // Arquivo corrompido (ex: escrita interrompida por OOM). Apaga e retorna null
             // para forçar novo download na próxima oportunidade.
-            Log.w("LocalSnapshotCache", "Corrupt snapshot '$key', deleting. ${e.message}")
+            Timber.w(e, "Corrupt snapshot '%s', deleting", key)
             storage.clear(key)
             null
         }

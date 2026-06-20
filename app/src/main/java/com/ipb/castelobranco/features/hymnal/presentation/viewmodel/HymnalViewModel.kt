@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,6 +45,7 @@ class HymnalViewModel @Inject constructor(
             _isRefreshing.value = true
             val start = System.currentTimeMillis()
             runCatching { observeHymnsUseCase.refresh() }
+                .onFailure { Timber.w(it, "Failed to refresh hymns") }
             val elapsed = System.currentTimeMillis() - start
             if (elapsed < minDurationMs) delay(minDurationMs - elapsed)
             _isRefreshing.value = false

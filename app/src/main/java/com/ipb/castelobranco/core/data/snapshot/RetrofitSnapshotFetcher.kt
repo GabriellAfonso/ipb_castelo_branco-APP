@@ -6,6 +6,7 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.ipb.castelobranco.core.network.error.parseApiError
 import org.json.JSONObject
 import retrofit2.Response
+import timber.log.Timber
 
 open class RetrofitSnapshotFetcher<T>(
     private val call: suspend (etag: String?) -> Response<T>
@@ -46,6 +47,7 @@ open class RetrofitSnapshotFetcher<T>(
                 }
             }
         } catch (t: Throwable) {
+            Timber.w(t, "Snapshot fetch failed")
             NetworkResult.Failure(t)
         }
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,6 +35,7 @@ class SongsListViewModel @Inject constructor(
             _isRefreshing.value = true
             val start = System.currentTimeMillis()
             runCatching { songsRepository.refreshAllSongs() }
+                .onFailure { Timber.w(it, "Failed to refresh songs list") }
             val elapsed = System.currentTimeMillis() - start
             if (elapsed < minDurationMs) delay(minDurationMs - elapsed)
             _isRefreshing.value = false

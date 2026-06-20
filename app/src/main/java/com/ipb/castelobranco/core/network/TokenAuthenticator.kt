@@ -13,6 +13,7 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import timber.log.Timber
 
 @Singleton
 class TokenAuthenticator @Inject constructor(
@@ -23,11 +24,18 @@ class TokenAuthenticator @Inject constructor(
     private val refreshTokenMutex = Mutex()
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        if (responseCount(response) >= 2) return null
+        if (responseCount(response) >= 2) {
+            Timber.w("Token refresh aborted: too many retries")
+            return null
+        }
 
         return runBlocking(Dispatchers.IO) {
             refreshTokenMutex.withLock {
-                val current = tokenStorage.peekOrNull() ?: return@runBlocking null
+                val current = tokenStorage.peekOrNull()
+                if (current == null) {
+                    Timber.d("Token refresh skipped: no stored tokens")
+                    return@runBlocking null
+                }
 
                 val failedAuthHeader = response.request.header("Authorization")
                 val currentAccess = current.access
@@ -35,6 +43,7 @@ class TokenAuthenticator @Inject constructor(
                     !currentAccess.isNullOrBlank() &&
                     failedAuthHeader != "Bearer $currentAccess"
                 ) {
+                    Timber.d("Token already refreshed by another request, retrying")
                     return@runBlocking response.request.newBuilder()
                         .header("Authorization", "Bearer $currentAccess")
                         .build()
@@ -43,13 +52,16 @@ class TokenAuthenticator @Inject constructor(
                 val refresh = current.refresh
                 if (refresh.isBlank()) return@runBlocking null
 
+                Timber.d("Attempting token refresh")
                 val refreshResponse = runCatching {
                     authApi.refresh(RefreshRequest(refresh = refresh))
-                }.getOrNull() ?: return@runBlocking null
+                }.onFailure { Timber.e(it, "Token refresh request failed") }
+                    .getOrNull() ?: return@runBlocking null
 
                 if (!refreshResponse.isSuccessful) {
-
+                    Timber.w("Token refresh failed: HTTP %d", refreshResponse.code())
                     if (refreshResponse.code() == 401 || refreshResponse.code() == 400) {
+                        Timber.w("Clearing tokens due to %d on refresh", refreshResponse.code())
                         tokenStorage.clear()
                     }
                     return@runBlocking null
@@ -58,6 +70,7 @@ class TokenAuthenticator @Inject constructor(
                 val newTokens = refreshResponse.body() ?: return@runBlocking null
 
                 tokenStorage.save(newTokens)
+                Timber.d("Token refresh successful")
 
                 return@runBlocking response.request.newBuilder()
                     .header("Authorization", "Bearer ${newTokens.access}")

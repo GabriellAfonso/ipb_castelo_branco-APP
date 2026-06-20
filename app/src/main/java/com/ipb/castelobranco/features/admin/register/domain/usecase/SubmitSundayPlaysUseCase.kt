@@ -7,6 +7,7 @@ import com.ipb.castelobranco.features.admin.register.domain.validation.MusicRegi
 import com.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import java.time.LocalDate
+import timber.log.Timber
 import javax.inject.Inject
 
 class SubmitSundayPlaysUseCase @Inject constructor(
@@ -35,6 +36,7 @@ class SubmitSundayPlaysUseCase @Inject constructor(
             repository.pushSundayPlays(date = dateIso, plays = plays).getOrThrow()
             Result.Success
         } catch (t: Throwable) {
+            Timber.w(t, "Failed to submit sunday plays")
             val msg = t.message?.trim().takeIf { !it.isNullOrBlank() } ?: "Erro inesperado ao enviar."
             Result.Failure(msg)
         }

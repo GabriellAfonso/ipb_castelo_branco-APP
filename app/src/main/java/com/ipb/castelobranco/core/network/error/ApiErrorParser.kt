@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.core.network.error
 
 import org.json.JSONObject
+import timber.log.Timber
 
 fun parseApiError(errorBody: String?): ApiErrorBody? {
     if (errorBody.isNullOrBlank()) return null
@@ -21,7 +22,8 @@ fun parseApiError(errorBody: String?): ApiErrorBody? {
             map.ifEmpty { null }
         }
         ApiErrorBody(errorCode = errorCode, detail = detail, fieldErrors = fieldErrors)
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to parse API error body")
         null
     }
 }

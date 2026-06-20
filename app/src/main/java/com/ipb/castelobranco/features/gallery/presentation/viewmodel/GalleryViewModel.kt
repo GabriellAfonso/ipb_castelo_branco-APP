@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.features.gallery.presentation.viewmodel
 
-import android.util.Log
+import timber.log.Timber
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
@@ -82,7 +82,7 @@ class GalleryViewModel @Inject constructor(
         repository.getLocalPhotos(albumId)
 
     suspend fun getPhotoName(albumId: Long, photoId: Long): String {
-        Log.d("GalleryViewModel", "getPhotoName: $albumId - $photoId")
+        Timber.d("getPhotoName: %d - %d", albumId, photoId)
         return repository.getPhotoName(albumId, photoId) ?: "Foto"
     }
 }
