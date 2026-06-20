@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.animation.EnterTransition
@@ -12,6 +13,9 @@ import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.logEvent
 import com.ipb.castelobranco.features.admin.panel.presentation.navigation.adminGraph
 import com.ipb.castelobranco.features.auth.presentation.navigation.authGraph
 import com.ipb.castelobranco.features.bible.presentation.navigation.bibleGraph
@@ -34,6 +38,15 @@ fun AppNavHost(navController: NavHostController) {
             navigateToProfile = { navController.navigate(AppRoutes.PROFILE) },
             navigateToAuth    = { navController.navigate(AppRoutes.AUTH_GRAPH) },
         )
+    }
+
+    val backStackEntry = navController.currentBackStackEntryAsState()
+    LaunchedEffect(backStackEntry.value) {
+        val route = backStackEntry.value?.destination?.route ?: return@LaunchedEffect
+        FirebaseAnalytics.getInstance(context).logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+            param(FirebaseAnalytics.Param.SCREEN_NAME, route)
+            param(FirebaseAnalytics.Param.SCREEN_CLASS, route)
+        }
     }
 
     CompositionLocalProvider(LocalAppNavigator provides appNavigator) {
