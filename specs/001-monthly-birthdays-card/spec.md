@@ -47,6 +47,23 @@ As a church member with unreliable connectivity, I want to see birthdays even wh
 - What happens on the 1st of a new month? The cache from the previous month is stale; a fresh API call is made. If it fails, the old cache is shown until a successful refresh.
 - What happens when a member's name is very long? The name is truncated with ellipsis to maintain card layout.
 
+### User Story 3 - Birthday Day Notification (Priority: P2)
+
+As a church member, I want to receive a notification on the day of a member's birthday so I can congratulate them without needing to open the app.
+
+**Why this priority**: Adds engagement value but the feature is fully usable without notifications.
+
+**Independent Test**: Can be tested by granting notification permission, ensuring cached birthday data exists for today's date, and waiting for or manually triggering the daily Worker to verify a notification appears.
+
+**Acceptance Scenarios**:
+
+1. **Given** cached birthday data exists and today matches a member's birth day, **When** the daily Worker executes, **Then** a notification is shown with a personalized message including the member's name and gender-appropriate prefix.
+2. **Given** multiple members have birthdays today, **When** the Worker executes, **Then** individual notifications are grouped under a summary notification showing the total count.
+3. **Given** the user has denied notification permission, **When** the Worker executes, **Then** no notification is shown and no error occurs.
+4. **Given** no cached birthday data exists (e.g., first install, never opened), **When** the Worker executes, **Then** it completes silently without error.
+
+---
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -58,10 +75,16 @@ As a church member with unreliable connectivity, I want to see birthdays even wh
 - **FR-005**: System MUST cache birthday data locally for offline access following the existing snapshot cache pattern.
 - **FR-006**: System MUST require user authentication to fetch birthday data.
 - **FR-007**: System MUST display the birthday card within the existing highlight carousel on the home screen, replacing the current static placeholder.
+- **FR-008**: System MUST send a daily notification for members whose birthday is today, using cached data (no network required).
+- **FR-009**: System MUST personalize notification messages by gender (do/da/de prefix) and randomly select from a pool of message templates.
+- **FR-010**: System MUST group multiple birthday notifications under a summary when more than one member has a birthday on the same day.
+- **FR-011**: System MUST request POST_NOTIFICATIONS runtime permission on Android 13+ and degrade gracefully if denied.
 
 ### Key Entities
 
-- **Birthday**: Represents a member's birthday entry — contains the member's name (text) and birth day of the month (integer 1-31).
+- **Birthday**: Represents a member's birthday entry — contains the member's name (text), birth day of the month (integer 1-31), and gender (MALE, FEMALE, or UNKNOWN).
+- **Gender**: Enum representing member gender — mapped from API values `"M"`, `"F"`, or `null`.
+- **BirthdayNotificationWorker**: Daily WorkManager worker that reads cached birthdays, filters for today, and dispatches notifications.
 
 ## Success Criteria *(mandatory)*
 

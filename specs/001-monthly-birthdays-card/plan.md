@@ -99,3 +99,43 @@ app/src/main/java/com/ipb/castelobranco/
 ```
 
 **Structure Decision**: All new code in `core/` following existing patterns. Feature is too small and shared (home screen) for a separate feature module. Follows same layered structure as schedule feature but scoped to core.
+
+## Birthday Notifications
+
+### Architecture
+
+Daily `PeriodicWorkRequest` scheduled at app startup (`MyApp.onCreate`), targeting ~8:00 AM via `initialDelay`. Worker reads from local snapshot cache (no network, no auth).
+
+### Source Code (notification additions)
+
+```text
+app/src/main/java/com/ipb/castelobranco/
+├── core/
+│   └── data/
+│       └── worker/
+│           └── BirthdayNotificationWorker.kt  # NEW — daily CoroutineWorker
+├── MyApp.kt                                   # MODIFY — schedule worker + channel
+├── core/presentation/CoreActivity.kt          # MODIFY — POST_NOTIFICATIONS runtime permission
+└── AndroidManifest.xml                        # MODIFY — POST_NOTIFICATIONS declaration
+```
+
+### Notification Messages (random per birthday)
+
+Gender-aware prefix: `do` (M), `da` (F), `de` (unknown).
+
+1. `"{Nome} esta completando mais um ano de vida hoje!"`
+2. `"Hoje: aniversario {da/do/de} {nome}"`
+3. `"Mais um ano de vida {da/do/de} {nome}! Que Deus continue abencoando essa caminhada"`
+4. `"A igreja celebra hoje o aniversario {da/do/de} {nome}!"`
+
+Multiple birthdays: grouped notifications with summary "X aniversariantes hoje!"
+
+### Key Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Data source | Local snapshot cache | No network needed, data already cached from home screen |
+| Schedule | PeriodicWorkRequest 24h, ~8AM | Natural morning check |
+| Permission | POST_NOTIFICATIONS (Android 13+) | Required, graceful degradation if denied |
+| Multiple birthdays | InboxStyle grouped notification | Avoids notification spam |
+| Toggle | None (OS permission suffices) | Keep simple |

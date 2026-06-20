@@ -20,9 +20,9 @@ Authorization: Bearer {jwt_token}
 ```json
 {
   "birthdays": [
-    { "name": "Alice", "birth_day": 5 },
-    { "name": "Bob", "birth_day": 12 },
-    { "name": "Carlos", "birth_day": 25 }
+    { "name": "Alice", "gender": "F", "birth_day": 5 },
+    { "name": "Bob", "gender": "M", "birth_day": 12 },
+    { "name": "Carlos", "gender": null, "birth_day": 25 }
   ]
 }
 ```

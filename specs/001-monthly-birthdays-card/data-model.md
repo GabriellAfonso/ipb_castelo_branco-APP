@@ -6,14 +6,16 @@
 
 **File**: `core/domain/model/Birthday.kt`
 
-| Field | Type | Description |
-|-------|------|-------------|
-| name  | String | Member's display name |
-| day   | Int    | Day of birth (1-31) |
+| Field  | Type   | Description |
+|--------|--------|-------------|
+| name   | String | Member's display name |
+| day    | Int    | Day of birth (1-31) |
+| gender | Gender | Member's gender (MALE, FEMALE, UNKNOWN) |
 
 **Validation rules**:
 - `day` must be 1-31
 - `name` must be non-blank
+- `gender` maps from API `"M"` → MALE, `"F"` → FEMALE, `null` → UNKNOWN
 - List is always sorted by `day` ascending (enforced by mapper)
 
 **State transitions**: None — read-only entity.
@@ -22,10 +24,11 @@
 
 **File**: `core/data/dto/BirthdayDtos.kt`
 
-| Field     | JSON Key   | Type   |
-|-----------|------------|--------|
-| name      | `name`     | String |
-| birthDay  | `birth_day`| Int    |
+| Field     | JSON Key   | Type    |
+|-----------|------------|---------|
+| name      | `name`     | String  |
+| gender    | `gender`   | String? |
+| birthDay  | `birth_day`| Int     |
 
 ### BirthdaysResponseDto (Network Wrapper)
 
@@ -38,7 +41,8 @@
 ## Mapping
 
 `BirthdaysResponseDto` → `List<Birthday>`:
-- Map each `BirthdayDto` to `Birthday(name = dto.name, day = dto.birthDay)`
+- Map each `BirthdayDto` to `Birthday(name = dto.name, day = dto.birthDay, gender = dto.gender.toGender())`
+- `gender` mapping: `"M"` → MALE, `"F"` → FEMALE, `null`/other → UNKNOWN
 - Sort by `day` ascending
 - Filter out entries with blank names (defensive)
 

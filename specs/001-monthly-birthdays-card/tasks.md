@@ -84,6 +84,21 @@
 
 ---
 
+## Phase 6: Birthday Notifications (User Story 3)
+
+**Purpose**: Daily notification for members whose birthday is today, using cached data
+
+- [x] T020 [US3] Add `gender` field to `BirthdayDto` in `core/data/dto/BirthdayDtos.kt` and `Gender` enum + `gender` field to `Birthday` in `core/domain/model/Birthday.kt`
+- [x] T021 [US3] Update `BirthdayMapper` in `core/data/mapper/BirthdayMapper.kt` to map `gender` string ("M"/"F"/null) to `Gender` enum
+- [x] T022 [US3] Create `BirthdayNotificationWorker` in `core/data/worker/BirthdayNotificationWorker.kt` — reads cached birthdays via `MembersRepository.getCurrentSnapshot()`, filters `birth_day == today`, dispatches gender-personalized notifications with random message templates
+- [x] T023 [US3] Schedule daily `PeriodicWorkRequest` in `MyApp.onCreate` with ~8AM initial delay and `ExistingPeriodicWorkPolicy.KEEP`
+- [x] T024 [US3] Add `POST_NOTIFICATIONS` permission to `AndroidManifest.xml` and runtime permission request in `CoreActivity`
+- [x] T025 [US3] Update spec docs (spec.md, plan.md, tasks.md, data-model.md, contracts/birthdays-api.md) with gender field and notification feature
+
+**Checkpoint**: Daily birthday notifications working from cached data. Gender-personalized messages. Grouped for multiple birthdays.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
