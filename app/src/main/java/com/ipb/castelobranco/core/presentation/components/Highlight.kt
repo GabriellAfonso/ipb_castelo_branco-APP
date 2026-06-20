@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextOverflow
 import com.ipb.castelobranco.core.domain.model.Birthday
+import com.ipb.castelobranco.core.domain.model.Gender
 import com.ipb.castelobranco.features.schedule.presentation.components.ScheduleSectionUi
 
 // ─── Main Highlight Carousel ────────────────────────────────────────────────
@@ -378,10 +379,10 @@ private fun HighlightBirthdaysPreview() {
     Highlight(pages = listOf {
         HighlightBirthdays(
             birthdays = listOf(
-                Birthday(name = "Ana Silva", day = 3),
-                Birthday(name = "Carlos Oliveira", day = 10),
-                Birthday(name = "Maria Santos", day = 15),
-                Birthday(name = "Pedro Almeida", day = 22),
+                Birthday(name = "Ana Silva", day = 3, gender = Gender.FEMALE),
+                Birthday(name = "Carlos Oliveira", day = 10, gender = Gender.MALE),
+                Birthday(name = "Maria Santos", day = 15, gender = Gender.FEMALE),
+                Birthday(name = "Pedro Almeida", day = 22, gender = Gender.MALE),
             )
         )
     })
@@ -399,12 +400,12 @@ private fun HighlightBirthdays6Preview() {
     Highlight(pages = listOf {
         HighlightBirthdays(
             birthdays = listOf(
-                Birthday(name = "Ana Silva", day = 1),
-                Birthday(name = "Carlos Oliveira", day = 5),
-                Birthday(name = "Maria Santos", day = 8),
-                Birthday(name = "Pedro Almeida", day = 14),
-                Birthday(name = "Juliana Costa", day = 20),
-                Birthday(name = "Fernando Souza", day = 27),
+                Birthday(name = "Ana Silva", day = 1, gender = Gender.FEMALE),
+                Birthday(name = "Carlos Oliveira", day = 5, gender = Gender.MALE),
+                Birthday(name = "Maria Santos", day = 8, gender = Gender.FEMALE),
+                Birthday(name = "Pedro Almeida", day = 14, gender = Gender.MALE),
+                Birthday(name = "Juliana Costa", day = 20, gender = Gender.FEMALE),
+                Birthday(name = "Fernando Souza", day = 27, gender = Gender.MALE),
             )
         )
     })
@@ -416,16 +417,16 @@ private fun HighlightBirthdays10Preview() {
     Highlight(pages = listOf {
         HighlightBirthdays(
             birthdays = listOf(
-                Birthday(name = "Ana Silva", day = 1),
-                Birthday(name = "Carlos Oliveira", day = 3),
-                Birthday(name = "Dinalva Souza", day = 3),
-                Birthday(name = "Maria Santos", day = 5),
-                Birthday(name = "Pedro Almeida", day = 8),
-                Birthday(name = "Juliana Costa", day = 10),
-                Birthday(name = "Fernando Souza", day = 10),
-                Birthday(name = "Beatriz Ferreira", day = 17),
-                Birthday(name = "Gabriela Martins de Albuquerque", day = 25),
-                Birthday(name = "Rafael Pereira", day = 29),
+                Birthday(name = "Ana Silva", day = 1, gender = Gender.FEMALE),
+                Birthday(name = "Carlos Oliveira", day = 3, gender = Gender.MALE),
+                Birthday(name = "Dinalva Souza", day = 3, gender = Gender.FEMALE),
+                Birthday(name = "Maria Santos", day = 5, gender = Gender.FEMALE),
+                Birthday(name = "Pedro Almeida", day = 8, gender = Gender.MALE),
+                Birthday(name = "Juliana Costa", day = 10, gender = Gender.FEMALE),
+                Birthday(name = "Fernando Souza", day = 10, gender = Gender.MALE),
+                Birthday(name = "Beatriz Ferreira", day = 17, gender = Gender.FEMALE),
+                Birthday(name = "Gabriela Martins de Albuquerque", day = 25, gender = Gender.FEMALE),
+                Birthday(name = "Rafael Pereira", day = 29, gender = Gender.MALE),
             )
         )
     })
@@ -437,19 +438,19 @@ private fun HighlightBirthdays13Preview() {
     Highlight(pages = listOf {
         HighlightBirthdays(
             birthdays = listOf(
-                Birthday(name = "Ana paula", day = 1),
-                Birthday(name = "Bruno perico arruda", day = 2),
-                Birthday(name = "Carla", day = 3),
-                Birthday(name = "Diego", day = 5),
-                Birthday(name = "Elena", day = 7),
-                Birthday(name = "Fabio", day = 9),
-                Birthday(name = "Gisele", day = 11),
-                Birthday(name = "Hugo", day = 13),
-                Birthday(name = "Iris", day = 15),
-                Birthday(name = "Jorge", day = 18),
-                Birthday(name = "Karen", day = 21),
-                Birthday(name = "Leo", day = 24),
-                Birthday(name = "Marta", day = 28),
+                Birthday(name = "Ana paula", day = 1, gender = Gender.FEMALE),
+                Birthday(name = "Bruno perico arruda", day = 2, gender = Gender.MALE),
+                Birthday(name = "Carla", day = 3, gender = Gender.FEMALE),
+                Birthday(name = "Diego", day = 5, gender = Gender.MALE),
+                Birthday(name = "Elena", day = 7, gender = Gender.FEMALE),
+                Birthday(name = "Fabio", day = 9, gender = Gender.MALE),
+                Birthday(name = "Gisele", day = 11, gender = Gender.FEMALE),
+                Birthday(name = "Hugo", day = 13, gender = Gender.MALE),
+                Birthday(name = "Iris", day = 15, gender = Gender.FEMALE),
+                Birthday(name = "Jorge", day = 18, gender = Gender.MALE),
+                Birthday(name = "Karen", day = 21, gender = Gender.FEMALE),
+                Birthday(name = "Leo", day = 24, gender = Gender.MALE),
+                Birthday(name = "Marta", day = 28, gender = Gender.FEMALE),
             )
         )
     })

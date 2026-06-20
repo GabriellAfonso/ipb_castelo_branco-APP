@@ -11,6 +11,7 @@ data class BirthdaysResponseDto(
 @Serializable
 data class BirthdayDto(
     val name: String,
+    val gender: String? = null,
     @SerialName("birth_day")
     val birthDay: Int,
 )
