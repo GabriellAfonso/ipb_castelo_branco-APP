@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.BugReport
@@ -65,17 +66,19 @@ fun SettingsScreen(
     }
 
     SettingsContent(
-        onBackClick           = onBackClick,
-        darkMode              = resolvedDark,
-        onToggleDark          = { viewModel.toggleDarkMode() },
-        onRequestResetGallery = { viewModel.requestReset(ResetAction.GALLERY) },
-        onRequestResetBible   = { viewModel.requestReset(ResetAction.BIBLE) },
-        pendingConfirmation   = uiState.pendingConfirmation,
-        onConfirmReset        = { viewModel.confirmReset() },
-        onDismissConfirmation = { viewModel.dismissConfirmation() },
-        galleryCleared        = uiState.galleryCleared,
-        bibleCleared          = uiState.bibleCleared,
-        onNavigateToLogViewer = onNavigateToLogViewer,
+        onBackClick                  = onBackClick,
+        darkMode                     = resolvedDark,
+        onToggleDark                 = { viewModel.toggleDarkMode() },
+        birthdayNotifications        = uiState.birthdayNotifications,
+        onToggleBirthdayNotifications = { viewModel.toggleBirthdayNotifications() },
+        onRequestResetGallery        = { viewModel.requestReset(ResetAction.GALLERY) },
+        onRequestResetBible          = { viewModel.requestReset(ResetAction.BIBLE) },
+        pendingConfirmation          = uiState.pendingConfirmation,
+        onConfirmReset               = { viewModel.confirmReset() },
+        onDismissConfirmation        = { viewModel.dismissConfirmation() },
+        galleryCleared               = uiState.galleryCleared,
+        bibleCleared                 = uiState.bibleCleared,
+        onNavigateToLogViewer        = onNavigateToLogViewer,
     )
 }
 
@@ -84,6 +87,8 @@ fun SettingsContent(
     onBackClick: () -> Unit,
     darkMode: Boolean,
     onToggleDark: () -> Unit,
+    birthdayNotifications: Boolean = true,
+    onToggleBirthdayNotifications: () -> Unit = {},
     onRequestResetGallery: () -> Unit,
     onRequestResetBible: () -> Unit,
     pendingConfirmation: ResetAction?,
@@ -130,6 +135,17 @@ fun SettingsContent(
                 description     = if (darkMode) "Ativado" else "Desativado",
                 checked         = darkMode,
                 onCheckedChange = { onToggleDark() },
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsSectionHeader("Notificações")
+            SettingsSwitchRow(
+                icon            = Icons.Filled.Cake,
+                title           = "Aniversários",
+                description     = if (birthdayNotifications) "Ativado" else "Desativado",
+                checked         = birthdayNotifications,
+                onCheckedChange = { onToggleBirthdayNotifications() },
             )
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))

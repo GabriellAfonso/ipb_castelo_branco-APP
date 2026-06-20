@@ -16,4 +16,8 @@ interface SettingsRepository {
     val hymnalFontSizeFlow: Flow<Float>
 
     suspend fun setHymnalFontSize(size: Float)
+
+    val birthdayNotificationsFlow: Flow<Boolean>
+
+    suspend fun setBirthdayNotifications(enabled: Boolean)
 }

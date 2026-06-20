@@ -2,6 +2,7 @@ package com.ipb.castelobranco.core.data.local
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -27,6 +28,7 @@ class ThemePreferences @Inject constructor(
     private val themeModeKey = intPreferencesKey("theme_mode")
     private val hymnalFontSizeKey = floatPreferencesKey("hymnal_font_size")
     private val songScrollModeKey = intPreferencesKey("song_scroll_mode")
+    private val birthdayNotificationsKey = booleanPreferencesKey("birthday_notifications_enabled")
 
     val themeModeFlow: Flow<ThemeMode> =
         dataStore.data.map { prefs ->
@@ -78,6 +80,17 @@ class ThemePreferences @Inject constructor(
         }
         dataStore.edit { prefs ->
             prefs[songScrollModeKey] = persisted
+        }
+    }
+
+    val birthdayNotificationsFlow: Flow<Boolean> =
+        dataStore.data.map { prefs ->
+            prefs[birthdayNotificationsKey] ?: true
+        }
+
+    suspend fun setBirthdayNotifications(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[birthdayNotificationsKey] = enabled
         }
     }
 }

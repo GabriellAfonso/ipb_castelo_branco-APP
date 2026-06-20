@@ -35,4 +35,10 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setHymnalFontSize(size: Float) {
         themePreferences.setHymnalFontSize(size)
     }
+
+    override val birthdayNotificationsFlow: Flow<Boolean> = themePreferences.birthdayNotificationsFlow
+
+    override suspend fun setBirthdayNotifications(enabled: Boolean) {
+        themePreferences.setBirthdayNotifications(enabled)
+    }
 }

@@ -24,6 +24,7 @@ enum class ResetAction { GALLERY, BIBLE }
 data class SettingsUiState(
     val darkMode: Boolean? = null,
     val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,
+    val birthdayNotifications: Boolean = true,
     val pendingConfirmation: ResetAction? = null,
     val galleryCleared: Boolean = false,
     val bibleCleared: Boolean = false,
@@ -46,8 +47,9 @@ class SettingsViewModel @Inject constructor(
 
     val uiState: StateFlow<SettingsUiState> = combine(
         repository.themeModeFlow,
+        repository.birthdayNotificationsFlow,
         _extra,
-    ) { mode, extra ->
+    ) { mode, birthdayNotif, extra ->
         SettingsUiState(
             themeMode = mode,
             darkMode = when (mode) {
@@ -55,6 +57,7 @@ class SettingsViewModel @Inject constructor(
                 ThemeMode.DARK -> true
                 ThemeMode.LIGHT -> false
             },
+            birthdayNotifications = birthdayNotif,
             pendingConfirmation = extra.pendingConfirmation,
             galleryCleared = extra.galleryCleared,
             bibleCleared = extra.bibleCleared,
@@ -90,6 +93,12 @@ class SettingsViewModel @Inject constructor(
                     _extra.update { it.copy(bibleCleared = true) }
                 }
             }
+        }
+    }
+
+    fun toggleBirthdayNotifications() {
+        viewModelScope.launch {
+            repository.setBirthdayNotifications(!uiState.value.birthdayNotifications)
         }
     }
 

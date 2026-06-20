@@ -4,7 +4,11 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.ipb.castelobranco.core.data.local.ThemePreferences
+import com.ipb.castelobranco.core.data.worker.BirthdayNotificationWorker
 import com.ipb.castelobranco.features.settings.domain.model.ThemeMode
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -12,6 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -40,5 +48,28 @@ class MyApp : Application(), Configuration.Provider {
             }
             AppCompatDelegate.setDefaultNightMode(nightMode)
         }
+
+        scheduleBirthdayNotifications()
+    }
+
+    private fun scheduleBirthdayNotifications() {
+        val now = LocalDateTime.now()
+        val targetToday = now.toLocalDate().atTime(TARGET_HOUR)
+        val nextRun = if (now.isBefore(targetToday)) targetToday else targetToday.plusDays(1)
+        val initialDelay = Duration.between(now, nextRun).toMinutes()
+
+        val request = PeriodicWorkRequestBuilder<BirthdayNotificationWorker>(
+            1, TimeUnit.DAYS
+        ).setInitialDelay(initialDelay, TimeUnit.MINUTES).build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            BirthdayNotificationWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request
+        )
+    }
+
+    companion object {
+        private val TARGET_HOUR: LocalTime = LocalTime.of(8, 0)
     }
 }
