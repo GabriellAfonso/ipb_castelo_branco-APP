@@ -14,7 +14,11 @@ import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.ipb.castelobranco.BuildConfig
+import com.ipb.castelobranco.core.data.logging.CrashlyticsTree
+import com.ipb.castelobranco.core.data.logging.LogBufferTree
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class CoreActivity : ComponentActivity() {
@@ -35,6 +39,7 @@ class CoreActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initTimber()
         enableEdgeToEdge()
 
         appUpdateManager = AppUpdateManagerFactory.create(this)
@@ -61,6 +66,17 @@ class CoreActivity : ComponentActivity() {
                     this,
                     UPDATE_REQUEST_CODE
                 )
+            }
+        }
+    }
+
+    private fun initTimber() {
+        if (Timber.forest().isEmpty()) {
+            Timber.plant(LogBufferTree)
+            if (BuildConfig.DEBUG) {
+                Timber.plant(Timber.DebugTree())
+            } else {
+                Timber.plant(CrashlyticsTree())
             }
         }
     }
