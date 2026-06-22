@@ -117,7 +117,7 @@ fun LogViewerScreen(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    items(filtered, key = { "${it.timestamp}-${it.message.hashCode()}" }) { entry ->
+                    items(filtered, key = { it.id }) { entry ->
                         LogRow(entry)
                     }
                 }

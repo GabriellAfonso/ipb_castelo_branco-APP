@@ -5,8 +5,10 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 data class LogEntry(
+    val id: String = UUID.randomUUID().toString(),
     val timestamp: String,
     val priority: Int,
     val tag: String?,
