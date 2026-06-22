@@ -11,6 +11,8 @@ import com.ipb.castelobranco.features.gallery.domain.usecase.GalleryAutoDownload
 import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
 import com.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
+import com.ipb.castelobranco.core.domain.repository.MembersRepository
+import com.ipb.castelobranco.core.domain.usecase.GetMonthlyBirthdaysUseCase
 import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -50,6 +52,8 @@ class CoreViewModelTest {
     private lateinit var bibleAutoDownload: BibleAutoDownloadUseCase
     private lateinit var bibleRepository: BibleRepository
     private lateinit var scheduleRepository: ScheduleRepository
+    private lateinit var getMonthlyBirthdaysUseCase: GetMonthlyBirthdaysUseCase
+    private lateinit var membersRepository: MembersRepository
     private lateinit var viewModel: CoreViewModel
 
     private val authEventsFlow = MutableSharedFlow<AuthEventBus.Event>()
@@ -75,6 +79,8 @@ class CoreViewModelTest {
         bibleAutoDownload = mockk()
         bibleRepository = mockk()
         scheduleRepository = mockk()
+        getMonthlyBirthdaysUseCase = mockk()
+        membersRepository = mockk()
 
         coEvery { preloadDataUseCase() } just runs
         coEvery { scheduleRepository.clearScheduleCache() } just runs
@@ -85,10 +91,15 @@ class CoreViewModelTest {
         every { galleryAutoDownload.triggerIfNeeded() } just runs
         every { bibleAutoDownload.triggerIfNeeded() } just runs
         coEvery { bibleRepository.preload() } just runs
+        every { getMonthlyBirthdaysUseCase.observe() } returns emptyFlow()
+        coEvery { getMonthlyBirthdaysUseCase.refresh() } returns
+            com.ipb.castelobranco.core.domain.snapshot.RefreshResult.NotModified
+        coEvery { membersRepository.clearBirthdaysCache() } just runs
         coEvery { fetchProfileUseCase.refresh() } returns
             com.ipb.castelobranco.core.domain.snapshot.RefreshResult.NotModified
         every { fetchProfileUseCase.observe() } returns emptyFlow()
         coEvery { fetchProfileUseCase.clearLocalPhoto() } returns Result.success(Unit)
+        coEvery { fetchProfileUseCase.clearSnapshot() } just runs
 
         viewModel = CoreViewModel(
             preloadDataUseCase,
@@ -99,7 +110,9 @@ class CoreViewModelTest {
             galleryAutoDownload,
             bibleAutoDownload,
             bibleRepository,
-            scheduleRepository
+            scheduleRepository,
+            getMonthlyBirthdaysUseCase,
+            membersRepository
         )
     }
 
@@ -319,6 +332,9 @@ class CoreViewModelTest {
         coEvery { scheduleRepository.clearScheduleCache() } coAnswers {
             order.add("clearSchedule")
         }
+        coEvery { membersRepository.clearBirthdaysCache() } coAnswers {
+            order.add("clearBirthdays")
+        }
         coEvery { logoutUseCase() } coAnswers {
             order.add("logout")
         }
@@ -326,7 +342,7 @@ class CoreViewModelTest {
         viewModel.logout()
         advanceUntilIdle()
 
-        assertEquals(listOf("clearPhoto", "clearSchedule", "logout"), order)
+        assertEquals(listOf("clearPhoto", "clearSchedule", "clearBirthdays", "logout"), order)
     }
 
     // endregion
