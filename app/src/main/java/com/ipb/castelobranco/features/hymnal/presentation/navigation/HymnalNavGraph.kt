@@ -12,6 +12,7 @@ import com.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.ipb.castelobranco.core.presentation.navigation.safePopBackStack
 import com.ipb.castelobranco.features.hymnal.presentation.screens.HymnDetailScreen
 import com.ipb.castelobranco.features.hymnal.presentation.screens.HymnalScreen
+import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnViewTrackingViewModel
 import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
 
 object HymnalRoutes {
@@ -44,10 +45,14 @@ fun NavGraphBuilder.hymnalGraph(navController: NavHostController) {
             val hymnId     = backStackEntry.arguments?.getString(HymnalRoutes.ArgHymnId).orEmpty()
             val graphEntry = remember(backStackEntry) { navController.getBackStackEntry(AppRoutes.HYMNAL_GRAPH) }
             val viewModel: HymnalViewModel = hiltViewModel(graphEntry)
+            // Deliberately NOT graph-scoped: view tracking must reset on every fresh visit to
+            // this destination, which is exactly what the back stack entry gives us.
+            val trackingViewModel: HymnViewTrackingViewModel = hiltViewModel()
             HymnDetailScreen(
-                hymnId    = hymnId,
-                onBack    = { navController.safePopBackStack() },
-                viewModel = viewModel,
+                hymnId            = hymnId,
+                onBack            = { navController.safePopBackStack() },
+                viewModel         = viewModel,
+                trackingViewModel = trackingViewModel,
             )
         }
     }

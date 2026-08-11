@@ -43,8 +43,8 @@ class HymnalViewModelTest {
     private lateinit var viewModel: HymnalViewModel
 
     private val fakeHymns = listOf(
-        Hymn(number = "1", title = "Quão Grande És Tu", lyrics = emptyList()),
-        Hymn(number = "2", title = "Grande É o Senhor", lyrics = emptyList()),
+        Hymn(id = null, number = "1", title = "Quão Grande És Tu", lyrics = emptyList()),
+        Hymn(id = null, number = "2", title = "Grande É o Senhor", lyrics = emptyList()),
     )
 
     @Before

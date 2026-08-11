@@ -7,6 +7,7 @@ import com.ipb.castelobranco.features.hymnal.domain.model.HymnLyricType
 
 fun HymnDto.toDomain(): Hymn =
     Hymn(
+        id = id,
         number = number,
         title = title,
         lyrics = lyrics.map { l ->
