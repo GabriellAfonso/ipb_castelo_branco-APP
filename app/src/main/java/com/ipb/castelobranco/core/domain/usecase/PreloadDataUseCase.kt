@@ -1,8 +1,9 @@
 package com.ipb.castelobranco.core.domain.usecase
 
+import com.ipb.castelobranco.core.di.IoDispatcher
 import com.ipb.castelobranco.core.domain.startup.Preloadable
 import com.ipb.castelobranco.core.domain.startup.Refreshable
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -13,13 +14,14 @@ import javax.inject.Inject
 class PreloadDataUseCase @Inject constructor(
     private val preloadables: Set<@JvmSuppressWildcards Preloadable>,
     private val refreshables: Set<@JvmSuppressWildcards Refreshable>,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     suspend operator fun invoke() {
         preloadCachesFromDisk()
         refreshDataFromNetwork()
     }
 
-    private suspend fun preloadCachesFromDisk() = withContext(Dispatchers.IO) {
+    private suspend fun preloadCachesFromDisk() = withContext(ioDispatcher) {
         supervisorScope {
             preloadables
                 .map { launch { runCatching { it.preload() } } }
@@ -27,7 +29,7 @@ class PreloadDataUseCase @Inject constructor(
         }
     }
 
-    private suspend fun refreshDataFromNetwork() = withContext(Dispatchers.IO) {
+    private suspend fun refreshDataFromNetwork() = withContext(ioDispatcher) {
         supervisorScope {
             refreshables
                 .map { async { runCatching { it.refresh() } } }

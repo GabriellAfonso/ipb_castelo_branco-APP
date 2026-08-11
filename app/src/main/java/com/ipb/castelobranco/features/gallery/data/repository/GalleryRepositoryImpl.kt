@@ -7,8 +7,9 @@ import com.ipb.castelobranco.features.gallery.domain.model.Album
 import com.ipb.castelobranco.core.domain.download.DownloadProgress
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import com.ipb.castelobranco.core.domain.error.AppError
+import com.ipb.castelobranco.core.di.IoDispatcher
 import com.ipb.castelobranco.core.network.error.toAppError
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.update
 class GalleryRepositoryImpl @Inject constructor(
     private val api: GalleryApi,
     private val storage: GalleryPhotoStorage,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : GalleryRepository {
 
     private val _albumsFlow = MutableStateFlow<List<Album>>(emptyList())
@@ -38,7 +40,7 @@ class GalleryRepositoryImpl @Inject constructor(
     private val _photosFlow = MutableStateFlow<Map<Long, List<File>>>(emptyMap())
     override val photosFlow: StateFlow<Map<Long, List<File>>> = _photosFlow.asStateFlow()
 
-    override suspend fun preload() = withContext(Dispatchers.IO) {
+    override suspend fun preload() = withContext(ioDispatcher) {
         val rawAlbums = storage.listAlbums()
         _albumsFlow.value = rawAlbums.map { Album(it.first, it.second) }
         _thumbnailsFlow.value = rawAlbums.associate { (id, _) ->
@@ -47,7 +49,7 @@ class GalleryRepositoryImpl @Inject constructor(
         // Não carregamos as fotos aqui para manter o preload leve
     }
 
-    override suspend fun getLocalPhotos(albumId: Long): List<File> = withContext(Dispatchers.IO) {
+    override suspend fun getLocalPhotos(albumId: Long): List<File> = withContext(ioDispatcher) {
         // Se já estiver no cache, retorna direto
         _photosFlow.value[albumId]?.let { return@withContext it }
 
@@ -93,22 +95,22 @@ class GalleryRepositoryImpl @Inject constructor(
             downloaded++
             emit(DownloadProgress(downloaded, total))
         }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(ioDispatcher)
 
-    override suspend fun clearAlbum(albumId: Long) = withContext(Dispatchers.IO) {
+    override suspend fun clearAlbum(albumId: Long) = withContext(ioDispatcher) {
         storage.clearAlbum(albumId)
         _photosFlow.update { it - albumId } // Remove do cache
     }
 
-    override suspend fun clearAllPhotos() = withContext(Dispatchers.IO) {
+    override suspend fun clearAllPhotos() = withContext(ioDispatcher) {
         storage.clearAll()
         _photosFlow.value = emptyMap() // Limpa todo o cache
         preload()
     }
 
     // Métodos delegados (mantidos)
-    override suspend fun getAllLocalPhotos(): List<File> = withContext(Dispatchers.IO) { storage.listAllPhotos() }
-    override suspend fun getLocalAlbums(): List<Album> = withContext(Dispatchers.IO) { storage.listAlbums().map { Album(it.first, it.second) } }
-    override suspend fun getThumbnailForAlbum(albumId: Long): File? = withContext(Dispatchers.IO) { storage.getThumbnailFile(albumId) }
-    override suspend fun getPhotoName(albumId: Long, photoId: Long): String? = withContext(Dispatchers.IO) { storage.getPhotoName(albumId, photoId) }
+    override suspend fun getAllLocalPhotos(): List<File> = withContext(ioDispatcher) { storage.listAllPhotos() }
+    override suspend fun getLocalAlbums(): List<Album> = withContext(ioDispatcher) { storage.listAlbums().map { Album(it.first, it.second) } }
+    override suspend fun getThumbnailForAlbum(albumId: Long): File? = withContext(ioDispatcher) { storage.getThumbnailFile(albumId) }
+    override suspend fun getPhotoName(albumId: Long, photoId: Long): String? = withContext(ioDispatcher) { storage.getPhotoName(albumId, photoId) }
 }

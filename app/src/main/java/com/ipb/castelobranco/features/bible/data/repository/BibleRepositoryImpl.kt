@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.bible.data.repository
 
 import com.ipb.castelobranco.core.data.local.SnapshotStorage
+import com.ipb.castelobranco.core.di.IoDispatcher
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.ipb.castelobranco.features.bible.data.dto.BibleBookDto
 import com.ipb.castelobranco.features.bible.data.local.BiblePreferences
@@ -8,6 +9,7 @@ import com.ipb.castelobranco.features.bible.domain.model.BibleBook
 import com.ipb.castelobranco.features.bible.domain.model.BibleReadingPosition
 import com.ipb.castelobranco.features.bible.domain.model.BibleTranslation
 import com.ipb.castelobranco.features.bible.domain.repository.BibleRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,6 +30,7 @@ class BibleRepositoryImpl @Inject constructor(
     private val caches: Map<BibleTranslation, @JvmSuppressWildcards SnapshotCache<List<BibleBookDto>>>,
     private val preferences: BiblePreferences,
     private val storage: SnapshotStorage,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : BibleRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -69,7 +72,7 @@ class BibleRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun preload() = withContext(Dispatchers.IO) {
+    override suspend fun preload() = withContext(ioDispatcher) {
         refreshCachedTranslations()
         loadBooksFor(activeTranslationFlow.value)
     }
@@ -87,7 +90,7 @@ class BibleRepositoryImpl @Inject constructor(
         preferences.setFontSize(size)
     }
 
-    override suspend fun clearAll() = withContext(Dispatchers.IO) {
+    override suspend fun clearAll() = withContext(ioDispatcher) {
         BibleTranslation.entries.forEach { translation ->
             caches[translation]?.clear()
         }

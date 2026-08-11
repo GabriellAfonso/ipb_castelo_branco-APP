@@ -7,6 +7,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -27,7 +28,7 @@ class GalleryRepositoryImplTest {
     fun setup() {
         api = mockk()
         storage = mockk(relaxed = true)
-        repository = GalleryRepositoryImpl(api, storage)
+        repository = GalleryRepositoryImpl(api, storage, Dispatchers.Unconfined)
     }
 
     // region preload

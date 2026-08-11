@@ -3,6 +3,7 @@ package com.ipb.castelobranco.features.profile.data.photo
 import android.content.Context
 import com.ipb.castelobranco.core.data.local.StorageDirConstants
 import com.ipb.castelobranco.core.di.ApiBaseUrl
+import com.ipb.castelobranco.core.di.IoDispatcher
 import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.error.mapError
 import com.ipb.castelobranco.core.network.error.toAppError
@@ -10,7 +11,7 @@ import com.ipb.castelobranco.features.profile.data.api.ProfileApi
 import com.ipb.castelobranco.features.profile.data.local.ProfilePhotoBus
 import com.ipb.castelobranco.features.profile.data.local.ProfilePhotoCacheStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -26,6 +27,7 @@ class ProfilePhotoDataSource @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApiBaseUrl private val baseUrl: String,
     private val photoCache: ProfilePhotoCacheStorage,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
 
     suspend fun upload(bytes: ByteArray, fileName: String): Result<String?> =
@@ -56,7 +58,7 @@ class ProfilePhotoDataSource @Inject constructor(
         }
 
     suspend fun downloadAndPersist(photoUrl: String): Result<File?> =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             runCatching {
                 val absoluteUrl = toAbsoluteUrl(photoUrl)
 
@@ -118,7 +120,7 @@ class ProfilePhotoDataSource @Inject constructor(
         }
 
     suspend fun clearLocal(): Result<Unit> =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             runCatching {
                 val dir = File(context.filesDir, StorageDirConstants.PROFILE)
                 if (dir.exists()) {

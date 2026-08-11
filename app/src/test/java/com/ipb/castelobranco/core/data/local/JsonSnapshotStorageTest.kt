@@ -3,6 +3,7 @@ package com.ipb.castelobranco.core.data.local
 import android.content.Context
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -26,7 +27,7 @@ class JsonSnapshotStorageTest {
         context = mockk()
         every { context.filesDir } returns tempDir
 
-        storage = JsonSnapshotStorage(context)
+        storage = JsonSnapshotStorage(context, Dispatchers.Unconfined)
     }
 
     @After

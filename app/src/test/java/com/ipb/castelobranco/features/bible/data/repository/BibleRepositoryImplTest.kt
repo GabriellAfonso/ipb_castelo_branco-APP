@@ -61,7 +61,7 @@ class BibleRepositoryImplTest {
     }
 
     private fun buildRepository(): BibleRepositoryImpl {
-        return BibleRepositoryImpl(caches, preferences, storage)
+        return BibleRepositoryImpl(caches, preferences, storage, Dispatchers.Unconfined)
     }
 
     // region preload

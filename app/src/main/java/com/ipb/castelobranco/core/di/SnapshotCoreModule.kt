@@ -11,6 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.serialization.json.Json
 
 import javax.inject.Singleton
@@ -28,9 +29,10 @@ object SnapshotCoreModule {
     @Provides
     @Singleton
     fun provideSnapshotStorage(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ): SnapshotStorage =
-        JsonSnapshotStorage(context)
+        JsonSnapshotStorage(context, ioDispatcher)
 
     @Provides
     @Singleton

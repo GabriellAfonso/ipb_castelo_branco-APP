@@ -14,6 +14,7 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -75,7 +76,7 @@ class PreloadDataUseCaseTest {
             Refreshable { lyricsRepository.refresh() },
         )
 
-        useCase = PreloadDataUseCase(preloadables, refreshables)
+        useCase = PreloadDataUseCase(preloadables, refreshables, Dispatchers.Unconfined)
     }
 
     // region preload phase — all repos called

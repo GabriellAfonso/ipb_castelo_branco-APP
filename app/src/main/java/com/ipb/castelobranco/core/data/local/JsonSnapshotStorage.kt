@@ -2,8 +2,9 @@
 package com.ipb.castelobranco.core.data.local
 
 import android.content.Context
+import com.ipb.castelobranco.core.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
@@ -12,6 +13,7 @@ import javax.inject.Singleton
 @Singleton
 class JsonSnapshotStorage @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : SnapshotStorage {
 
     private val dirName = "snapshots"
@@ -35,15 +37,15 @@ class JsonSnapshotStorage @Inject constructor(
     private fun etagFileForKey(key: String): File =
         File(dir(), "${safeKey(key)}_etag.txt")
 
-    override suspend fun save(key: String, json: String) = withContext(Dispatchers.IO) {
+    override suspend fun save(key: String, json: String) = withContext(ioDispatcher) {
         jsonFileForKey(key).writeText(json)
     }
 
-    override suspend fun loadOrNull(key: String): String? = withContext(Dispatchers.IO) {
+    override suspend fun loadOrNull(key: String): String? = withContext(ioDispatcher) {
         jsonFileForKey(key).takeIf { it.exists() }?.readText()
     }
 
-    override suspend fun clear(key: String) = withContext(Dispatchers.IO) {
+    override suspend fun clear(key: String) = withContext(ioDispatcher) {
         val json = jsonFileForKey(key)
         if (json.exists()) json.delete()
 
@@ -51,11 +53,11 @@ class JsonSnapshotStorage @Inject constructor(
         if (etag.exists()) etag.delete()
     }
 
-    override suspend fun clearAll() = withContext(Dispatchers.IO) {
+    override suspend fun clearAll() = withContext(ioDispatcher) {
         val dir = File(context.filesDir, dirName)
         if (dir.exists()) dir.deleteRecursively()
     }
-    override suspend fun loadETagOrNull(key: String): String? = withContext(Dispatchers.IO) {
+    override suspend fun loadETagOrNull(key: String): String? = withContext(ioDispatcher) {
         etagFileForKey(key)
             .takeIf { it.exists() }
             ?.readText()
@@ -63,7 +65,7 @@ class JsonSnapshotStorage @Inject constructor(
             ?.takeIf { it.isNotBlank() }
     }
 
-    override suspend fun saveETag(key: String, etag: String) = withContext(Dispatchers.IO) {
+    override suspend fun saveETag(key: String, etag: String) = withContext(ioDispatcher) {
         etagFileForKey(key).writeText(etag)
     }
 
