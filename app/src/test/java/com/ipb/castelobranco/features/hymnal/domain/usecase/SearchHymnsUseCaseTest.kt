@@ -15,6 +15,7 @@ class SearchHymnsUseCaseTest {
     // region fixtures
 
     private val hymnSanto = Hymn(
+        id = null,
         number = "1",
         title = "Santo, Santo, Santo",
         lyrics = listOf(
@@ -24,6 +25,7 @@ class SearchHymnsUseCaseTest {
     )
 
     private val hymnPastor = Hymn(
+        id = null,
         number = "23",
         title = "O Senhor é Meu Pastor",
         lyrics = listOf(
@@ -32,6 +34,7 @@ class SearchHymnsUseCaseTest {
     )
 
     private val hymnGrande = Hymn(
+        id = null,
         number = "100",
         title = "Grande é o Senhor",
         lyrics = listOf(

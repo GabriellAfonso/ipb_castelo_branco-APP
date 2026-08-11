@@ -28,7 +28,7 @@ class ObserveHymnsUseCaseTest {
 
     @Test
     fun `invoke returns flow from repository`() = runTest {
-        val hymns = listOf(Hymn(number = "1", title = "Castelo Forte", lyrics = emptyList()))
+        val hymns = listOf(Hymn(id = null, number = "1", title = "Castelo Forte", lyrics = emptyList()))
         val flow = MutableStateFlow<SnapshotState<List<Hymn>>>(SnapshotState.Data(hymns))
         every { repository.observeHymnal() } returns flow
 
