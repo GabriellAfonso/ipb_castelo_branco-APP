@@ -9,6 +9,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ipb.castelobranco.core.data.local.ThemePreferences
 import com.ipb.castelobranco.core.data.worker.BirthdayNotificationWorker
+import com.ipb.castelobranco.features.hymnal.domain.sync.HymnViewSyncScheduler
 import com.ipb.castelobranco.features.settings.domain.model.ThemeMode
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +28,7 @@ class MyApp : Application(), Configuration.Provider {
 
     @Inject lateinit var themePreferences: ThemePreferences
     @Inject lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var hymnViewSyncScheduler: HymnViewSyncScheduler
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -50,6 +52,10 @@ class MyApp : Application(), Configuration.Provider {
         }
 
         scheduleBirthdayNotifications()
+
+        // Picks up anything the unique-work KEEP policy could not schedule while a previous run
+        // was finishing, so a queued view is never stranded longer than one app launch.
+        hymnViewSyncScheduler.scheduleSync()
     }
 
     private fun scheduleBirthdayNotifications() {

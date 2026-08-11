@@ -44,11 +44,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.ipb.castelobranco.features.hymnal.domain.model.HymnLyric
 import com.ipb.castelobranco.features.hymnal.domain.model.HymnLyricType
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnViewTrackingViewModel
 import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
 import kotlin.math.roundToInt
 
@@ -56,6 +58,7 @@ import kotlin.math.roundToInt
 fun HymnDetailScreen(
     hymnId: String,
     viewModel: HymnalViewModel,
+    trackingViewModel: HymnViewTrackingViewModel,
     onBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -63,6 +66,14 @@ fun HymnDetailScreen(
 
     val hymn = remember(hymnId, state.hymns) {
         state.hymns.firstOrNull { it.number == hymnId }
+    }
+
+    // Counts only while the hymn is genuinely in front of the member. RESUMED is left when the
+    // app is backgrounded, when the screen turns off, and when another surface covers it —
+    // STARTED would keep counting behind the lock screen on some devices.
+    LifecycleResumeEffect(hymn?.id) {
+        trackingViewModel.onHymnVisible(hymn?.id)
+        onPauseOrDispose { trackingViewModel.onHymnHidden() }
     }
 
     HymnDetailContent(
