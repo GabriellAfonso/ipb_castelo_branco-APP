@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.schedule.data.repository
 
+import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
 import com.ipb.castelobranco.core.domain.snapshot.Logger
 import com.ipb.castelobranco.core.domain.snapshot.NetworkResult
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
@@ -106,7 +107,7 @@ class ScheduleRepositoryImplTest {
     // region clearScheduleCache
 
     @Test
-    fun `clearScheduleCache resets state to Loading`() = runTest {
+    fun `clearScheduleCache clears cache and emits 401 error`() = runTest {
         coEvery { cache.loadETag() } returns null
         coEvery { fetcher.fetch(any()) } returns NetworkResult.Success(sampleDto, "v1")
 
@@ -115,7 +116,11 @@ class ScheduleRepositoryImplTest {
 
         repository.clearScheduleCache()
 
-        assertTrue(repository.getCurrentSnapshot() is SnapshotState.Loading)
+        val state = repository.getCurrentSnapshot()
+        assertTrue(state is SnapshotState.Error)
+        val throwable = (state as SnapshotState.Error).throwable
+        assertTrue(throwable is HttpPermissionException)
+        assertEquals(401, (throwable as HttpPermissionException).code)
         coVerify { cache.clear() }
     }
 

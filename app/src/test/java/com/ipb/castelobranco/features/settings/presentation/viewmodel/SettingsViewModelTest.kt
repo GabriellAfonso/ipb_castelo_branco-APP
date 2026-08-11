@@ -17,6 +17,7 @@ import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -41,6 +42,7 @@ class SettingsViewModelTest {
     private lateinit var viewModel: SettingsViewModel
 
     private val themeModeFlow = MutableSharedFlow<ThemeMode>(replay = 1)
+    private val birthdayNotificationsFlow = MutableStateFlow(true)
 
     @Before
     fun setup() {
@@ -49,6 +51,7 @@ class SettingsViewModelTest {
         galleryRepository = mockk(relaxed = true)
         deleteAndRedownloadBible = mockk(relaxed = true)
         every { settingsRepository.themeModeFlow } returns themeModeFlow
+        every { settingsRepository.birthdayNotificationsFlow } returns birthdayNotificationsFlow
         viewModel = SettingsViewModel(settingsRepository, galleryRepository, deleteAndRedownloadBible)
     }
 
