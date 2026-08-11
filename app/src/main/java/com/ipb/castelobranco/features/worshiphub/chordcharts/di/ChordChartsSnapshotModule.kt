@@ -1,11 +1,11 @@
 package com.ipb.castelobranco.features.worshiphub.chordcharts.di
 
+import com.ipb.castelobranco.core.data.snapshot.RetrofitSnapshotFetcher
 import com.ipb.castelobranco.core.data.snapshot.SnapshotCacheFactory
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.ipb.castelobranco.features.worshiphub.chordcharts.data.api.ChordChartsApi
 import com.ipb.castelobranco.features.worshiphub.chordcharts.data.dto.ChordChartDto
-import com.ipb.castelobranco.features.worshiphub.chordcharts.data.fetcher.ChordChartsSnapshotFetcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,5 +27,5 @@ object ChordChartsSnapshotModule {
     @Provides
     fun provideChordChartsFetcher(
         api: ChordChartsApi,
-    ): SnapshotFetcher<List<ChordChartDto>> = ChordChartsSnapshotFetcher(api)
+    ): SnapshotFetcher<List<ChordChartDto>> = RetrofitSnapshotFetcher { etag -> api.getChordCharts(etag) }
 }
