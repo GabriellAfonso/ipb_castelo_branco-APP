@@ -3,7 +3,7 @@ package com.ipb.castelobranco.features.admin.register.data.repository
 import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.features.admin.register.data.api.WorshipRegisterApi
 import com.ipb.castelobranco.features.admin.register.data.dto.RegisterSundayPlaysResponseDto
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
+import com.ipb.castelobranco.features.admin.register.domain.model.SundayPlayPushItem
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

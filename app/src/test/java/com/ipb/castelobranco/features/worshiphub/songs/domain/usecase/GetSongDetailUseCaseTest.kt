@@ -5,7 +5,7 @@ import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordC
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.model.Lyrics
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySetItem
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository

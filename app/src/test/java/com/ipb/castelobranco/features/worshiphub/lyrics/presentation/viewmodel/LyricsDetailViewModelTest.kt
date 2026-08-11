@@ -9,7 +9,7 @@ import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.model.Lyrics
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify

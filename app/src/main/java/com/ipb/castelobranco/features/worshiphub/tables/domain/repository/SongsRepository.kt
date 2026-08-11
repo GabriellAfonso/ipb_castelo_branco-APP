@@ -1,15 +1,15 @@
 package com.ipb.castelobranco.features.worshiphub.tables.domain.repository
 
+import com.ipb.castelobranco.core.domain.repository.AllSongsRepository
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopTone
 import kotlinx.coroutines.flow.Flow
 
-interface SongsRepository {
+interface SongsRepository : AllSongsRepository {
 
     fun observeSongsBySunday(): Flow<SnapshotState<List<SundaySet>>>
     suspend fun refreshSongsBySunday(): RefreshResult
@@ -24,7 +24,5 @@ interface SongsRepository {
     suspend fun refreshSuggestedSongs(): RefreshResult
     suspend fun refreshSuggestedSongs(fixedByPosition: Map<Int, Int>): RefreshResult
 
-    fun observeAllSongs(): Flow<SnapshotState<List<Song>>>
-    suspend fun refreshAllSongs(): RefreshResult
     suspend fun preload()
 }

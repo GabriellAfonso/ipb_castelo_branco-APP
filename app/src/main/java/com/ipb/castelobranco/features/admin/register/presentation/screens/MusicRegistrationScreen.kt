@@ -42,7 +42,7 @@ import com.ipb.castelobranco.features.admin.register.presentation.state.MusicReg
 import com.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationUiState
 import com.ipb.castelobranco.features.admin.register.presentation.state.RegistrationType
 import com.ipb.castelobranco.features.admin.register.presentation.viewmodel.MusicRegistrationViewModel
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 
 private val Green = Color(0xFF0F6B5C)
 private val Orange = Color(0xFFF2A300)

@@ -28,7 +28,7 @@ import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsCreateUiState
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel.LyricsCreateViewModel
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 
 @Composable
 fun LyricsCreateScreen(

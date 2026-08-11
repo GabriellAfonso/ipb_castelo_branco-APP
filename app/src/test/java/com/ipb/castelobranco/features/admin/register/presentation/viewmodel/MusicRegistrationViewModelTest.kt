@@ -5,7 +5,7 @@ import com.ipb.castelobranco.features.admin.register.domain.usecase.ObserveSongs
 import com.ipb.castelobranco.features.admin.register.domain.usecase.SubmitSundayPlaysUseCase
 import com.ipb.castelobranco.features.admin.register.presentation.state.MusicRegistrationEvent
 import com.ipb.castelobranco.features.admin.register.presentation.state.RegistrationType
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.worshiphub.tables.di
 
 import com.ipb.castelobranco.core.di.AuthLessRetrofit
+import com.ipb.castelobranco.core.domain.repository.AllSongsRepository
 import com.ipb.castelobranco.core.domain.startup.Preloadable
 import com.ipb.castelobranco.core.domain.startup.Refreshable
 import com.ipb.castelobranco.features.worshiphub.tables.data.api.SongsTableApi
@@ -22,6 +23,10 @@ abstract class SongsTable {
     @Binds
     @Singleton
     abstract fun bindSongsRepository(impl: SongsRepositoryImpl): SongsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAllSongsRepository(impl: SongsRepositoryImpl): AllSongsRepository
 
     companion object {
         @Provides

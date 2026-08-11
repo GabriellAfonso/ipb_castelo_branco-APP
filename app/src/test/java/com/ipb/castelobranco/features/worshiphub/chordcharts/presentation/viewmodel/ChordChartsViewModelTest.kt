@@ -6,7 +6,7 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordChart
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.usecase.GetChordChartsUseCase
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify

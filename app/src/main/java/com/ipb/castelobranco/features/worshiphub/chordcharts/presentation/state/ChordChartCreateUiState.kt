@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state
 
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 
 data class ChordChartCreateUiState(
     val allSongs: List<Song> = emptyList(),

@@ -6,7 +6,7 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
 import com.ipb.castelobranco.features.worshiphub.tables.data.dto.AllSongDto
 import com.ipb.castelobranco.features.worshiphub.tables.data.mapper.toDomain
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import javax.inject.Inject
 
 class AllSongsSnapshotRepository @Inject constructor(

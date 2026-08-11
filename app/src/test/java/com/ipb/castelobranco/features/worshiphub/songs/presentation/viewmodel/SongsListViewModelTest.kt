@@ -2,7 +2,7 @@ package com.ipb.castelobranco.features.worshiphub.songs.presentation.viewmodel
 
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify

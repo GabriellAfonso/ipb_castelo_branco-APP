@@ -6,7 +6,7 @@ import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.util.normalize
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartCreateUiState
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

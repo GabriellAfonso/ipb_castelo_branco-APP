@@ -2,7 +2,7 @@ package com.ipb.castelobranco.features.admin.register.data.mapper
 
 import com.ipb.castelobranco.features.admin.register.data.dto.RegisterSundayPlayItemDto
 import com.ipb.castelobranco.features.admin.register.data.dto.RegisterSundayPlaysRequestDto
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
+import com.ipb.castelobranco.features.admin.register.domain.model.SundayPlayPushItem
 
 fun buildRegisterRequest(date: String, plays: List<SundayPlayPushItem>): RegisterSundayPlaysRequestDto =
     RegisterSundayPlaysRequestDto(

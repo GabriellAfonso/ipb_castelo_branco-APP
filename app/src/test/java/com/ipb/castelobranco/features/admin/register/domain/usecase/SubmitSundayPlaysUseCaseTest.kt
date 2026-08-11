@@ -2,7 +2,7 @@ package com.ipb.castelobranco.features.admin.register.domain.usecase
 
 import com.ipb.castelobranco.features.admin.register.domain.repository.WorshipRegisterRepository
 import com.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

@@ -61,8 +61,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ipb.castelobranco.features.admin.register.presentation.constants.NATURAL_TONES
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.constants.NATURAL_TONES
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.RepertoireRowState
 import java.text.SimpleDateFormat
 import java.util.Date

@@ -48,10 +48,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ipb.castelobranco.features.admin.register.presentation.constants.NATURAL_TONES
+import com.ipb.castelobranco.core.domain.constants.NATURAL_TONES
 import com.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
 import com.ipb.castelobranco.features.admin.register.presentation.util.SongLabelFormatter
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 
 private val Green = Color(0xFF0F6B5C)
 

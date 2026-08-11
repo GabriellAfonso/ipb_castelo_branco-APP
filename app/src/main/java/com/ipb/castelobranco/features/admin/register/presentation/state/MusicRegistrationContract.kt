@@ -2,7 +2,7 @@ package com.ipb.castelobranco.features.admin.register.presentation.state
 
 import androidx.compose.runtime.Immutable
 import com.ipb.castelobranco.features.admin.register.domain.validation.MusicRegistrationValidator
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

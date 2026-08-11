@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.features.admin.register.data.mapper
 
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundayPlayPushItem
+import com.ipb.castelobranco.features.admin.register.domain.model.SundayPlayPushItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

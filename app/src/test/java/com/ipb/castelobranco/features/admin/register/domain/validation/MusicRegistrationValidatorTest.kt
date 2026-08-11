@@ -1,7 +1,7 @@
 package com.ipb.castelobranco.features.admin.register.domain.validation
 
 import com.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

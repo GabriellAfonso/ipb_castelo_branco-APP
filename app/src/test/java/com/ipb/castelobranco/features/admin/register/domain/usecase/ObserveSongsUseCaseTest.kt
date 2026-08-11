@@ -2,8 +2,8 @@ package com.ipb.castelobranco.features.admin.register.domain.usecase
 
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
-import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
+import com.ipb.castelobranco.core.domain.model.Song
+import com.ipb.castelobranco.core.domain.repository.AllSongsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -18,7 +18,7 @@ import org.junit.Test
 
 class ObserveSongsUseCaseTest {
 
-    private lateinit var repository: SongsRepository
+    private lateinit var repository: AllSongsRepository
     private lateinit var useCase: ObserveSongsUseCase
 
     @Before

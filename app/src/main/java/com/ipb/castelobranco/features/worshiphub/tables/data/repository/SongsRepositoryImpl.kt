@@ -11,7 +11,7 @@ import com.ipb.castelobranco.features.worshiphub.tables.data.snapshot.AllSongsSn
 import com.ipb.castelobranco.features.worshiphub.tables.data.snapshot.SongsBySundaySnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.tables.data.snapshot.TopSongsSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.tables.data.snapshot.TopTonesSnapshotRepository
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong

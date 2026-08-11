@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
-import com.ipb.castelobranco.features.worshiphub.tables.domain.model.Song
+import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SundaySet
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.TopSong
