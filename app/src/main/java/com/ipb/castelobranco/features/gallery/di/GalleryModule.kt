@@ -1,12 +1,13 @@
 package com.ipb.castelobranco.features.gallery.di
 
 import android.content.Context
-import androidx.work.WorkManager
 import com.ipb.castelobranco.core.di.AuthedRetrofit
 import com.ipb.castelobranco.core.domain.startup.Preloadable
 import com.ipb.castelobranco.features.gallery.data.api.GalleryApi
 import com.ipb.castelobranco.features.gallery.data.local.GalleryPhotoStorage
 import com.ipb.castelobranco.features.gallery.data.repository.GalleryRepositoryImpl
+import com.ipb.castelobranco.features.gallery.data.work.WorkManagerGalleryDownloadScheduler
+import com.ipb.castelobranco.features.gallery.domain.download.GalleryDownloadScheduler
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import dagger.Binds
 import dagger.Module
@@ -26,6 +27,12 @@ abstract class GalleryModule {
     @Singleton
     abstract fun bindGalleryRepository(impl: GalleryRepositoryImpl): GalleryRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindGalleryDownloadScheduler(
+        impl: WorkManagerGalleryDownloadScheduler
+    ): GalleryDownloadScheduler
+
     companion object {
         @Provides
         @Singleton
@@ -38,12 +45,6 @@ abstract class GalleryModule {
         fun provideGalleryApi(
             @AuthedRetrofit retrofit: Retrofit
         ): GalleryApi = retrofit.create(GalleryApi::class.java)
-
-        @Provides
-        @Singleton
-        fun provideWorkManager(
-            @ApplicationContext context: Context
-        ): WorkManager = WorkManager.getInstance(context)
 
         @Provides @IntoSet
         fun bindGalleryPreloadable(r: GalleryRepository): Preloadable = Preloadable { r.preload() }

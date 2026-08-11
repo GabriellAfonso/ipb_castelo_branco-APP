@@ -1,16 +1,11 @@
 package com.ipb.castelobranco.features.gallery.domain.usecase
 
-import androidx.work.Constraints
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import com.ipb.castelobranco.features.gallery.data.work.GalleryDownloadWorker
+import com.ipb.castelobranco.features.gallery.domain.download.GalleryDownloadScheduler
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import javax.inject.Inject
 
 class GalleryAutoDownloadUseCase @Inject constructor(
-    private val workManager: WorkManager,
+    private val scheduler: GalleryDownloadScheduler,
     private val repository: GalleryRepository,
 ) {
     /**
@@ -19,35 +14,13 @@ class GalleryAutoDownloadUseCase @Inject constructor(
      */
     fun triggerIfNeeded() {
         if (repository.albumsFlow.value.isEmpty()) {
-            enqueueWifiOnly(policy = ExistingWorkPolicy.KEEP)
+            scheduler.enqueueWifiOnly()
         }
     }
 
     /** Download manual via botão — WiFi only, mantém se já estiver rodando. */
-    fun enqueueWifiOnly(policy: ExistingWorkPolicy = ExistingWorkPolicy.KEEP) {
-        val request = OneTimeWorkRequestBuilder<GalleryDownloadWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.UNMETERED)
-                    .build()
-            )
-            .build()
-        workManager.enqueueUniqueWork(GalleryDownloadWorker.WORK_NAME, policy, request)
-    }
+    fun enqueueWifiOnly(replaceExisting: Boolean = false) = scheduler.enqueueWifiOnly(replaceExisting)
 
     /** Download forçado com dados móveis — substitui qualquer trabalho pendente. */
-    fun enqueueAnyNetwork() {
-        val request = OneTimeWorkRequestBuilder<GalleryDownloadWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .build()
-        workManager.enqueueUniqueWork(
-            GalleryDownloadWorker.WORK_NAME,
-            ExistingWorkPolicy.REPLACE,
-            request
-        )
-    }
+    fun enqueueAnyNetwork() = scheduler.enqueueAnyNetwork()
 }

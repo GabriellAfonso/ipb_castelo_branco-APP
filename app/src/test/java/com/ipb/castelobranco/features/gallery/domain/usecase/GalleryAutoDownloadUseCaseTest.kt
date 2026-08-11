@@ -1,9 +1,6 @@
 package com.ipb.castelobranco.features.gallery.domain.usecase
 
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
-import com.ipb.castelobranco.features.gallery.data.work.GalleryDownloadWorker
+import com.ipb.castelobranco.features.gallery.domain.download.GalleryDownloadScheduler
 import com.ipb.castelobranco.features.gallery.domain.model.Album
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
 import io.mockk.every
@@ -15,7 +12,7 @@ import org.junit.Test
 
 class GalleryAutoDownloadUseCaseTest {
 
-    private lateinit var workManager: WorkManager
+    private lateinit var scheduler: GalleryDownloadScheduler
     private lateinit var repository: GalleryRepository
     private lateinit var useCase: GalleryAutoDownloadUseCase
 
@@ -23,25 +20,19 @@ class GalleryAutoDownloadUseCaseTest {
 
     @Before
     fun setup() {
-        workManager = mockk(relaxed = true)
+        scheduler = mockk(relaxed = true)
         repository = mockk(relaxed = true)
         every { repository.albumsFlow } returns albumsFlow
-        useCase = GalleryAutoDownloadUseCase(workManager, repository)
+        useCase = GalleryAutoDownloadUseCase(scheduler, repository)
     }
 
     @Test
-    fun `triggerIfNeeded enqueues with KEEP when gallery is empty`() {
+    fun `triggerIfNeeded enqueues keeping existing work when gallery is empty`() {
         albumsFlow.value = emptyList()
 
         useCase.triggerIfNeeded()
 
-        verify(exactly = 1) {
-            workManager.enqueueUniqueWork(
-                GalleryDownloadWorker.WORK_NAME,
-                ExistingWorkPolicy.KEEP,
-                any<OneTimeWorkRequest>()
-            )
-        }
+        verify(exactly = 1) { scheduler.enqueueWifiOnly(replaceExisting = false) }
     }
 
     @Test
@@ -50,7 +41,7 @@ class GalleryAutoDownloadUseCaseTest {
 
         useCase.triggerIfNeeded()
 
-        verify(exactly = 0) { workManager.enqueueUniqueWork(any<String>(), any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
+        verify(exactly = 0) { scheduler.enqueueWifiOnly(any()) }
     }
 
     @Test
@@ -60,38 +51,20 @@ class GalleryAutoDownloadUseCaseTest {
         useCase.triggerIfNeeded()
         useCase.triggerIfNeeded()
 
-        verify(exactly = 2) {
-            workManager.enqueueUniqueWork(
-                GalleryDownloadWorker.WORK_NAME,
-                ExistingWorkPolicy.KEEP,
-                any<OneTimeWorkRequest>()
-            )
-        }
+        verify(exactly = 2) { scheduler.enqueueWifiOnly(replaceExisting = false) }
     }
 
     @Test
-    fun `enqueueWifiOnly calls enqueueUniqueWork with KEEP policy`() {
+    fun `enqueueWifiOnly keeps existing work by default`() {
         useCase.enqueueWifiOnly()
 
-        verify(exactly = 1) {
-            workManager.enqueueUniqueWork(
-                GalleryDownloadWorker.WORK_NAME,
-                ExistingWorkPolicy.KEEP,
-                any<OneTimeWorkRequest>()
-            )
-        }
+        verify(exactly = 1) { scheduler.enqueueWifiOnly(replaceExisting = false) }
     }
 
     @Test
-    fun `enqueueAnyNetwork calls enqueueUniqueWork with REPLACE policy`() {
+    fun `enqueueAnyNetwork delegates to the scheduler`() {
         useCase.enqueueAnyNetwork()
 
-        verify(exactly = 1) {
-            workManager.enqueueUniqueWork(
-                GalleryDownloadWorker.WORK_NAME,
-                ExistingWorkPolicy.REPLACE,
-                any<OneTimeWorkRequest>()
-            )
-        }
+        verify(exactly = 1) { scheduler.enqueueAnyNetwork() }
     }
 }

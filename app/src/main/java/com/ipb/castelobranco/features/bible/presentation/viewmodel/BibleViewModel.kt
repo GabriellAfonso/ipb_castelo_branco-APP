@@ -212,6 +212,6 @@ class BibleViewModel @Inject constructor(
     }
 
     fun retryDownloadWifi() {
-        autoDownload.enqueueWifiOnly(policy = androidx.work.ExistingWorkPolicy.REPLACE)
+        autoDownload.enqueueWifiOnly(replaceExisting = true)
     }
 }

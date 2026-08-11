@@ -282,7 +282,7 @@ class BibleViewModelTest {
         val vm = buildViewModel()
         vm.retryDownloadWifi()
 
-        verify { autoDownload.enqueueWifiOnly(policy = androidx.work.ExistingWorkPolicy.REPLACE) }
+        verify { autoDownload.enqueueWifiOnly(replaceExisting = true) }
     }
 
     // endregion
