@@ -37,11 +37,17 @@ features/
 
 ## UI — Jetpack Compose
 
-- Every screen has `sealed class UiState` with `Loading`, `Success`, `Error` — always handle all three.
+- Every screen must handle the three states — loading, success, error. The default representation is a
+  `data class` UI state with flags (`isLoading: Boolean`, `error: String?`), which pairs with the
+  `SnapshotState` returned by `BaseSnapshotRepository` — that is the project's real sealed hierarchy.
+  Use `sealed` for one-shot events (`MusicRegistrationEvent`, `AdminScheduleEvent`, `SaveResult`) and
+  where a screen's states are genuinely exclusive (`ScheduleViewModel`).
 - ViewModel exposes `StateFlow<UiState>`; Screen collects with `collectAsStateWithLifecycle()`.
 - Composables are **dumb**: receive state, emit events via lambdas. Zero logic.
-- Separate Screen (VM collector) from content Composable (pure data) — enables previews.
-- `@Preview` with explicit fake data on every content Composable.
+- Separate Screen (VM collector) from content Composable (pure data) — mandatory, and what makes a
+  preview possible whenever someone wants one.
+- `@Preview` with explicit fake data is required on shared components in
+  `core/presentation/components/`, optional on feature screens.
 - Naming: PascalCase, no prefix (`ScheduleScreen`).
 
 ## ViewModel
