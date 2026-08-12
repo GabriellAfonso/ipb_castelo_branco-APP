@@ -165,7 +165,9 @@ fun BibleReaderScreen(
                             Text("Bíblia ainda não baixada.")
                             Spacer(Modifier.padding(top = 12.dp))
                             TextButton(onClick = viewModel::retryDownloadWifi) { Text("Baixar via WiFi") }
-                            TextButton(onClick = viewModel::retryDownloadOnMobileData) { Text("Baixar com dados móveis") }
+                            TextButton(onClick = viewModel::retryDownloadOnMobileData) {
+                                Text("Baixar com dados móveis")
+                            }
                         }
                     }
                 }

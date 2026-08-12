@@ -73,7 +73,8 @@ fun SundaySongRow(
         val q = searchQuery.trim()
         if (q.isBlank()) availableSongs
         else availableSongs.filter {
-            it.title.normalize().contains(q.normalize(), ignoreCase = true) || it.artist.normalize().contains(q.normalize(), ignoreCase = true)
+            it.title.normalize().contains(q.normalize(), ignoreCase = true) ||
+                it.artist.normalize().contains(q.normalize(), ignoreCase = true)
         }
     }
 

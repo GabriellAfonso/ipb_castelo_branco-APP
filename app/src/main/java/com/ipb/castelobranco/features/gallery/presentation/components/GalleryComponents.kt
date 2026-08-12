@@ -65,7 +65,8 @@ fun AlbumItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)  // Alinha no fundo
-                    .background(Color.Black.copy(alpha = 0.5f))  // Cinza escuro semi-transparente (ajuste alpha ou cor se quiser mais claro)
+                    // Cinza escuro semi-transparente (ajuste alpha ou cor se quiser mais claro)
+                    .background(Color.Black.copy(alpha = 0.5f))
                     .padding(8.dp)
             ) {
                 Text(

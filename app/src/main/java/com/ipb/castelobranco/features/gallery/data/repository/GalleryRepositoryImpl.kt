@@ -110,7 +110,15 @@ class GalleryRepositoryImpl @Inject constructor(
 
     // Métodos delegados (mantidos)
     override suspend fun getAllLocalPhotos(): List<File> = withContext(ioDispatcher) { storage.listAllPhotos() }
-    override suspend fun getLocalAlbums(): List<Album> = withContext(ioDispatcher) { storage.listAlbums().map { Album(it.first, it.second) } }
-    override suspend fun getThumbnailForAlbum(albumId: Long): File? = withContext(ioDispatcher) { storage.getThumbnailFile(albumId) }
-    override suspend fun getPhotoName(albumId: Long, photoId: Long): String? = withContext(ioDispatcher) { storage.getPhotoName(albumId, photoId) }
+    override suspend fun getLocalAlbums(): List<Album> = withContext(ioDispatcher) {
+        storage.listAlbums().map { Album(it.first, it.second) }
+    }
+
+    override suspend fun getThumbnailForAlbum(albumId: Long): File? = withContext(ioDispatcher) {
+        storage.getThumbnailFile(albumId)
+    }
+
+    override suspend fun getPhotoName(albumId: Long, photoId: Long): String? = withContext(ioDispatcher) {
+        storage.getPhotoName(albumId, photoId)
+    }
 }

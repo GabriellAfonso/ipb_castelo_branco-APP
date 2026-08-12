@@ -157,7 +157,8 @@ fun PhotoContent(
                                             val zoom = event.calculateZoom()
                                             val pan = event.calculatePan()
 
-                                            // Só atualizamos e consumimos se houver mudança real (zoom ou arrasto com zoom)
+                                            // Só atualizamos e consumimos se houver mudança real
+                                            // (zoom ou arrasto com zoom)
                                             if (zoom != 1f || (scale > 1f && pan != Offset.Zero)) {
                                                 scale = (scale * zoom).coerceIn(1f, 5f)
                                                 isZoomed = scale > 1f
@@ -278,7 +279,8 @@ fun saveImageToGallery(
         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
         put(
             MediaStore.Images.Media.RELATIVE_PATH,
-            "${android.os.Environment.DIRECTORY_PICTURES}/ipb_castelobranco" // ou: "${Environment.DIRECTORY_DCIM}/ipb_castelobranco"
+            // ou: "${Environment.DIRECTORY_DCIM}/ipb_castelobranco"
+            "${android.os.Environment.DIRECTORY_PICTURES}/ipb_castelobranco"
         )
         put(MediaStore.Images.Media.IS_PENDING, 1)
     }

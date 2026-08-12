@@ -191,7 +191,8 @@ fun AuthScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation =
+                    if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val img =
                         if (passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff

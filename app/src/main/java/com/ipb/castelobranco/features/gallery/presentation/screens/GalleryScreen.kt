@@ -27,7 +27,13 @@ fun GalleryScreen(
     isLoggedIn: Boolean,
     onNavigateToAuth: () -> Unit,
 ) {
-    GalleryContent(actions = nav, viewModel = viewModel, albums = albums, isLoggedIn = isLoggedIn, onNavigateToAuth = onNavigateToAuth)
+    GalleryContent(
+        actions = nav,
+        viewModel = viewModel,
+        albums = albums,
+        isLoggedIn = isLoggedIn,
+        onNavigateToAuth = onNavigateToAuth
+    )
 }
 
 @Composable

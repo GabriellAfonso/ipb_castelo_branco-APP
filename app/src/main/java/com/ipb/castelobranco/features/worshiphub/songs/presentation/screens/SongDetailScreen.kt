@@ -144,7 +144,8 @@ private fun SongDetailContent(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text  = "Tocada ${state.playCount} ${if (state.playCount == 1) "vez" else "vezes"} aos domingos",
+                        text  = "Tocada ${state.playCount} " +
+                            "${if (state.playCount == 1) "vez" else "vezes"} aos domingos",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )

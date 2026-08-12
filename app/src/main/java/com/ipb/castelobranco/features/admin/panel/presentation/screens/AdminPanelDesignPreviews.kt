@@ -136,13 +136,29 @@ private fun DesignA_AccentBorder() {
                                                 .background(item.color.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
                                                 .padding(horizontal = 5.dp, vertical = 1.dp)
                                         ) {
-                                            Text(item.badge, fontSize = 10.sp, color = item.color, fontWeight = FontWeight.Bold)
+                                            Text(
+                                                item.badge,
+                                                fontSize = 10.sp,
+                                                color = item.color,
+                                                fontWeight = FontWeight.Bold
+                                            )
                                         }
                                     }
                                 }
                                 Spacer(Modifier.height(8.dp))
-                                Text(item.label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFE2E8F0))
-                                Text(item.description, fontSize = 10.sp, color = Color(0xFF64748B), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(
+                                    item.label,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFFE2E8F0)
+                                )
+                                Text(
+                                    item.description,
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF64748B),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }
@@ -234,13 +250,29 @@ private fun DesignB_GradientGlass() {
                                             .background(item.color.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
                                             .padding(horizontal = 6.dp, vertical = 2.dp)
                                     ) {
-                                        Text(item.badge, fontSize = 11.sp, color = item.color, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            item.badge,
+                                            fontSize = 11.sp,
+                                            color = item.color,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     }
                                 }
                             }
                             Spacer(Modifier.height(10.dp))
-                            Text(item.label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFE2E8F0))
-                            Text(item.description, fontSize = 11.sp, color = Color(0xFF94A3B8), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                item.label,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFFE2E8F0)
+                            )
+                            Text(
+                                item.description,
+                                fontSize = 11.sp,
+                                color = Color(0xFF94A3B8),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
                 }
@@ -346,13 +378,29 @@ private fun DesignC_Merged() {
                                                 .background(item.color.copy(alpha = 0.2f), RoundedCornerShape(7.dp))
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
-                                            Text(item.badge, fontSize = 10.sp, color = item.color, fontWeight = FontWeight.Bold)
+                                            Text(
+                                                item.badge,
+                                                fontSize = 10.sp,
+                                                color = item.color,
+                                                fontWeight = FontWeight.Bold
+                                            )
                                         }
                                     }
                                 }
                                 Spacer(Modifier.height(10.dp))
-                                Text(item.label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFE2E8F0))
-                                Text(item.description, fontSize = 10.sp, color = Color(0xFF94A3B8), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(
+                                    item.label,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFFE2E8F0)
+                                )
+                                Text(
+                                    item.description,
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF94A3B8),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }

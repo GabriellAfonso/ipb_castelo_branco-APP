@@ -141,7 +141,8 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation =
+                    if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val img = if (passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                     Icon(
@@ -163,7 +164,8 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation =
+                    if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                 isError = registerErrors.passwordConfirm != null,
                 supportingText = {
                     registerErrors.passwordConfirm?.let { Text(it, color = MaterialTheme.colorScheme.error) }

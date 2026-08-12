@@ -61,7 +61,11 @@ fun parseRegisterError(message: String): RegisterErrors {
                     else -> errors.copy(general = (errors.general?.let { "$it\n$msg" } ?: msg))
                 }
             }
-            return if (errors == RegisterErrors()) RegisterErrors(general = apiError.detail.ifBlank { message }) else errors
+            return if (errors == RegisterErrors()) {
+                RegisterErrors(general = apiError.detail.ifBlank { message })
+            } else {
+                errors
+            }
         }
 
         // Fallback: legacy format

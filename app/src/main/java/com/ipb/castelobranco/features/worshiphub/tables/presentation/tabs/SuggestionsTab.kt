@@ -200,7 +200,8 @@ private fun RepertoireRow(
         else {
             val nq = q.normalize()
             availableSongs.filter {
-                it.title.normalize().contains(nq, ignoreCase = true) || it.artist.normalize().contains(nq, ignoreCase = true)
+                it.title.normalize().contains(nq, ignoreCase = true) ||
+                    it.artist.normalize().contains(nq, ignoreCase = true)
             }
         }
     }

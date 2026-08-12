@@ -59,7 +59,13 @@ class BibleDownloadWorker @AssistedInject constructor(
                         val raw = response.errorBody()?.string()
                         val parsed = parseApiError(raw)
                         val errorMessage = parsed?.detail?.ifBlank { null }
-                            ?: raw?.let { try { JSONObject(it).optString("detail", "").ifBlank { null } } catch (_: Exception) { null } }
+                            ?: raw?.let {
+                                try {
+                                    JSONObject(it).optString("detail", "").ifBlank { null }
+                                } catch (_: Exception) {
+                                    null
+                                }
+                            }
                             ?: raw?.ifBlank { null }
                             ?: "HTTP $code"
                         if (code == 401 || code == 403) {

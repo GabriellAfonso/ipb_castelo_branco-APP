@@ -53,7 +53,13 @@ fun NavGraphBuilder.galleryGraph(
             val coreViewModel: CoreViewModel = hiltViewModel(coreEntry)
             val albums by viewModel.albums.collectAsState()
             val isLoggedIn by coreViewModel.isLoggedIn.collectAsState()
-            GalleryScreen(nav = nav(), viewModel = viewModel, albums = albums, isLoggedIn = isLoggedIn, onNavigateToAuth = onNavigateToAuth)
+            GalleryScreen(
+                nav = nav(),
+                viewModel = viewModel,
+                albums = albums,
+                isLoggedIn = isLoggedIn,
+                onNavigateToAuth = onNavigateToAuth
+            )
         }
 
         composable(
