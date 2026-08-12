@@ -23,8 +23,13 @@ Ambas vivem em `hymnalGraph` (`HymnalNavGraph.kt`), com `HymnalViewModel` escopa
 ### 1.1 Lista
 
 Lista completa ordenada por número crescente (numérico quando possível, alfabético como
-desempate). Busca por número, título ou trecho de letra, *accent-insensitive* via `normalize()`,
-com `debounce` de 200 ms. Pull-to-refresh chama `refreshHymnal()`.
+desempate). Busca por número, título ou trecho de letra, *accent-insensitive* via `normalize()`.
+Pull-to-refresh chama `refreshHymnal()`.
+
+O `debounce` de 200 ms vale **somente para query não vazia**: a busca varre a letra inteira de
+todos os hinos e não deve rodar a cada tecla, mas a query vazia precisa passar direto. Um
+`debounce` uniforme atrasaria também a emissão inicial do `MutableStateFlow("")`, deixando a tela
+em `isLoading` por 200 ms toda vez que se entra no hinário, mesmo com os hinos já em memória.
 
 `HymnalUiState`: `hymns`, `filteredHymns`, `isLoading`, `error`.
 

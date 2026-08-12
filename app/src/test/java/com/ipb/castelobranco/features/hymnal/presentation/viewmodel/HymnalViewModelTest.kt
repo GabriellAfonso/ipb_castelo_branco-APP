@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -125,9 +126,45 @@ class HymnalViewModelTest {
         assertEquals("Erro ao carregar hinário", viewModel.uiState.value.error)
     }
 
+    @Test
+    fun `uiState emits data without waiting for the debounce when the query is empty`() = runTest {
+        every { observeHymnsUseCase() } returns flowOf(SnapshotState.Data(fakeHymns))
+        every { searchHymnsUseCase(fakeHymns, "") } returns fakeHymns
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
+
+        val job = launch { viewModel.uiState.collect { } }
+        runCurrent() // nao avanca o tempo virtual
+        job.cancel()
+
+        assertEquals(fakeHymns, viewModel.uiState.value.filteredHymns)
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
     // endregion
 
     // region onQueryChange
+
+    @Test
+    fun `onQueryChange debounces a non-empty query`() = runTest {
+        val hymnsFlow = MutableStateFlow<SnapshotState<List<Hymn>>>(SnapshotState.Data(fakeHymns))
+        every { observeHymnsUseCase() } returns hymnsFlow
+        every { searchHymnsUseCase(fakeHymns, "") } returns fakeHymns
+        every { searchHymnsUseCase(fakeHymns, "Quão") } returns listOf(fakeHymns[0])
+        viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
+        val job = launch { viewModel.uiState.collect { } }
+        runCurrent()
+
+        viewModel.onQueryChange("Quão")
+        advanceTimeBy(199)
+        runCurrent()
+        verify(exactly = 0) { searchHymnsUseCase(fakeHymns, "Quão") }
+
+        advanceTimeBy(2)
+        runCurrent()
+        verify { searchHymnsUseCase(fakeHymns, "Quão") }
+
+        job.cancel()
+    }
 
     @Test
     fun `onQueryChange updates query in uiState`() = runTest {

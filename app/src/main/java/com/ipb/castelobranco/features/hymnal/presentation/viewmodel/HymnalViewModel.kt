@@ -67,7 +67,10 @@ class HymnalViewModel @Inject constructor(
     @OptIn(FlowPreview::class)
     val uiState: StateFlow<HymnalUiState> = combine(
         observeHymnsUseCase(),
-        _query.debounce(200)
+        // Debounce apenas na digitacao: a busca varre a letra inteira de todos os hinos, mas a
+        // query vazia (abertura da tela e limpeza do campo) tem que passar direto, senao a lista
+        // so aparece 200 ms depois de entrar no hinario.
+        _query.debounce { query -> if (query.isEmpty()) 0L else SEARCH_DEBOUNCE_MS }
     ) { state, query ->
         when (state) {
             is SnapshotState.Loading -> HymnalUiState(isLoading = true, error = null)
@@ -93,4 +96,7 @@ class HymnalViewModel @Inject constructor(
         _query.value = query
     }
 
+    private companion object {
+        const val SEARCH_DEBOUNCE_MS = 200L
+    }
 }
