@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.util.normalize
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.SongListItem
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.SongsListUiState
 import com.ipb.castelobranco.features.worshiphub.tables.domain.repository.SongsRepository
@@ -48,7 +49,7 @@ class SongsListViewModel @Inject constructor(
     ) { songsState, query ->
         when (songsState) {
             is SnapshotState.Loading -> SongsListUiState(isLoading = true)
-            is SnapshotState.Error   -> SongsListUiState(error = songsState.throwable.message)
+            is SnapshotState.Error   -> SongsListUiState(error = songsState.error.toUserMessage())
             is SnapshotState.Data    -> {
                 val all = songsState.value.map { song ->
                     SongListItem(

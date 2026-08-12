@@ -5,7 +5,7 @@ import com.ipb.castelobranco.core.domain.snapshot.Logger
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotCache
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotFetcher
-import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.schedule.data.dto.MonthScheduleDto
 import com.ipb.castelobranco.features.schedule.data.mapper.toDomain
@@ -38,6 +38,6 @@ class ScheduleRepositoryImpl @Inject constructor(
 
     override suspend fun clearScheduleCache() {
         clearCache()
-        emitError(HttpPermissionException(401, "Faça login para ver a escala"))
+        emitError(AppError.Auth(code = 401, userMessage = "Faça login para ver a escala"))
     }
 }

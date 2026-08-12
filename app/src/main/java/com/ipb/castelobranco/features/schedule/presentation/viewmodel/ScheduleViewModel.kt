@@ -2,8 +2,9 @@ package com.ipb.castelobranco.features.schedule.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.schedule.domain.model.MonthSchedule
 import com.ipb.castelobranco.features.schedule.domain.repository.ScheduleRepository
 import com.ipb.castelobranco.features.schedule.presentation.components.ScheduleSectionUi
@@ -124,9 +125,9 @@ class ScheduleViewModel @Inject constructor(
             is SnapshotState.Loading -> ScheduleUiState.Loading
 
             is SnapshotState.Error -> {
-                val code = (snapshot.throwable as? HttpPermissionException)?.code
+                val code = (snapshot.error as? AppError.Auth)?.code
                 ScheduleUiState.Error(
-                    message = snapshot.throwable.message ?: "Erro desconhecido",
+                    message = snapshot.error.toUserMessage(),
                     httpCode = code,
                 )
             }

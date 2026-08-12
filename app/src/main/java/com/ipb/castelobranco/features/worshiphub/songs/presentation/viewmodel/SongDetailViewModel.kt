@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.worshiphub.songs.domain.usecase.GetSongDetailUseCase
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.ChordChartOption
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.SongDetailUiState
@@ -26,7 +27,7 @@ class SongDetailViewModel @Inject constructor(
         .map { state ->
             when (state) {
                 is SnapshotState.Loading -> SongDetailUiState(isLoading = true)
-                is SnapshotState.Error   -> SongDetailUiState(error = state.throwable.message)
+                is SnapshotState.Error   -> SongDetailUiState(error = state.error.toUserMessage())
                 is SnapshotState.Data    -> {
                     val detail = state.value
                     SongDetailUiState(

@@ -1,5 +1,7 @@
 package com.ipb.castelobranco.core.domain.snapshot
 
+import com.ipb.castelobranco.core.domain.error.AppError
+import com.ipb.castelobranco.core.domain.error.toAppError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -35,8 +37,8 @@ abstract class BaseSnapshotRepository<Dto, Domain>(
 
     fun getCurrentState(): SnapshotState<Domain> = _state.value
 
-    protected fun emitError(throwable: Throwable) {
-        _state.value = SnapshotState.Error(throwable)
+    protected fun emitError(error: AppError) {
+        _state.value = SnapshotState.Error(error)
     }
 
     suspend fun clearCache() {
@@ -59,18 +61,19 @@ abstract class BaseSnapshotRepository<Dto, Domain>(
                     RefreshResult.Updated
                 }
                 is NetworkResult.Failure -> {
-                    if (result.throwable is HttpPermissionException) {
+                    val error = result.throwable.toAppError()
+                    if (error is AppError.Auth) {
                         withContext(ioDispatcher) { cache.clear() }
-                        _state.value = SnapshotState.Error(result.throwable)
-                        RefreshResult.Error(result.throwable)
+                        _state.value = SnapshotState.Error(error)
+                        RefreshResult.Error(error)
                     } else {
                         val cached = withContext(ioDispatcher) { cache.load() }
                         if (cached != null) {
                             _state.value = SnapshotState.Data(mapper(cached))
                             RefreshResult.CacheUsed
                         } else {
-                            _state.value = SnapshotState.Error(result.throwable)
-                            RefreshResult.Error(result.throwable)
+                            _state.value = SnapshotState.Error(error)
+                            RefreshResult.Error(error)
                         }
                     }
                 }

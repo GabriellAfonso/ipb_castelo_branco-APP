@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.data.local.ThemePreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.hymnal.domain.usecase.ObserveHymnsUseCase
 import com.ipb.castelobranco.features.hymnal.domain.usecase.SearchHymnsUseCase
 import com.ipb.castelobranco.features.hymnal.presentation.screens.HymnalUiState
@@ -78,7 +79,7 @@ class HymnalViewModel @Inject constructor(
             )
             is SnapshotState.Error -> HymnalUiState(
                 isLoading = false,
-                error = state.throwable.message ?: "Erro ao carregar hinário"
+                error = state.error.toUserMessage()
             )
         }
     }.flowOn(defaultDispatcher)

@@ -3,7 +3,9 @@ package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.domain.error.toAppError
 import com.ipb.castelobranco.core.domain.util.normalize
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsCreateUiState
 import com.ipb.castelobranco.core.domain.model.Song
@@ -56,7 +58,9 @@ class LyricsCreateViewModel @Inject constructor(
             _uiState.update { it.copy(isSaving = true, saveError = null) }
             lyricsRepository.createLyrics(song.id, state.content)
                 .onSuccess { _uiState.update { it.copy(isSaving = false, savedSuccessfully = true) } }
-                .onFailure { e -> _uiState.update { it.copy(isSaving = false, saveError = e.message) } }
+                .onFailure { e ->
+                    _uiState.update { it.copy(isSaving = false, saveError = e.toAppError().toUserMessage()) }
+                }
         }
     }
 

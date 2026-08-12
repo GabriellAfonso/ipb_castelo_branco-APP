@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.admin.register.domain.usecase
 
+import com.ipb.castelobranco.core.domain.error.toAppError
 import com.ipb.castelobranco.features.admin.register.domain.mapper.dateIso
 import com.ipb.castelobranco.features.admin.register.domain.mapper.toSundayPlayItems
 import com.ipb.castelobranco.features.admin.register.domain.repository.WorshipRegisterRepository
@@ -37,7 +38,8 @@ class SubmitSundayPlaysUseCase @Inject constructor(
             Result.Success
         } catch (t: Throwable) {
             Timber.w(t, "Failed to submit sunday plays")
-            val msg = t.message?.trim().takeIf { !it.isNullOrBlank() } ?: "Erro inesperado ao enviar."
+            val msg = t.toAppError().userMessage?.trim().takeIf { !it.isNullOrBlank() }
+                ?: "Erro inesperado ao enviar."
             Result.Failure(msg)
         }
     }

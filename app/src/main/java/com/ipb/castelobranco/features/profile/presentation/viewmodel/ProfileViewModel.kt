@@ -3,7 +3,9 @@ package com.ipb.castelobranco.features.profile.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.ipb.castelobranco.core.domain.error.toAppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
 import com.ipb.castelobranco.features.profile.domain.usecase.UploadProfilePhotoUseCase
 import com.ipb.castelobranco.features.profile.presentation.state.ProfileUiState
@@ -62,7 +64,7 @@ class ProfileViewModel @Inject constructor(
 
                     is SnapshotState.Error -> {
                         _uiState.update {
-                            it.copy(error = state.throwable.message ?: "Erro ao carregar perfil")
+                            it.copy(error = state.error.toUserMessage())
                         }
                     }
                 }
@@ -93,7 +95,7 @@ class ProfileViewModel @Inject constructor(
                 }
             } catch (t: Throwable) {
                 Timber.w(t, "Failed to refresh profile from server")
-                _uiState.update { it.copy(error = t.message ?: "Falha ao atualizar perfil") }
+                _uiState.update { it.copy(error = t.toAppError().toUserMessage()) }
                 refreshLocalPhotoPathAndBump()
             }
         }

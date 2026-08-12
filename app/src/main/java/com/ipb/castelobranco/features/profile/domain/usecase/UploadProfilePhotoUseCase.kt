@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.profile.domain.usecase
 
+import com.ipb.castelobranco.core.domain.error.toAppError
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.domain.repository.ProfileRepository
@@ -36,7 +37,7 @@ class UploadProfilePhotoUseCase @Inject constructor(
             Result.Success
         } catch (t: Throwable) {
             Timber.w(t, "Failed to upload profile photo")
-            Result.Failure(t.message ?: "Falha ao enviar imagem")
+            Result.Failure(t.toAppError().userMessage ?: "Falha ao enviar imagem")
         }
     }
 }

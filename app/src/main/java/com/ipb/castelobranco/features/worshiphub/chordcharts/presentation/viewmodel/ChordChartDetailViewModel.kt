@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.data.local.ThemePreferences
+import com.ipb.castelobranco.core.domain.error.toAppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.usecase.GetChordChartsUseCase
@@ -58,7 +60,7 @@ class ChordChartDetailViewModel @Inject constructor(
         when (chartsState) {
             is SnapshotState.Loading -> ChordChartDetailUiState(isLoading = true, isAdmin = isAdmin)
             is SnapshotState.Error   -> ChordChartDetailUiState(
-                error = chartsState.throwable.message, isAdmin = isAdmin,
+                error = chartsState.error.toUserMessage(), isAdmin = isAdmin,
             )
             is SnapshotState.Data    -> {
                 val chart = chartsState.value.find { it.id == chordChartId }
@@ -116,7 +118,9 @@ class ChordChartDetailViewModel @Inject constructor(
             _editState.update { it.copy(isSaving = true, saveError = null) }
             chordChartRepository.updateContent(chordChartId, _editState.value.editContent)
                 .onSuccess { _editState.update { EditState() } }
-                .onFailure { e -> _editState.update { it.copy(isSaving = false, saveError = e.message) } }
+                .onFailure { e ->
+                    _editState.update { it.copy(isSaving = false, saveError = e.toAppError().toUserMessage()) }
+                }
         }
     }
 }

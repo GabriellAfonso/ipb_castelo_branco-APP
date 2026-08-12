@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.worshiphub.songs.domain.usecase
 
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordChart
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
@@ -42,12 +43,14 @@ class GetSongDetailUseCase @Inject constructor(
             val error = listOf(songsState, sundaysState, chartsState, lyricsState)
                 .filterIsInstance<SnapshotState.Error>()
                 .firstOrNull()
-            if (error != null) return@combine SnapshotState.Error(error.throwable)
+            if (error != null) return@combine SnapshotState.Error(error.error)
             return@combine SnapshotState.Loading
         }
 
         val song = songs.firstOrNull { it.id == songId }
-            ?: return@combine SnapshotState.Error(IllegalArgumentException("Música não encontrada"))
+            ?: return@combine SnapshotState.Error(
+                AppError.Unknown(message = "Song $songId not found", userMessage = "Música não encontrada")
+            )
 
         val sundayItems = sundays.flatMap { set ->
             set.songs.filter { it.songId == songId }.map { set.date to it }

@@ -2,6 +2,8 @@ package com.ipb.castelobranco.features.admin.schedule.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ipb.castelobranco.core.domain.error.toAppError
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleItem
 import com.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
@@ -144,7 +146,7 @@ class AdminScheduleViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     Timber.e(error, "Failed to save schedule")
-                    val message = error.message ?: "Falha ao salvar escala."
+                    val message = error.toAppError().toUserMessage()
                     _uiState.update {
                         it.copy(
                             isSaving = false,

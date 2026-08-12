@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.util.normalize
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.usecase.GetChordChartsUseCase
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartListItem
@@ -70,7 +71,7 @@ class ChordChartsViewModel @Inject constructor(
 
         when (chartsState) {
             is SnapshotState.Loading -> ChordChartsUiState(isLoading = true, isAdmin = isAdmin)
-            is SnapshotState.Error   -> ChordChartsUiState(error = chartsState.throwable.message, isAdmin = isAdmin)
+            is SnapshotState.Error   -> ChordChartsUiState(error = chartsState.error.toUserMessage(), isAdmin = isAdmin)
             is SnapshotState.Data    -> {
                 val pinOrder = pinnedSongIds.withIndex().associate { (index, songId) -> songId to index }
                 val sorted = chartsState.value.map { chart ->

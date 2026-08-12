@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.data.local.ThemePreferences
+import com.ipb.castelobranco.core.domain.error.toAppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
@@ -58,7 +60,7 @@ class LyricsDetailViewModel @Inject constructor(
         when (lyricsState) {
             is SnapshotState.Loading -> LyricsDetailUiState(isLoading = true, isAdmin = isAdmin)
             is SnapshotState.Error   -> LyricsDetailUiState(
-                error = lyricsState.throwable.message, isAdmin = isAdmin,
+                error = lyricsState.error.toUserMessage(), isAdmin = isAdmin,
             )
             is SnapshotState.Data    -> {
                 val lyrics = lyricsState.value.find { it.id == lyricsId }
@@ -115,7 +117,9 @@ class LyricsDetailViewModel @Inject constructor(
             _editState.update { it.copy(isSaving = true, saveError = null) }
             lyricsRepository.updateContent(lyricsId, _editState.value.editContent)
                 .onSuccess { _editState.update { EditState() } }
-                .onFailure { e -> _editState.update { it.copy(isSaving = false, saveError = e.message) } }
+                .onFailure { e ->
+                    _editState.update { it.copy(isSaving = false, saveError = e.toAppError().toUserMessage()) }
+                }
         }
     }
 }

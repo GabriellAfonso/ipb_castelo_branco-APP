@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.worshiphub.tables.data.repository
 
+import com.ipb.castelobranco.core.domain.error.toAppError
 import com.ipb.castelobranco.core.domain.snapshot.NetworkResult
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotCache
@@ -74,9 +75,10 @@ class SongsRepositoryImpl @Inject constructor(
             }
             is NetworkResult.NotModified -> RefreshResult.NotModified
             is NetworkResult.Failure -> {
-                _suggestedSongsState.value = SnapshotState.Error(result.throwable)
+                val error = result.throwable.toAppError()
+                _suggestedSongsState.value = SnapshotState.Error(error)
                 if (suggestedSongsCache.load() != null) RefreshResult.CacheUsed
-                else RefreshResult.Error(result.throwable)
+                else RefreshResult.Error(error)
             }
         }
     }

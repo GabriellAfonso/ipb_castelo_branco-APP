@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.util.normalize
+import com.ipb.castelobranco.core.presentation.error.toUserMessage
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.usecase.GetLyricsUseCase
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsListItem
@@ -70,7 +71,7 @@ class LyricsViewModel @Inject constructor(
 
         when (lyricsState) {
             is SnapshotState.Loading -> LyricsUiState(isLoading = true, isAdmin = isAdmin)
-            is SnapshotState.Error   -> LyricsUiState(error = lyricsState.throwable.message, isAdmin = isAdmin)
+            is SnapshotState.Error   -> LyricsUiState(error = lyricsState.error.toUserMessage(), isAdmin = isAdmin)
             is SnapshotState.Data    -> {
                 val pinOrder = pinnedSongIds.withIndex().associate { (index, songId) -> songId to index }
                 val sorted = lyricsState.value.map { lyrics ->

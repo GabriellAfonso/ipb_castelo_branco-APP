@@ -7,19 +7,32 @@ import java.io.IOException
  * to one of these subtypes so callers can react to specific failure categories without
  * depending on HTTP or I/O implementation details.
  */
-sealed class AppError(message: String?, cause: Throwable?) : Exception(message, cause) {
+sealed class AppError(
+    message: String?,
+    cause: Throwable?,
+    /**
+     * Text written by the app to be shown to the user. Null means "use the generic text for this
+     * category". NEVER fill this with server-provided content — [message] exists for that, and it
+     * is technical: it belongs in logs, not on screen. The only exception is the `detail` field of
+     * a structured API error (one carrying `error_code`), which the API owns as user-facing copy.
+     */
+    val userMessage: String? = null,
+) : Exception(message, cause) {
 
     /** Connectivity failure: no network, DNS error, socket timeout, etc. */
     class Network(
         message: String? = "Erro de rede",
         cause: Throwable? = null,
-    ) : AppError(message, cause)
+        userMessage: String? = null,
+    ) : AppError(message, cause, userMessage)
 
     /** Authentication / authorisation failure (HTTP 401 or 403). */
     class Auth(
+        val code: Int = 401,
         message: String? = "Falha de autenticação",
         cause: Throwable? = null,
-    ) : AppError(message, cause)
+        userMessage: String? = null,
+    ) : AppError(message, cause, userMessage)
 
     /** The server responded with an error status code (4xx / 5xx, except 401/403). */
     class Server(
@@ -27,13 +40,15 @@ sealed class AppError(message: String?, cause: Throwable?) : Exception(message, 
         message: String? = "Erro no servidor ($code)",
         cause: Throwable? = null,
         val errorCode: String? = null,
-    ) : AppError(message, cause)
+        userMessage: String? = null,
+    ) : AppError(message, cause, userMessage)
 
     /** An unexpected error that does not fit the categories above. */
     class Unknown(
         message: String? = "Erro desconhecido",
         cause: Throwable? = null,
-    ) : AppError(message, cause)
+        userMessage: String? = null,
+    ) : AppError(message, cause, userMessage)
 }
 
 /**
