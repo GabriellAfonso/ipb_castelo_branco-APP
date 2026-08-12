@@ -47,9 +47,10 @@ import androidx.compose.ui.unit.dp
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 
-private val Orange = Color(0xFFF2A300)
-private val Green = Color(0xFF0F6B5C)
+private val Orange = BrandColors.Orange
+private val Green = BrandColors.Green
 
 /**
  * List screen shared by the chord charts and lyrics sub-features. Both render the same layout;

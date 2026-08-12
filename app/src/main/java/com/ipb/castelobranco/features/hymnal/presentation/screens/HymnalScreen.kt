@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
@@ -163,7 +164,7 @@ private fun SearchCard(
     onSearchClick: () -> Unit,
 ) {
     val cardBg = MaterialTheme.colorScheme.surfaceContainer
-    val green = Color(0xFF0F6B5C)
+    val green = BrandColors.Green
 
     Card(
         modifier = Modifier
@@ -226,8 +227,8 @@ private fun HymnRow(
     item: Hymn,
     onClick: () -> Unit
 ) {
-    val green = Color(0xFF0F6B5C)
-    val orange = Color(0xFFF2A300)
+    val green = BrandColors.Green
+    val orange = BrandColors.Orange
 
     val preview = remember(item) {
         item.lyrics.firstOrNull()?.text

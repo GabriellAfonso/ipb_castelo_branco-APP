@@ -20,11 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 
-private val Green = Color(0xFF0F6B5C)
+private val Green = BrandColors.Green
 
 @Composable
 fun DateFieldWithPicker(

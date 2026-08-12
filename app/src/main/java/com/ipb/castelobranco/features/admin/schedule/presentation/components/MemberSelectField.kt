@@ -38,9 +38,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 
-private val Green = Color(0xFF0F6B5C)
+private val Green = BrandColors.Green
 
 @Composable
 fun MemberSelectField(

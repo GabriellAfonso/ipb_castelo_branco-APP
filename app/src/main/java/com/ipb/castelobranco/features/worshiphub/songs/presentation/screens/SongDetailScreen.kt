@@ -45,12 +45,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.ChordChartOption
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.SongDetailUiState
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.viewmodel.SongDetailViewModel
 
-private val Green = Color(0xFF0F6B5C)
-private val YouTubeRed = Color(0xFFFF0000)
+private val Green = BrandColors.Green
+private val YouTubeRed = BrandColors.YouTubeRed
 
 @Composable
 fun SongDetailScreen(

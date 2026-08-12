@@ -51,14 +51,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.ChordBlock
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.ChordLine
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.parser.LineToken
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartDetailUiState
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewmodel.ChordChartDetailViewModel
 
-private val ChordColor = Color(0xFFF2A300)
-private val SectionTitleColor = Color(0xFF0F6B5C)
+private val ChordColor = BrandColors.Orange
+private val SectionTitleColor = BrandColors.Green
 
 @Composable
 fun ChordChartDetailScreen(

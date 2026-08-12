@@ -46,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.admin.panel.presentation.navigation.AdminNav
 import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.ipb.castelobranco.features.admin.schedule.presentation.components.ScheduleEditorTable
@@ -55,8 +56,8 @@ import com.ipb.castelobranco.features.admin.schedule.presentation.state.SaveResu
 import com.ipb.castelobranco.features.admin.schedule.presentation.viewmodel.AdminScheduleViewModel
 import com.ipb.castelobranco.features.schedule.domain.formatter.MonthScheduleWhatsappFormatter
 
-private val Green = Color(0xFF0F6B5C)
-private val Orange = Color(0xFFF2A300)
+private val Green = BrandColors.Green
+private val Orange = BrandColors.Orange
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 

@@ -7,14 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.state.ChordChartListItem
 import com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewmodel.ChordChartsViewModel
 import com.ipb.castelobranco.features.worshiphub.shared.presentation.components.SongContentChip
 import com.ipb.castelobranco.features.worshiphub.shared.presentation.components.SongContentListScreen
 import com.ipb.castelobranco.features.worshiphub.shared.presentation.components.SongContentRow
 
-private val Green = Color(0xFF0F6B5C)
-private val DarkGreen = Color(0xFF045A48)
+private val Green = BrandColors.Green
+private val DarkGreen = BrandColors.DarkGreen
 
 @Composable
 fun ChordChartsScreen(

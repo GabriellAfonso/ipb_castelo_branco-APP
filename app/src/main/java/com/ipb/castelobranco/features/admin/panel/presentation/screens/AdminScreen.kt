@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.admin.panel.presentation.navigation.AdminNav
 
 data class AdminAction(
@@ -44,9 +45,9 @@ fun AdminScreen(
 fun AdminPanelContent(
     nav: AdminNav
 ) {
-    val green = Color(0xFF0F6B5C)
-    val orange = Color(0xFFF2A300)
-    val teal = Color(0xFF1A9E8A)
+    val green = BrandColors.Green
+    val orange = BrandColors.Orange
+    val teal = BrandColors.Teal
 
     val actions = listOf(
         AdminAction(

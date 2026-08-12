@@ -15,10 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.admin.register.presentation.state.MusicSongFormState
 import com.ipb.castelobranco.features.admin.register.presentation.screens.MusicSongRegistrationActions
 
-private val Green = Color(0xFF0F6B5C)
+private val Green = BrandColors.Green
 
 @Composable
 fun MusicSongRegistrationForm(

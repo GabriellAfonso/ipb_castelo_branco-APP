@@ -52,8 +52,9 @@ import com.ipb.castelobranco.core.domain.constants.NATURAL_TONES
 import com.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
 import com.ipb.castelobranco.features.admin.register.presentation.util.SongLabelFormatter
 import com.ipb.castelobranco.core.domain.model.Song
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 
-private val Green = Color(0xFF0F6B5C)
+private val Green = BrandColors.Green
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

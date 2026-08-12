@@ -45,12 +45,13 @@ import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.core.presentation.modifier.tapToPaginate
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.parser.LyricsStanza
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsDetailUiState
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel.LyricsDetailViewModel
 
-private val DotColor   = Color(0xFF1565C0)
-private val TitleColor = Color(0xFFF2A300)
+private val DotColor   = BrandColors.Blue
+private val TitleColor = BrandColors.Orange
 
 @Composable
 fun LyricsDetailScreen(

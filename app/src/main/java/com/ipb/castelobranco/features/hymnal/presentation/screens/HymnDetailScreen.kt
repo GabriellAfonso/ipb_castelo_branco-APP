@@ -50,6 +50,7 @@ import com.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.ipb.castelobranco.features.hymnal.domain.model.HymnLyric
 import com.ipb.castelobranco.features.hymnal.domain.model.HymnLyricType
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnViewTrackingViewModel
 import com.ipb.castelobranco.features.hymnal.presentation.viewmodel.HymnalViewModel
 import kotlin.math.roundToInt
@@ -91,7 +92,7 @@ fun HymnDetailContent(
     onFontSizeChange: (Float) -> Unit,
     onBack: () -> Unit
 ) {
-    val headerGreen = Color(0xFF0F6B5C)
+    val headerGreen = BrandColors.Green
 
     val minFont = 16f
     val maxFont = 32f
@@ -218,8 +219,8 @@ private fun LyricCard(
 ) {
     val container = MaterialTheme.colorScheme.surfaceBright
     val stripe = when (lyric.type) {
-        HymnLyricType.VERSE -> Color(0xFFF2A300)
-        HymnLyricType.CHORUS -> Color(0xFF0F6B5C)
+        HymnLyricType.VERSE -> BrandColors.Orange
+        HymnLyricType.CHORUS -> BrandColors.Green
         HymnLyricType.OTHER -> Color(0xFF9E9E9E)
     }
 

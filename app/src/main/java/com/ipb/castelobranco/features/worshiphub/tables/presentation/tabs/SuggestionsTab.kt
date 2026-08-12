@@ -63,12 +63,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ipb.castelobranco.core.domain.constants.NATURAL_TONES
 import com.ipb.castelobranco.core.domain.model.Song
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel.RepertoireRowState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val Green = Color(0xFF0F6B5C)
+private val Green = BrandColors.Green
 
 @Composable
 fun RepertoireTab(

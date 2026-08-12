@@ -4,14 +4,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lyrics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.state.LyricsListItem
 import com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel.LyricsViewModel
 import com.ipb.castelobranco.features.worshiphub.shared.presentation.components.SongContentListScreen
 import com.ipb.castelobranco.features.worshiphub.shared.presentation.components.SongContentRow
 
-private val Accent = Color(0xFF1565C0)
+private val Accent = BrandColors.Blue
 
 @Composable
 fun LyricsScreen(

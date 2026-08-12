@@ -39,12 +39,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ipb.castelobranco.R
 import com.ipb.castelobranco.core.presentation.base.BaseScreen
 import com.ipb.castelobranco.core.presentation.components.ElasticPullToRefresh
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.SongListItem
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.state.SongsListUiState
 import com.ipb.castelobranco.features.worshiphub.songs.presentation.viewmodel.SongsListViewModel
 
-private val Green = Color(0xFF0F6B5C)
-private val DarkGreen = Color(0xFF045A48)
+private val Green = BrandColors.Green
+private val DarkGreen = BrandColors.DarkGreen
 
 @Composable
 fun SongsListScreen(

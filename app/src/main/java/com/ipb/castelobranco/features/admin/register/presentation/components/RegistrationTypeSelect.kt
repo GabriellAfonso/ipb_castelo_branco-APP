@@ -37,10 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ipb.castelobranco.core.presentation.theme.BrandColors
 import com.ipb.castelobranco.features.admin.register.presentation.state.RegistrationType
 
-private val Green = Color(0xFF0F6B5C)
-private val Orange = Color(0xFFF2A300)
+private val Green = BrandColors.Green
+private val Orange = BrandColors.Orange
 
 private data class RegistrationTypeOption(
     val type: RegistrationType,
