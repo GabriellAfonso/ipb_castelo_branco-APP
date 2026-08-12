@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,6 +23,7 @@ import com.ipb.castelobranco.features.bible.presentation.navigation.bibleGraph
 import com.ipb.castelobranco.features.gallery.presentation.navigation.galleryGraph
 import com.ipb.castelobranco.features.hymnal.presentation.navigation.hymnalGraph
 import com.ipb.castelobranco.core.presentation.screens.CoreView
+import com.ipb.castelobranco.core.presentation.viewmodel.CoreViewModel
 import com.ipb.castelobranco.features.profile.presentation.screens.ProfileScreen
 import com.ipb.castelobranco.features.schedule.presentation.screens.MonthScheduleScreen
 import com.ipb.castelobranco.features.settings.presentation.screens.LogViewerScreen
@@ -32,6 +34,11 @@ import com.ipb.castelobranco.features.worshiphub.hub.presentation.navigation.wor
 @Composable
 fun AppNavHost(navController: NavHostController) {
     val context = LocalContext.current
+
+    // Escopo da Activity (fora do NavHost): o boot roda mesmo quando o processo e recriado
+    // direto numa rota interna, onde a CoreView nunca chega a ser composta.
+    val coreViewModel: CoreViewModel = hiltViewModel()
+    LaunchedEffect(Unit) { coreViewModel.initialize() }
 
     val appNavigator = remember(navController) {
         AppNavigator(
@@ -72,6 +79,7 @@ fun AppNavHost(navController: NavHostController) {
                     onNavigateToSettings   = { navController.navigate(AppRoutes.SETTINGS) },
                     onNavigateToAdmin      = { navController.navigate(AppRoutes.ADMIN_GRAPH) },
                     onLogoutSuccess        = {},
+                    viewModel              = coreViewModel,
                 )
             }
 

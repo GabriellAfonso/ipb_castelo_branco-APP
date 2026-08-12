@@ -220,6 +220,18 @@ Orquestra inicializacao do app em 2 fases:
 1. `preloadCachesFromDisk()` — roda todos Preloadables em paralelo (SupervisorScope)
 2. `refreshDataFromNetwork()` — roda todos Refreshables em paralelo (SupervisorScope)
 
+#### Onde o boot e disparado
+
+`CoreViewModel.initialize()` e chamado no `AppNavHost`, **fora** do `NavHost`, com o ViewModel no
+escopo da Activity. Isso e obrigatorio: o hot state de cada `BaseSnapshotRepository` nasce em
+`Loading` a cada processo novo, e o Android pode recriar o processo restaurando a back stack
+direto numa rota interna (ex.: lista de cifras). Nesse cenario a `CoreView` nunca e composta —
+se o trigger morasse nela, nenhum `preload()` rodaria e todas as listas ficariam vazias ate o
+usuario voltar para a home.
+
+`initialize()` e idempotente (guarda `initialized`), entao a chamada redundante da `CoreView` e
+inofensiva.
+
 ### 4.5 SnapshotRepository (interface)
 
 ```kotlin
@@ -369,7 +381,8 @@ Orquestra inicializacao e estado global.
 3. Cascata: preload disco -> refresh rede -> auto-download gallery/bible -> fetch profile
 
 **Metodos:**
-- `initialize()` — setup de observables e trigger startup
+- `initialize()` — setup de observables e trigger startup. Idempotente; chamado pelo `AppNavHost`
+  (escopo da Activity) para garantir o boot em qualquer rota restaurada — ver secao 4.4.
 - `logout()` — limpa todos os caches + tokens
 
 ### 6.3 CoreScreen (Tela Principal)

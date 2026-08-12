@@ -56,7 +56,16 @@ class CoreViewModel @Inject constructor(
     private val _birthdays = MutableStateFlow<List<Birthday>>(emptyList())
     val birthdays: StateFlow<List<Birthday>> = _birthdays.asStateFlow()
 
+    private var initialized = false
+
+    /**
+     * Idempotente: chamada tanto pelo AppNavHost (garante o boot mesmo quando o processo e
+     * recriado direto numa rota interna) quanto pela CoreView.
+     */
     fun initialize() {
+        if (initialized) return
+        initialized = true
+
         // Observa estado de login
         viewModelScope.launch {
             authSession.isLoggedInFlow.collect { logged ->

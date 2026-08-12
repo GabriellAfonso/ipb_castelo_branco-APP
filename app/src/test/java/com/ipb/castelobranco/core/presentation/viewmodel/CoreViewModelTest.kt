@@ -150,6 +150,15 @@ class CoreViewModelTest {
     }
 
     @Test
+    fun `initialize is idempotent and preloads only once`() = runTest {
+        viewModel.initialize()
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { preloadDataUseCase() }
+    }
+
+    @Test
     fun `initialize calls galleryAutoDownload triggerIfNeeded`() = runTest {
         viewModel.initialize()
         advanceUntilIdle()
