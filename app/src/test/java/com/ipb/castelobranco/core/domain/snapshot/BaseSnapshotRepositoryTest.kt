@@ -7,7 +7,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
+import com.ipb.castelobranco.core.domain.error.AppError
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BaseSnapshotRepositoryTest {
@@ -221,17 +221,17 @@ class BaseSnapshotRepositoryTest {
         val result = repo.refresh()
 
         assertTrue(result is RefreshResult.Error)
-        assertEquals(error, (result as RefreshResult.Error).throwable)
+        assertEquals(error, (result as RefreshResult.Error).throwable.cause)
     }
 
     // endregion
 
-    // region refresh — HttpPermissionException
+    // region refresh — AppError.Auth
 
     @Test
-    fun `refresh on HttpPermissionException ignores cache and emits Error state`() = runTest {
+    fun `refresh on AppError Auth ignores cache and emits Error state`() = runTest {
         val cache = FakeCache(stored = "fallback")
-        val exception = HttpPermissionException(401, "Não autorizado")
+        val exception = AppError.Auth(code = 401, message = "Não autorizado")
         val repo = buildRepository(cache, FakeFetcher(NetworkResult.Failure(exception)))
 
         val result = repo.refresh()
@@ -242,9 +242,9 @@ class BaseSnapshotRepositoryTest {
     }
 
     @Test
-    fun `refresh on HttpPermissionException clears cache even when it has data`() = runTest {
+    fun `refresh on AppError Auth clears cache even when it has data`() = runTest {
         val cache = FakeCache(stored = "fallback")
-        val exception = HttpPermissionException(403, "Proibido")
+        val exception = AppError.Auth(code = 403, message = "Proibido")
         val repo = buildRepository(cache, FakeFetcher(NetworkResult.Failure(exception)))
 
         repo.refresh()
@@ -253,16 +253,16 @@ class BaseSnapshotRepositoryTest {
     }
 
     @Test
-    fun `refresh on HttpPermissionException preserves exception in Error state`() = runTest {
+    fun `refresh on AppError Auth preserves exception in Error state`() = runTest {
         val cache = FakeCache(stored = null)
-        val exception = HttpPermissionException(401, "Token inválido")
+        val exception = AppError.Auth(code = 401, message = "Token inválido")
         val repo = buildRepository(cache, FakeFetcher(NetworkResult.Failure(exception)))
 
         repo.refresh()
 
         val state = repo.getCurrentState()
         assertTrue(state is SnapshotState.Error)
-        assertEquals(exception, (state as SnapshotState.Error).throwable)
+        assertEquals(exception, (state as SnapshotState.Error).error)
     }
 
     // endregion

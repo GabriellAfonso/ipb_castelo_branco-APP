@@ -187,7 +187,7 @@ class SongsRepositoryImplTest {
         val result = repository.refreshSuggestedSongs()
 
         assertTrue(result is RefreshResult.Error)
-        assertEquals(error, (result as RefreshResult.Error).throwable)
+        assertEquals(error, (result as RefreshResult.Error).throwable.cause)
     }
 
     @Test

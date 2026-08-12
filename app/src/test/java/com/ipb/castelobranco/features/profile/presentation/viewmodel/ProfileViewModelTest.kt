@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.profile.presentation.viewmodel
 
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.domain.model.MeProfile
 import com.ipb.castelobranco.features.profile.domain.usecase.FetchProfileUseCase
@@ -142,18 +143,19 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `refreshFromServer exception sets error message from throwable`() = runTest {
+    fun `refreshFromServer exception sets generic error message`() = runTest {
         coEvery { fetchProfileUseCase.refresh() } throws Exception("timeout")
 
         viewModel.refreshFromServer()
         advanceUntilIdle()
 
-        assertEquals("timeout", viewModel.uiState.value.error)
+        assertEquals("Algo deu errado. Tente novamente.", viewModel.uiState.value.error)
     }
 
     @Test
-    fun `refreshFromServer exception without message sets default error`() = runTest {
-        coEvery { fetchProfileUseCase.refresh() } throws Exception()
+    fun `refreshFromServer AppError with userMessage sets that message`() = runTest {
+        coEvery { fetchProfileUseCase.refresh() } throws
+            AppError.Server(code = 500, message = "raw body", userMessage = "Falha ao atualizar perfil")
 
         viewModel.refreshFromServer()
         advanceUntilIdle()
@@ -304,9 +306,9 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `observeProfile SnapshotState Error sets error message`() = runTest {
+    fun `observeProfile SnapshotState Error sets generic error message`() = runTest {
         every { fetchProfileUseCase.observe() } returns flowOf(
-            SnapshotState.Error(Exception("snapshot error"))
+            SnapshotState.Error(AppError.Server(code = 500, message = "snapshot error"))
         )
 
         // refreshFromServer always clears error before refreshing, so the Error state from
@@ -316,15 +318,17 @@ class ProfileViewModelTest {
             viewModel.initialize()
             awaitItem() // after synchronous refreshLocalPhotoPathAndBump (localPhotoVersion bumped)
             val errorState = awaitItem() // after observeProfile processes SnapshotState.Error
-            assertEquals("snapshot error", errorState.error)
+            assertEquals("Não foi possível completar a operação. Tente novamente mais tarde.", errorState.error)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `observeProfile SnapshotState Error without message uses default`() = runTest {
+    fun `observeProfile SnapshotState Error uses the authored userMessage when present`() = runTest {
         every { fetchProfileUseCase.observe() } returns flowOf(
-            SnapshotState.Error(Exception())
+            SnapshotState.Error(
+                AppError.Server(code = 500, message = "raw body", userMessage = "Erro ao carregar perfil")
+            )
         )
 
         viewModel.uiState.test {

@@ -2,6 +2,7 @@ package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
 
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.model.Lyrics
@@ -101,12 +102,16 @@ class LyricsViewModelTest {
 
     @Test
     fun `uiState sets error when observe emits Error`() = runTest {
-        every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Error(RuntimeException("fetch failed")))
+        every { getLyricsUseCase.observe() } returns
+            flowOf(SnapshotState.Error(AppError.Network(message = "fetch failed")))
         viewModel = LyricsViewModel(getLyricsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
-        assertEquals("fetch failed", viewModel.uiState.value.error)
+        assertEquals(
+            "Sem conexão com a internet. Verifique sua rede e tente novamente.",
+            viewModel.uiState.value.error,
+        )
     }
 
     @Test

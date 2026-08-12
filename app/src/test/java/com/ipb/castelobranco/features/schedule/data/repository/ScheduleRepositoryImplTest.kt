@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.features.schedule.data.repository
 
-import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.Logger
 import com.ipb.castelobranco.core.domain.snapshot.NetworkResult
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
@@ -118,9 +118,10 @@ class ScheduleRepositoryImplTest {
 
         val state = repository.getCurrentSnapshot()
         assertTrue(state is SnapshotState.Error)
-        val throwable = (state as SnapshotState.Error).throwable
-        assertTrue(throwable is HttpPermissionException)
-        assertEquals(401, (throwable as HttpPermissionException).code)
+        val error = (state as SnapshotState.Error).error
+        assertTrue(error is AppError.Auth)
+        assertEquals(401, (error as AppError.Auth).code)
+        assertEquals("Faça login para ver a escala", error.userMessage)
         coVerify { cache.clear() }
     }
 

@@ -3,6 +3,7 @@ package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import com.ipb.castelobranco.core.data.local.SongScrollMode
 import com.ipb.castelobranco.core.data.local.ThemePreferences
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.profile.domain.model.MeProfile
@@ -137,14 +138,15 @@ class LyricsDetailViewModelTest {
 
     @Test
     fun `Error state maps error message`() = runTest {
-        every { getLyricsUseCase.observe() } returns flowOf(SnapshotState.Error(RuntimeException("fail")))
+        every { getLyricsUseCase.observe() } returns
+            flowOf(SnapshotState.Error(AppError.Server(code = 500, message = "fail")))
         every { songsRepository.observeAllSongs() } returns flowOf(SnapshotState.Data(fakeSongs))
 
         val vm = createViewModel()
         val collector = testScope.launch { vm.uiState.collect {} }
         advanceUntilIdle()
 
-        assertEquals("fail", vm.uiState.value.error)
+        assertEquals("Não foi possível completar a operação. Tente novamente mais tarde.", vm.uiState.value.error)
 
         collector.cancel()
     }

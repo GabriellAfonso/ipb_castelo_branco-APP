@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.worshiphub.songs.presentation.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordChart
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.model.Lyrics
@@ -99,12 +100,16 @@ class SongDetailViewModelTest {
 
     @Test
     fun `uiState sets error when use case emits Error`() = runTest {
-        every { getSongDetailUseCase.observe(1) } returns flowOf(SnapshotState.Error(RuntimeException("fail")))
+        every { getSongDetailUseCase.observe(1) } returns
+            flowOf(SnapshotState.Error(AppError.Server(code = 500, message = "fail")))
         viewModel = createViewModel()
 
         subscribeAndAdvance(viewModel)
 
-        assertEquals("fail", viewModel.uiState.value.error)
+        assertEquals(
+            "Não foi possível completar a operação. Tente novamente mais tarde.",
+            viewModel.uiState.value.error,
+        )
     }
 
     @Test

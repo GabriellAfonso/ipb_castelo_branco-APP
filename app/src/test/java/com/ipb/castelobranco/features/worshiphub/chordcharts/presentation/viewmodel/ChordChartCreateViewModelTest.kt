@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewmodel
 
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.repository.ChordChartRepository
 import com.ipb.castelobranco.core.domain.model.Song
@@ -157,7 +158,14 @@ class ChordChartCreateViewModelTest {
     @Test
     fun `onSave failure sets saveError`() = runTest {
         coEvery { chordChartRepository.createChordChart(any(), any(), any(), any()) } returns
-            Result.failure(RuntimeException("server error"))
+            Result.failure(
+                AppError.Server(
+                    code = 400,
+                    message = """{"error_code":"chart_exists","detail":"Já existe cifra para esta música"}""",
+                    errorCode = "chart_exists",
+                    userMessage = "Já existe cifra para esta música",
+                )
+            )
 
         val vm = createViewModel()
         advanceUntilIdle()
@@ -171,7 +179,7 @@ class ChordChartCreateViewModelTest {
 
         assertFalse(vm.uiState.value.savedSuccessfully)
         assertNotNull(vm.uiState.value.saveError)
-        assertEquals("server error", vm.uiState.value.saveError)
+        assertEquals("Já existe cifra para esta música", vm.uiState.value.saveError)
     }
 
     @Test

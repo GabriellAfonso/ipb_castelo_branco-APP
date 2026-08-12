@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.worshiphub.lyrics.presentation.viewmodel
 
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.worshiphub.lyrics.domain.repository.LyricsRepository
 import com.ipb.castelobranco.core.domain.model.Song
@@ -130,7 +131,14 @@ class LyricsCreateViewModelTest {
 
     @Test
     fun `onSave failure sets saveError`() = runTest {
-        coEvery { lyricsRepository.createLyrics(any(), any()) } returns Result.failure(RuntimeException("server error"))
+        coEvery { lyricsRepository.createLyrics(any(), any()) } returns Result.failure(
+            AppError.Server(
+                code = 400,
+                message = """{"error_code":"lyrics_exists","detail":"Já existe letra para esta música"}""",
+                errorCode = "lyrics_exists",
+                userMessage = "Já existe letra para esta música",
+            )
+        )
 
         val vm = createViewModel()
         advanceUntilIdle()
@@ -142,7 +150,7 @@ class LyricsCreateViewModelTest {
 
         assertFalse(vm.uiState.value.savedSuccessfully)
         assertNotNull(vm.uiState.value.saveError)
-        assertEquals("server error", vm.uiState.value.saveError)
+        assertEquals("Já existe letra para esta música", vm.uiState.value.saveError)
     }
 
     @Test

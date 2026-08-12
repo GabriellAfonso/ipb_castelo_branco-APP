@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.admin.schedule.presentation.viewmodel
 
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.features.admin.schedule.domain.model.Member
 import com.ipb.castelobranco.features.admin.schedule.domain.model.ScheduleItem
 import com.ipb.castelobranco.features.admin.schedule.domain.repository.AdminScheduleRepository
@@ -192,10 +193,10 @@ class AdminScheduleViewModelTest {
     }
 
     @Test
-    fun `saveSchedule failure sets Error saveResult with message from exception`() = runTest {
+    fun `saveSchedule failure sets Error saveResult with the authored userMessage`() = runTest {
         coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
         coEvery { repository.saveSchedule(any(), any(), any()) } returns
-            Result.failure(Exception("Escala já existe"))
+            Result.failure(AppError.Server(code = 400, message = "raw body", userMessage = "Escala já existe"))
 
         viewModel.onEvent(AdminScheduleEvent.GenerateSchedule)
         advanceUntilIdle()
@@ -207,7 +208,7 @@ class AdminScheduleViewModelTest {
     }
 
     @Test
-    fun `saveSchedule failure without message falls back to default message`() = runTest {
+    fun `saveSchedule failure without userMessage falls back to the generic message`() = runTest {
         coEvery { repository.generateSchedule(any(), any()) } returns Result.success(listOf(scheduleItem))
         coEvery { repository.saveSchedule(any(), any(), any()) } returns
             Result.failure(Exception())
@@ -217,7 +218,7 @@ class AdminScheduleViewModelTest {
         viewModel.onEvent(AdminScheduleEvent.SaveSchedule)
         advanceUntilIdle()
 
-        assertEquals(SaveResult.Error("Falha ao salvar escala."), viewModel.uiState.value.saveResult)
+        assertEquals(SaveResult.Error("Algo deu errado. Tente novamente."), viewModel.uiState.value.saveResult)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.admin.register.domain.usecase
 
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.features.admin.register.domain.repository.WorshipRegisterRepository
 import com.ipb.castelobranco.features.admin.register.presentation.state.SundaySongRowState
 import com.ipb.castelobranco.core.domain.model.Song
@@ -99,10 +100,11 @@ class SubmitSundayPlaysUseCaseTest {
     // region failure
 
     @Test
-    fun `repository throws exception with message returns Failure with that message`() = runTest {
+    fun `repository throws AppError with userMessage returns Failure with that message`() = runTest {
         val songs = listOf(song(1))
         val rows = listOf(row(1, selectedSongId = 1, tone = "C"))
-        coEvery { repository.pushSundayPlays(any(), any()) } throws RuntimeException("Servidor indisponível")
+        coEvery { repository.pushSundayPlays(any(), any()) } throws
+            AppError.Server(code = 400, message = "raw body", userMessage = "Servidor indisponível")
 
         val result = useCase(rows, songs, LocalDate.of(2025, 6, 15))
 
@@ -111,10 +113,11 @@ class SubmitSundayPlaysUseCaseTest {
     }
 
     @Test
-    fun `exception message with surrounding spaces is trimmed`() = runTest {
+    fun `userMessage with surrounding spaces is trimmed`() = runTest {
         val songs = listOf(song(1))
         val rows = listOf(row(1, selectedSongId = 1, tone = "C"))
-        coEvery { repository.pushSundayPlays(any(), any()) } throws RuntimeException("  erro  ")
+        coEvery { repository.pushSundayPlays(any(), any()) } throws
+            AppError.Server(code = 400, userMessage = "  erro  ")
 
         val result = useCase(rows, songs, LocalDate.of(2025, 6, 15))
 

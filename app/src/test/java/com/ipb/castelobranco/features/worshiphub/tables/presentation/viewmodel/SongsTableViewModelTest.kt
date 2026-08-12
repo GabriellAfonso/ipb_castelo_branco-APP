@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.worshiphub.tables.presentation.viewmodel
 
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.core.domain.model.Song
 import com.ipb.castelobranco.features.worshiphub.tables.domain.model.SuggestedSong
@@ -96,7 +97,7 @@ class SongsTableViewModelTest {
 
     @Test
     fun `allSongs emits empty list when state is Error`() = runTest {
-        every { repository.observeAllSongs() } returns flowOf(SnapshotState.Error(RuntimeException()))
+        every { repository.observeAllSongs() } returns flowOf(SnapshotState.Error(AppError.Unknown()))
         viewModel = SongsTableViewModel(repository)
 
         val job = launch { viewModel.allSongs.collect { } }

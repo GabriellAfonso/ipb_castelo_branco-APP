@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.profile.domain.usecase
 
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.domain.model.MeProfile
@@ -75,7 +76,7 @@ class UploadProfilePhotoUseCaseTest {
     @Test
     fun `invoke returns Failure when upload throws`() = runTest {
         coEvery { repository.uploadProfilePhoto(bytes, fileName) } returns
-            Result.failure(RuntimeException("upload failed"))
+            Result.failure(AppError.Server(code = 400, message = "raw body", userMessage = "upload failed"))
 
         val result = useCase(bytes, fileName)
 
@@ -109,7 +110,7 @@ class UploadProfilePhotoUseCaseTest {
         every { repository.observeMeProfile() } returns
             MutableStateFlow(SnapshotState.Data(profileWithPhoto))
         coEvery { repository.downloadAndPersistProfilePhoto(any()) } returns
-            Result.failure(RuntimeException("download fail"))
+            Result.failure(AppError.Server(code = 400, message = "raw body", userMessage = "download fail"))
 
         val result = useCase(bytes, fileName)
 

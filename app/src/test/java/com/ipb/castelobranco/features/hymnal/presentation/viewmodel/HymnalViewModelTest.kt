@@ -1,6 +1,7 @@
 package com.ipb.castelobranco.features.hymnal.presentation.viewmodel
 
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.hymnal.domain.model.Hymn
 import com.ipb.castelobranco.features.hymnal.domain.usecase.ObserveHymnsUseCase
@@ -96,19 +97,27 @@ class HymnalViewModelTest {
     }
 
     @Test
-    fun `uiState sets error when observe emits Error`() = runTest {
-        every { observeHymnsUseCase() } returns flowOf(SnapshotState.Error(RuntimeException("fetch failed")))
+    fun `uiState sets generic error message when observe emits Error`() = runTest {
+        every { observeHymnsUseCase() } returns
+            flowOf(SnapshotState.Error(AppError.Server(code = 500, message = "fetch failed")))
         viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
 
         subscribeAndAdvance()
 
-        assertEquals("fetch failed", viewModel.uiState.value.error)
+        assertEquals(
+            "Não foi possível completar a operação. Tente novamente mais tarde.",
+            viewModel.uiState.value.error,
+        )
         assertFalse(viewModel.uiState.value.isLoading)
     }
 
     @Test
-    fun `uiState uses default error message when Error throwable has no message`() = runTest {
-        every { observeHymnsUseCase() } returns flowOf(SnapshotState.Error(RuntimeException()))
+    fun `uiState uses the authored userMessage when the error carries one`() = runTest {
+        every { observeHymnsUseCase() } returns flowOf(
+            SnapshotState.Error(
+                AppError.Server(code = 500, message = "raw body", userMessage = "Erro ao carregar hinário")
+            )
+        )
         viewModel = HymnalViewModel(observeHymnsUseCase, searchHymnsUseCase, settingsRepository, testDispatcher)
 
         subscribeAndAdvance()

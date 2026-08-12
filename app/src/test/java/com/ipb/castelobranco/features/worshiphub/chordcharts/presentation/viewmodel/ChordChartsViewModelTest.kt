@@ -2,6 +2,7 @@ package com.ipb.castelobranco.features.worshiphub.chordcharts.presentation.viewm
 
 import com.ipb.castelobranco.core.data.local.SetlistPreferences
 import com.ipb.castelobranco.core.domain.snapshot.RefreshResult
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.profile.data.snapshot.ProfileSnapshotRepository
 import com.ipb.castelobranco.features.worshiphub.chordcharts.domain.model.ChordChart
@@ -101,12 +102,16 @@ class ChordChartsViewModelTest {
 
     @Test
     fun `uiState sets error when observe emits Error`() = runTest {
-        every { getChordChartsUseCase.observe() } returns flowOf(SnapshotState.Error(RuntimeException("network error")))
+        every { getChordChartsUseCase.observe() } returns
+            flowOf(SnapshotState.Error(AppError.Network(message = "network error")))
         viewModel = ChordChartsViewModel(getChordChartsUseCase, songsRepository, setlistPreferences, profileSnapshot)
 
         subscribeAndAdvance()
 
-        assertEquals("network error", viewModel.uiState.value.error)
+        assertEquals(
+            "Sem conexão com a internet. Verifique sua rede e tente novamente.",
+            viewModel.uiState.value.error,
+        )
     }
 
     @Test

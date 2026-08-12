@@ -1,5 +1,6 @@
 package com.ipb.castelobranco.features.admin.register.presentation.viewmodel
 
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.SnapshotState
 import com.ipb.castelobranco.features.admin.register.domain.usecase.ObserveSongsUseCase
 import com.ipb.castelobranco.features.admin.register.domain.usecase.SubmitSundayPlaysUseCase
@@ -93,7 +94,7 @@ class MusicRegistrationViewModelTest {
         createViewModel()
         viewModel.onEvent(MusicRegistrationEvent.Init)
 
-        songsFlow.value = SnapshotState.Error(RuntimeException("fail"))
+        songsFlow.value = SnapshotState.Error(AppError.Server(code = 500, message = "fail"))
         advanceUntilIdle()
 
         assertEquals("Falha ao carregar músicas.", viewModel.uiState.value.snackbarMessage)

@@ -1,6 +1,6 @@
 package com.ipb.castelobranco.core.data.snapshot
 
-import com.ipb.castelobranco.core.domain.snapshot.HttpPermissionException
+import com.ipb.castelobranco.core.domain.error.AppError
 import com.ipb.castelobranco.core.domain.snapshot.NetworkResult
 import kotlinx.coroutines.test.runTest
 import okhttp3.Headers
@@ -63,7 +63,7 @@ class RetrofitSnapshotFetcherTest {
     // region empty body
 
     @Test
-    fun `fetch returns Failure with IllegalStateException when body is null on 200`() = runTest {
+    fun `fetch returns Failure with AppError Unknown when body is null on 200`() = runTest {
         val fetcher = RetrofitSnapshotFetcher<String> {
             buildRetrofitResponse(code = 200, body = null, etag = null)
         }
@@ -71,7 +71,7 @@ class RetrofitSnapshotFetcherTest {
         val result = fetcher.fetch(etag = null)
 
         assertTrue(result is NetworkResult.Failure)
-        assertTrue((result as NetworkResult.Failure).throwable is IllegalStateException)
+        assertTrue((result as NetworkResult.Failure).throwable is AppError.Unknown)
         assertEquals("Empty body", result.throwable.message)
     }
 
@@ -89,32 +89,33 @@ class RetrofitSnapshotFetcherTest {
 
         assertTrue(result is NetworkResult.Failure)
         val failure = result as NetworkResult.Failure
-        assertTrue(failure.throwable is IllegalStateException)
+        assertTrue(failure.throwable is AppError.Server)
+        assertEquals(500, (failure.throwable as AppError.Server).code)
         assertEquals("HTTP 500", failure.throwable.message)
     }
 
     @Test
-    fun `fetch returns HttpPermissionException with code 401 on 401 response`() = runTest {
+    fun `fetch returns AppError Auth with code 401 on 401 response`() = runTest {
         val fetcher = RetrofitSnapshotFetcher<String> { buildRawResponse(code = 401) }
 
         val result = fetcher.fetch(etag = null)
 
         assertTrue(result is NetworkResult.Failure)
         val failure = result as NetworkResult.Failure
-        assertTrue(failure.throwable is HttpPermissionException)
-        assertEquals(401, (failure.throwable as HttpPermissionException).code)
+        assertTrue(failure.throwable is AppError.Auth)
+        assertEquals(401, (failure.throwable as AppError.Auth).code)
     }
 
     @Test
-    fun `fetch returns HttpPermissionException with code 403 on 403 response`() = runTest {
+    fun `fetch returns AppError Auth with code 403 on 403 response`() = runTest {
         val fetcher = RetrofitSnapshotFetcher<String> { buildRawResponse(code = 403) }
 
         val result = fetcher.fetch(etag = null)
 
         assertTrue(result is NetworkResult.Failure)
         val failure = result as NetworkResult.Failure
-        assertTrue(failure.throwable is HttpPermissionException)
-        assertEquals(403, (failure.throwable as HttpPermissionException).code)
+        assertTrue(failure.throwable is AppError.Auth)
+        assertEquals(403, (failure.throwable as AppError.Auth).code)
     }
 
     @Test
@@ -126,7 +127,7 @@ class RetrofitSnapshotFetcherTest {
         val result = fetcher.fetch(etag = null)
 
         val failure = result as NetworkResult.Failure
-        val ex = failure.throwable as HttpPermissionException
+        val ex = failure.throwable as AppError.Auth
         assertEquals(401, ex.code)
         assertEquals("Token expirado", ex.message)
     }
@@ -140,7 +141,7 @@ class RetrofitSnapshotFetcherTest {
         val result = fetcher.fetch(etag = null)
 
         val failure = result as NetworkResult.Failure
-        val ex = failure.throwable as HttpPermissionException
+        val ex = failure.throwable as AppError.Auth
         assertEquals(401, ex.code)
     }
 
@@ -153,7 +154,7 @@ class RetrofitSnapshotFetcherTest {
         val result = fetcher.fetch(etag = null)
 
         val failure = result as NetworkResult.Failure
-        val ex = failure.throwable as HttpPermissionException
+        val ex = failure.throwable as AppError.Auth
         assertEquals(401, ex.code)
         assertEquals("Unauthorized plain text", ex.message)
     }
@@ -170,7 +171,9 @@ class RetrofitSnapshotFetcherTest {
         val result = fetcher.fetch(etag = null)
 
         assertTrue(result is NetworkResult.Failure)
-        assertEquals(cause, (result as NetworkResult.Failure).throwable)
+        val failure = result as NetworkResult.Failure
+        assertTrue(failure.throwable is AppError.Unknown)
+        assertEquals(cause, failure.throwable.cause)
     }
 
     // endregion
