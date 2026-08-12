@@ -15,15 +15,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -42,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ipb.castelobranco.R
@@ -108,7 +113,15 @@ fun SongContentListScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (rows.isEmpty()) {
-                    EmptyState()
+                    // Sempre scrollavel: o PullToRefreshBox so recebe o gesto se o filho
+                    // despachar nested scroll, senao a tela vazia fica sem como recarregar.
+                    ScrollableFullSizeBox {
+                        when {
+                            isLoading     -> LoadingState()
+                            error != null -> ErrorState(message = error, onRetry = onRefresh)
+                            else          -> EmptyState()
+                        }
+                    }
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -288,14 +301,62 @@ private fun MetadataChip(text: String, color: Color) {
     }
 }
 
+/**
+ * Ocupa a tela toda e aceita scroll vertical mesmo sem conteudo transbordando — e isso que
+ * mantem o pull-to-refresh vivo nos estados de loading, erro e lista vazia.
+ */
+@Composable
+private fun ScrollableFullSizeBox(content: @Composable () -> Unit) {
+    Box(
+        modifier         = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Column(
+        modifier            = Modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        CircularProgressIndicator(color = Green)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text  = "Carregando...",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+    }
+}
+
+@Composable
+private fun ErrorState(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier            = Modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text      = message,
+            style     = MaterialTheme.typography.bodyLarge,
+            color     = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = onRetry) {
+            Text(text = "Tentar novamente")
+        }
+    }
+}
+
 @Composable
 private fun EmptyState() {
     Column(
-        modifier            = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier            = Modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text  = "Nenhum resultado",

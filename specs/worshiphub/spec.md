@@ -157,6 +157,19 @@ Tela com todas as informacoes consolidadas de uma musica. Dados vem de multiplas
 
 Lista de todas as cifras cadastradas. Cada item mostra nome da musica, tom e instrumento.
 
+**Estados (compartilhados com Letras via `SongContentListScreen`):**
+
+| Estado | Renderizacao |
+|--------|--------------|
+| `isLoading` e lista vazia | Spinner + "Carregando..." |
+| `error != null` e lista vazia | Mensagem do erro + botao "Tentar novamente" (dispara `onRefresh`) |
+| Lista vazia sem loading/erro | "Nenhum resultado" |
+| Lista com itens | `LazyColumn` de cards |
+
+Os tres estados sem itens sao renderizados dentro de um container com `verticalScroll`, porque
+o `PullToRefreshBox` so recebe o gesto de puxar se o filho despachar nested scroll — sem isso a
+tela vazia ficaria sem nenhuma forma de recarregar.
+
 **Busca:** campo no topo, filtra por nome da musica (accent-insensitive).
 
 **Pinned:** musicas podem ser fixadas no topo da lista via `SetlistPreferences`. Ordem de exibicao: pinned primeiro (na ordem de pin), depois o resto.
@@ -210,6 +223,8 @@ Lista de todas as letras cadastradas. Cada item mostra nome da musica.
 **Busca:** campo no topo, filtra por nome da musica (accent-insensitive).
 
 **Pinned:** mesmo mecanismo de `SetlistPreferences` das cifras.
+
+**Estados:** identicos aos da lista de cifras (secao 4.1) — mesma `SongContentListScreen`.
 
 **Dados:** `GET lyrics/`
 ```
