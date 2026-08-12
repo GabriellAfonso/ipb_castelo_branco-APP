@@ -298,7 +298,7 @@ private fun EmptyState() {
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text  = "No results",
+            text  = "Nenhum resultado",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )

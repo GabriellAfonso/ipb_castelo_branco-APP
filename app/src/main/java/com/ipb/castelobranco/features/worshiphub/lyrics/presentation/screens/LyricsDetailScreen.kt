@@ -110,7 +110,7 @@ private fun LyricsDetailContent(
                 onContentChange = onEditContentChange,
                 modifier        = Modifier.padding(innerPadding),
             )
-            state.stanzas.isEmpty() -> ErrorState("No content available", Modifier.padding(innerPadding))
+            state.stanzas.isEmpty() -> ErrorState("Sem conteúdo disponível", Modifier.padding(innerPadding))
             scrollMode == SongScrollMode.VERTICAL -> LyricsVerticalContent(
                 stanzas        = state.stanzas,
                 songName       = state.songName,
@@ -459,7 +459,7 @@ private fun EditContent(
 private fun LoadingState(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text  = "Loading...",
+            text  = "Carregando...",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )

@@ -92,7 +92,7 @@ private fun ChordChartDetailContent(
     onSaveEdit: () -> Unit,
 ) {
     BaseScreen(
-        tabName       = state.songName.ifEmpty { "Chord Chart" },
+        tabName       = state.songName.ifEmpty { "Cifra" },
         logoRes       = R.drawable.ic_sarca_ipb,
         showBackArrow = true,
         onBackClick   = onBackClick,
@@ -118,7 +118,7 @@ private fun ChordChartDetailContent(
                 onContentChange = onEditContentChange,
                 modifier        = Modifier.padding(innerPadding),
             )
-            state.blocks.isEmpty() -> ErrorState("No content available", Modifier.padding(innerPadding))
+            state.blocks.isEmpty() -> ErrorState("Sem conteúdo disponível", Modifier.padding(innerPadding))
             scrollMode == SongScrollMode.VERTICAL -> ChordVerticalContent(
                 blocks         = state.blocks,
                 tone           = state.tone,
@@ -582,7 +582,7 @@ private fun EditContent(
 private fun LoadingState(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text  = "Loading...",
+            text  = "Carregando...",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
