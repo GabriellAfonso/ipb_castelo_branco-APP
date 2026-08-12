@@ -58,9 +58,9 @@ extensions.configure<ApplicationExtension> {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // A keystore de release é selecionada manualmente no wizard do Android Studio (Generate Signed Bundle/APK).
-            // Esta linha não afeta o build de release gerado pelo AS — pode ser ignorada.
-            signingConfig = signingConfigs.getByName("debug")
+            // A keystore de release vem do wizard do Android Studio (Generate Signed Bundle/APK).
+            // Nenhuma signingConfig é declarada aqui de propósito: assim `./gradlew assembleRelease`
+            // produz um APK não assinado em vez de um APK assinado com a chave de debug.
         }
     }
 
