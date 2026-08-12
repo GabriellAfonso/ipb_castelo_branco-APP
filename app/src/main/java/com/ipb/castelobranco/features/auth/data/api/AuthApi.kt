@@ -12,21 +12,21 @@ import retrofit2.http.POST
 data class GoogleLoginRequest(val id_token: String)
 interface AuthApi {
 
-    @POST(AuthEndpoins.AUTH_LOGIN_PATH)
+    @POST(AuthEndpoints.AUTH_LOGIN_PATH)
     suspend fun login(
         @Body request: LoginRequest
     ): Response<AuthTokens>
 
-    @POST(AuthEndpoins.AUTH_REGISTER_PATH)
+    @POST(AuthEndpoints.AUTH_REGISTER_PATH)
     suspend fun register(
         @Body request: RegisterRequest
     ): Response<AuthTokens>
 
-    @POST(AuthEndpoins.AUTH_REFRESH_PATH)
+    @POST(AuthEndpoints.AUTH_REFRESH_PATH)
     suspend fun refresh(
         @Body request: RefreshRequest
     ): Response<AuthTokens>
 
-    @POST(AuthEndpoins.GOOGLE_AUTH_LOGIN)
+    @POST(AuthEndpoints.GOOGLE_AUTH_LOGIN)
     suspend fun loginWithGoogle(@Body body: GoogleLoginRequest): Response<AuthTokens>
 }
