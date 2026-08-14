@@ -72,6 +72,11 @@ class GalleryViewModel @Inject constructor(
         autoDownload.enqueueAnyNetwork()
     }
 
+    /** Nova tentativa após falha — REPLACE para descartar o WorkInfo com erro. */
+    fun retryDownload() {
+        autoDownload.enqueueWifiOnly(replaceExisting = true)
+    }
+
     fun clearGallery() {
         viewModelScope.launch {
             repository.clearAllPhotos()

@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,11 +14,11 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.ipb.castelobranco.core.presentation.navigation.AppRoutes
 import com.ipb.castelobranco.core.presentation.navigation.safePopBackStack
-import com.ipb.castelobranco.core.presentation.viewmodel.CoreViewModel
 import com.ipb.castelobranco.features.gallery.presentation.screens.AlbumScreen
 import com.ipb.castelobranco.features.gallery.presentation.screens.GalleryScreen
 import com.ipb.castelobranco.features.gallery.presentation.screens.PhotoScreen
 import com.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryViewModel
+import kotlinx.coroutines.flow.StateFlow
 
 @Stable
 data class GalleryNav(
@@ -32,8 +33,14 @@ object GalleryRoutes {
     fun Photo(albumId: Long, photoIndex: Int) = "Photo/$albumId/$photoIndex"
 }
 
+/**
+ * [isLoggedIn] chega de fora porque o `CoreViewModel` vive no escopo da Activity, não no back
+ * stack entry de [AppRoutes.CORE]. Buscá-lo por `getBackStackEntry(CORE)` daria uma segunda
+ * instância, sem `initialize()`, presa em "deslogado".
+ */
 fun NavGraphBuilder.galleryGraph(
     navController: NavHostController,
+    isLoggedIn: StateFlow<Boolean>,
     onNavigateToAuth: () -> Unit,
 ) {
     fun nav() = GalleryNav(
@@ -48,16 +55,14 @@ fun NavGraphBuilder.galleryGraph(
     ) {
         composable(GalleryRoutes.Gallery) { entry ->
             val graphEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.GALLERY_GRAPH) }
-            val coreEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.CORE) }
             val viewModel: GalleryViewModel = hiltViewModel(graphEntry)
-            val coreViewModel: CoreViewModel = hiltViewModel(coreEntry)
             val albums by viewModel.albums.collectAsState()
-            val isLoggedIn by coreViewModel.isLoggedIn.collectAsState()
+            val loggedIn by isLoggedIn.collectAsStateWithLifecycle()
             GalleryScreen(
                 nav = nav(),
                 viewModel = viewModel,
                 albums = albums,
-                isLoggedIn = isLoggedIn,
+                isLoggedIn = loggedIn,
                 onNavigateToAuth = onNavigateToAuth
             )
         }

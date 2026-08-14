@@ -70,4 +70,11 @@ class WorkManagerGalleryDownloadSchedulerTest {
         }
         assertEquals(NetworkType.CONNECTED, request.captured.workSpec.constraints.requiredNetworkType)
     }
+
+    @Test
+    fun `cancel cancels the unique work`() {
+        scheduler.cancel()
+
+        verify(exactly = 1) { workManager.cancelUniqueWork(GalleryDownloadWorker.WORK_NAME) }
+    }
 }

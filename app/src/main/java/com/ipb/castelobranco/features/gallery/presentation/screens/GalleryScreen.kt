@@ -19,6 +19,9 @@ import com.ipb.castelobranco.features.gallery.presentation.navigation.GalleryNav
 import com.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryDownloadState
 import com.ipb.castelobranco.features.gallery.presentation.viewmodel.GalleryViewModel
 
+private const val HTTP_UNAUTHORIZED = 401
+private const val HTTP_FORBIDDEN = 403
+
 @Composable
 fun GalleryScreen(
     nav: GalleryNav,
@@ -106,21 +109,33 @@ fun GalleryContent(
                         .padding(16.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (!downloadState.isResolved) {
-                        CircularProgressIndicator()
-                    } else {
-                        val errorMsg = downloadState.error
-                        if (errorMsg != null) {
-                            PermissionErrorPlaceholder(
+                    val errorMsg = downloadState.error
+                    when {
+                        !downloadState.isResolved -> CircularProgressIndicator()
+
+                        // Só 401 é problema de sessão. Em 403 o usuário está logado e não é
+                        // membro — logar de novo não muda isso. Nos demais erros a falha é de
+                        // rede/servidor, e mandar o usuário para o login não resolve nada.
+                        errorMsg != null -> when (downloadState.errorCode) {
+                            HTTP_UNAUTHORIZED -> PermissionErrorPlaceholder(
                                 message = errorMsg,
                                 onLoginClick = onNavigateToAuth,
-                                showLoginButton = downloadState.errorCode != 403,
+                                showLoginButton = true,
                             )
-                        } else {
-                            EmptyGalleryPlaceholder(
-                                onDownloadClick = { viewModel.downloadAllPhotos() },
+                            HTTP_FORBIDDEN -> PermissionErrorPlaceholder(
+                                message = errorMsg,
+                                onLoginClick = onNavigateToAuth,
+                                showLoginButton = false,
+                            )
+                            else -> DownloadErrorPlaceholder(
+                                message = errorMsg,
+                                onRetryClick = { viewModel.retryDownload() },
                             )
                         }
+
+                        else -> EmptyGalleryPlaceholder(
+                            onDownloadClick = { viewModel.downloadAllPhotos() },
+                        )
                     }
                 }
             }
@@ -197,6 +212,21 @@ private fun WaitingForWifiBanner(onDownloadWithMobileData: () -> Unit) {
             TextButton(onClick = onDownloadWithMobileData) {
                 Text("Usar dados móveis")
             }
+        }
+    }
+}
+
+@Composable
+private fun DownloadErrorPlaceholder(message: String, onRetryClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        OutlinedButton(onClick = onRetryClick) {
+            Text("Tentar novamente")
         }
     }
 }

@@ -40,4 +40,8 @@ class WorkManagerGalleryDownloadScheduler @Inject constructor(
             request
         )
     }
+
+    override fun cancel() {
+        workManager.cancelUniqueWork(GalleryDownloadWorker.WORK_NAME)
+    }
 }

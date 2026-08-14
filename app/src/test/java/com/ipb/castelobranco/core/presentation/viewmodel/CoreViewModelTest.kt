@@ -89,6 +89,8 @@ class CoreViewModelTest {
         every { authEventBus.events } returns authEventsFlow
         coEvery { logoutUseCase() } just runs
         every { galleryAutoDownload.triggerIfNeeded() } just runs
+        every { galleryAutoDownload.onLoginSuccess() } just runs
+        coEvery { galleryAutoDownload.clearOnLogout() } just runs
         every { bibleAutoDownload.triggerIfNeeded() } just runs
         coEvery { bibleRepository.preload() } just runs
         every { getMonthlyBirthdaysUseCase.observe() } returns emptyFlow()
@@ -159,11 +161,24 @@ class CoreViewModelTest {
     }
 
     @Test
-    fun `initialize calls galleryAutoDownload triggerIfNeeded`() = runTest {
+    fun `initialize calls galleryAutoDownload triggerIfNeeded when logged in`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns true
+
         viewModel.initialize()
         advanceUntilIdle()
 
         coVerify { galleryAutoDownload.triggerIfNeeded() }
+    }
+
+    @Test
+    fun `initialize does not trigger gallery download when not logged in`() = runTest {
+        coEvery { authSession.isLoggedIn() } returns false
+
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        // Sem sessão o download só poderia falhar com 401 e deixar esse erro para a tela
+        coVerify(exactly = 0) { galleryAutoDownload.triggerIfNeeded() }
     }
 
     @Test
@@ -265,6 +280,18 @@ class CoreViewModelTest {
     }
 
     @Test
+    fun `initialize on LoginSuccess re-enqueues the gallery download`() = runTest {
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        authEventsFlow.emit(AuthEventBus.Event.LoginSuccess)
+        advanceUntilIdle()
+
+        // REPLACE descarta um WorkInfo com 401 registrado enquanto ainda estava deslogado
+        coVerify(exactly = 1) { galleryAutoDownload.onLoginSuccess() }
+    }
+
+    @Test
     fun `initialize on LoginSuccess does not refresh when not logged in`() = runTest {
         coEvery { authSession.isLoggedIn() } returns false
 
@@ -344,6 +371,9 @@ class CoreViewModelTest {
         coEvery { membersRepository.clearBirthdaysCache() } coAnswers {
             order.add("clearBirthdays")
         }
+        coEvery { galleryAutoDownload.clearOnLogout() } coAnswers {
+            order.add("clearGallery")
+        }
         coEvery { logoutUseCase() } coAnswers {
             order.add("logout")
         }
@@ -351,7 +381,10 @@ class CoreViewModelTest {
         viewModel.logout()
         advanceUntilIdle()
 
-        assertEquals(listOf("clearPhoto", "clearSchedule", "clearBirthdays", "logout"), order)
+        assertEquals(
+            listOf("clearPhoto", "clearSchedule", "clearBirthdays", "clearGallery", "logout"),
+            order
+        )
     }
 
     // endregion

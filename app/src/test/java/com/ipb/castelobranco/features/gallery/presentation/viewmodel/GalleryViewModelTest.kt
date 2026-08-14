@@ -261,6 +261,13 @@ class GalleryViewModelTest {
         verify { autoDownload.enqueueAnyNetwork() }
     }
 
+    @Test
+    fun `retryDownload replaces the existing work`() = runTest {
+        viewModel.retryDownload()
+        // REPLACE é o que descarta o WorkInfo com o erro anterior
+        verify { autoDownload.enqueueWifiOnly(replaceExisting = true) }
+    }
+
     // endregion
 
     // region clearGallery

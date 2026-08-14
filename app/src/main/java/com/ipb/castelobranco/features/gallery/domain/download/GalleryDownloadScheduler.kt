@@ -9,4 +9,10 @@ package com.ipb.castelobranco.features.gallery.domain.download
 interface GalleryDownloadScheduler {
     fun enqueueWifiOnly(replaceExisting: Boolean = false)
     fun enqueueAnyNetwork()
+
+    /**
+     * Cancels the job and, with it, any finished state it left behind — a failed job stays in the
+     * scheduler's records and would keep being reported to the UI long after it ran.
+     */
+    fun cancel()
 }

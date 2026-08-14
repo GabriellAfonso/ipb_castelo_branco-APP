@@ -97,6 +97,7 @@ fun AppNavHost(navController: NavHostController) {
             worshipHubGraph(navController)
             galleryGraph(
                 navController = navController,
+                isLoggedIn = coreViewModel.isLoggedIn,
                 onNavigateToAuth = { navController.navigate(AppRoutes.AUTH_GRAPH) },
             )
             hymnalGraph(navController)

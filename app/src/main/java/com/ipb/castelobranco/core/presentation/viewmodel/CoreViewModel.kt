@@ -78,6 +78,8 @@ class CoreViewModel @Inject constructor(
             authEventBus.events.collect { event ->
                 if (event is AuthEventBus.Event.LoginSuccess) {
                     refreshProfileOnAppOpen()
+                    // A galeria só é acessível a membros: antes do login não havia o que baixar.
+                    galleryAutoDownload.onLoginSuccess()
                 }
             }
         }
@@ -109,8 +111,10 @@ class CoreViewModel @Inject constructor(
                 .onFailure { Timber.w(it, "Bible preload failed") }
             bibleAutoDownload.triggerIfNeeded()
 
-            // Auto-download da galeria se estiver vazia (somente via WiFi)
-            galleryAutoDownload.triggerIfNeeded()
+            // Auto-download da galeria se estiver vazia (somente via WiFi e com sessão ativa)
+            if (authSession.isLoggedIn()) {
+                galleryAutoDownload.triggerIfNeeded()
+            }
 
             // Perfil é um caso à parte pois depende de login
             refreshProfileOnAppOpen()
@@ -151,6 +155,7 @@ class CoreViewModel @Inject constructor(
             fetchProfileUseCase.clearSnapshot()
             scheduleRepository.clearScheduleCache()
             membersRepository.clearBirthdaysCache()
+            galleryAutoDownload.clearOnLogout()
             logoutUseCase()
             Timber.d("Logout completed")
             _events.trySend(CoreEvent.LogoutSuccess)

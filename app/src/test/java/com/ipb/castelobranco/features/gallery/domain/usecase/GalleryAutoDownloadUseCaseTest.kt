@@ -3,10 +3,12 @@ package com.ipb.castelobranco.features.gallery.domain.usecase
 import com.ipb.castelobranco.features.gallery.domain.download.GalleryDownloadScheduler
 import com.ipb.castelobranco.features.gallery.domain.model.Album
 import com.ipb.castelobranco.features.gallery.domain.repository.GalleryRepository
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 
@@ -66,5 +68,21 @@ class GalleryAutoDownloadUseCaseTest {
         useCase.enqueueAnyNetwork()
 
         verify(exactly = 1) { scheduler.enqueueAnyNetwork() }
+    }
+
+    @Test
+    fun `onLoginSuccess replaces existing work`() {
+        useCase.onLoginSuccess()
+
+        // REPLACE é o que descarta um WorkInfo com 401 registrado antes do login
+        verify(exactly = 1) { scheduler.enqueueWifiOnly(replaceExisting = true) }
+    }
+
+    @Test
+    fun `clearOnLogout cancels the work and clears the photos`() = runTest {
+        useCase.clearOnLogout()
+
+        verify(exactly = 1) { scheduler.cancel() }
+        coVerify(exactly = 1) { repository.clearAllPhotos() }
     }
 }
