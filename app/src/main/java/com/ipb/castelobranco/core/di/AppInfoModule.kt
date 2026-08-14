@@ -6,12 +6,15 @@ import com.ipb.castelobranco.core.data.auth.AuthSessionStatusProvider
 import com.ipb.castelobranco.core.data.local.DataStoreDeviceIdProvider
 import com.ipb.castelobranco.core.data.local.DeviceIdProvider
 import com.ipb.castelobranco.core.domain.auth.AuthStatusProvider
+import com.ipb.castelobranco.core.domain.util.DateProvider
 import com.ipb.castelobranco.core.domain.util.MonotonicClock
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -59,6 +62,18 @@ abstract class AppInfoModule {
         fun provideMonotonicClock(): MonotonicClock =
             MonotonicClock { SystemClock.elapsedRealtime() }
 
+        /**
+         * Today in the church's zone, not the device's. A leader travelling must not see the
+         * report shift by a day, and the collection service resolves its inclusive day
+         * boundaries in this same zone.
+         */
+        @Provides
+        @Singleton
+        fun provideDateProvider(): DateProvider =
+            DateProvider { LocalDate.now(ZoneId.of(CHURCH_ZONE_ID)) }
+
         private const val PLATFORM_ANDROID = "android"
+
+        private const val CHURCH_ZONE_ID = "America/Sao_Paulo"
     }
 }
