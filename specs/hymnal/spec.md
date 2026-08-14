@@ -179,14 +179,33 @@ DataStore `@SettingsPrefs`.
 Fallback: valores cacheados → padrões embutidos (**30 s** e lote de **50**). Falha na busca não
 produz nenhum efeito visível.
 
-`PATCH` é admin-only e **fora de escopo** do app.
+O `PATCH` é admin-only e agora **tem superfície no app**, em
+[`features/admin/reports/`](../admin/spec.md#6-relatórios) — não aqui. A tela administrativa lê e
+grava os parâmetros pelo cliente autenticado; a coleta continua lendo pelo cliente público. As duas
+não compartilham interface Retrofit, de propósito.
+
+Salvar pelo painel **não** atualiza o cache deste aparelho: `HymnViewSettingsStore` vive nesta
+feature e `features/admin` não pode importá-la. Os valores novos passam a valer no próximo startup,
+pelo `Refreshable` já existente.
+
+### 3.7 Catálogo compartilhado
+
+`HymnalRepository` implementa também `core/domain/repository/HymnCatalogRepository`, que expõe
+apenas número e título (`HymnCatalogEntry`). É como o relatório administrativo descobre quais hinos
+**nunca** foram cantados, sem que `features/admin` importe `features/hymnal`.
+
+Mesmo arranjo que `SongsRepository` tem com `AllSongsRepository`: o binding fica em `HymnalModule`,
+não há segundo cache nem segunda busca — o snapshot já pré-carregado é mapeado.
 
 ---
 
 ## 4. Fora de escopo
 
-- Telas administrativas de histórico (ocorrências, hinos mais vistos, edição de settings, CRUD de
-  janelas de culto). Todas existem no backend sob `IsAdminUser` e serão uma feature separada.
+- Telas administrativas de histórico (ocorrências, hinos mais cantados, edição de settings, CRUD de
+  janelas de culto). Existem desde `003-hymnal-history-reports`, mas **não neste domínio**: são
+  superfície administrativa e vivem em `features/admin/reports/`
+  ([spec](../admin/spec.md#6-relatórios)). O que este domínio expõe para elas é o catálogo, por
+  `core/` (§3.7) — nada mais.
 - Coleta em qualquer outra tela — letras, cifras, estudos e Bíblia não são instrumentados.
 - Qualquer controle para o membro ativar, desativar ou inspecionar a coleta.
 - Colapso local de visualizações próximas.
