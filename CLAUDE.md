@@ -115,7 +115,7 @@ Both environments can build/test simultaneously without cleaning. First run on a
 
 ## Pitfalls
 
-1. **Graph-scoped VM:** In existing graphs (hymnal, gallery, worshiphub, admin), use `hiltViewModel(graphEntry)` — not bare `hiltViewModel()`.
+1. **Graph-scoped VM:** In existing graphs (hymnal, gallery, worshiphub, admin), use `hiltViewModel(graphEntry)` — not bare `hiltViewModel()`. **`CoreViewModel` is the exception:** `AppNavHost` resolves it outside the `NavHost` (Activity scope), so `hiltViewModel(getBackStackEntry(AppRoutes.CORE))` returns a *second*, never-initialized instance. Pass what you need down as a parameter to the graph.
 2. **Single screen vs. graph:** Check `AppNavHost.kt` first — single screen = inline, multiple = graph.
 3. **Snapshot cache:** Offline features follow the `JsonSnapshotStorage` pattern (`HymnalSnapshotModule`, `ScheduleSnapshotModule`...).
 4. **UCropActivity** in Manifest — do not remove (profile photo upload).
@@ -184,5 +184,5 @@ specs/                          # project root, outside server/
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at `specs/002-hymnal-view-history/plan.md`
+at `specs/003-hymnal-history-reports/plan.md`
 <!-- SPECKIT END -->
