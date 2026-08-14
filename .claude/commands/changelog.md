@@ -1,14 +1,15 @@
 ---
-description: Gera um changelog em pt-BR agrupado por área, salva em changelogs/vX.Y.Z.md e exibe versão resumida para Play Store (≤500 chars). Use: /changelog v0.9.0 v0.9.1
-allowed-tools: Bash(git log:*), Bash(git tag:*), Bash(mkdir:*), Bash(tee:*), Bash(echo:*), Bash(grep:*)
+description: Gera um changelog em pt-BR agrupado por área, salva em changelogs/vX.Y.Z.md e exibe versão resumida para Play Store (≤500 chars). Use: /changelog 0.9.6 0.9.7
+allowed-tools: Bash(git log:*), Bash(git tag:*), Bash(git rev-parse:*), Bash(mkdir:*), Bash(tee:*), Bash(echo:*), Bash(grep:*), Bash(sed:*)
 ---
 
 ## Contexto
 
-- Tags disponíveis: !`git tag --sort=-version:refname | head -20`
-- Versão atual do app: !`grep 'versionName' app/build.gradle.kts | grep -oP '"\K[^"]+'`
-- Commits entre as versões informadas: !`git log --oneline --no-merges $ARGUMENTS 2>/dev/null || git log --oneline --no-merges -30`
-- Log completo com corpo: !`git log --pretty=format:"%s|%b" --no-merges $ARGUMENTS 2>/dev/null || git log --pretty=format:"%s|%b" --no-merges -30`
+- Versão atual do app: !`grep 'versionName' app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/'`
+- Tags de versão: !`git tag --sort=-version:refname | head -10 || echo "(nenhuma tag)"`
+- Range resolvido: !`A="$ARGUMENTS"; r(){ git rev-parse -q --verify "v$1^{commit}" || git rev-parse -q --verify "$1^{commit}" || git log --format=%H --grep="bump version to $1" -1; }; if [ -z "$A" ]; then L=$(git tag --sort=-version:refname | head -1); echo "${L:-(sem tag)}..HEAD"; elif [ "${A#*..}" != "$A" ]; then echo "$A"; else set -- $A; F=$(r "$1"); T=$([ -n "$2" ] && r "$2"); echo "$1..${2:-HEAD}  =  $(git rev-parse --short ${F:-HEAD})..$(git rev-parse --short ${T:-HEAD})"; fi`
+- Commits do range: !`A="$ARGUMENTS"; r(){ git rev-parse -q --verify "v$1^{commit}" || git rev-parse -q --verify "$1^{commit}" || git log --format=%H --grep="bump version to $1" -1; }; if [ -z "$A" ]; then L=$(git tag --sort=-version:refname | head -1); git log --oneline --no-merges ${L:+$L..}HEAD; elif [ "${A#*..}" != "$A" ]; then git log --oneline --no-merges $A; else set -- $A; F=$(r "$1"); T=$([ -n "$2" ] && r "$2"); git log --oneline --no-merges ${F:+$F..}${T:-HEAD}; fi`
+- Log completo com corpo: !`A="$ARGUMENTS"; r(){ git rev-parse -q --verify "v$1^{commit}" || git rev-parse -q --verify "$1^{commit}" || git log --format=%H --grep="bump version to $1" -1; }; if [ -z "$A" ]; then L=$(git tag --sort=-version:refname | head -1); git log --pretty=format:"%s|%b" --no-merges ${L:+$L..}HEAD; elif [ "${A#*..}" != "$A" ]; then git log --pretty=format:"%s|%b" --no-merges $A; else set -- $A; F=$(r "$1"); T=$([ -n "$2" ] && r "$2"); git log --pretty=format:"%s|%b" --no-merges ${F:+$F..}${T:-HEAD}; fi`
 
 ## Sua tarefa
 
@@ -18,8 +19,30 @@ Gere um changelog completo e salve-o em arquivo. Siga os passos abaixo na ordem.
 
 ### Passo 1 — Identificar a versão alvo
 
-Extraia a versão alvo do `$ARGUMENTS` (ex: de `v0.9.0 v0.9.1`, a versão alvo é `v0.9.1`).
-Se não houver argumento, use a **versão atual do app** lida acima de `app/build.gradle.kts` (campo `versionName`) como versão alvo e indique no topo que a faixa não foi especificada.
+O range é resolvido por **tag de versão**. Cada release lançada tem uma tag `vX.Y.Z` apontando para
+o commit que virou APK. Se a tag não existir, o resolvedor cai no commit
+`chore(release): bump version to X.Y.Z` — que é aproximado, porque o bump nem sempre é o último
+commit da versão.
+
+Formas aceitas em `$ARGUMENTS`:
+
+- `0.9.6 0.9.7` — da tag `v0.9.6` (exclusiva) até a `v0.9.7` (inclusiva). **Versão alvo: `0.9.7`**
+- `0.9.6` — da tag `v0.9.6` até `HEAD`. Versão alvo: o `versionName` atual
+- `<sha>..HEAD` ou `<ref>..<ref>` — range literal do git, usado como veio
+- sem argumento — da tag mais recente até `HEAD`. Versão alvo: o `versionName` atual
+
+O bloco **Range resolvido** acima mostra o intervalo que realmente foi usado, com os SHAs. Confira
+antes de gerar: se a versão informada não tiver tag nem commit de bump, o lado do range vem vazio e
+o `git log` devolve o histórico inteiro — nesse caso avise em vez de gerar.
+
+### Ao lançar uma versão nova
+
+Depois de publicar, marque o commit lançado para que o próximo changelog tenha o range exato:
+
+```bash
+git tag vX.Y.Z <sha-do-commit-lançado>
+git push origin vX.Y.Z
+```
 
 ---
 
