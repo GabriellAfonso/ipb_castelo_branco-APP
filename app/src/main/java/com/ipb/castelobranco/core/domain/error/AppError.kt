@@ -40,6 +40,13 @@ sealed class AppError(
         message: String? = "Erro no servidor ($code)",
         cause: Throwable? = null,
         val errorCode: String? = null,
+        /**
+         * Per-field validation messages from a structured error body, keyed by the field name the
+         * API uses. A form maps each key back to its own field; a screen with no form ignores it
+         * and falls back to [userMessage] or the generic text. Filled only in
+         * `core/network/error/ResponseExt.kt` — no other layer parses an error body.
+         */
+        val fieldErrors: Map<String, List<String>>? = null,
         userMessage: String? = null,
     ) : AppError(message, cause, userMessage)
 

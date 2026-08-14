@@ -12,6 +12,9 @@ import retrofit2.Response
  * one is present, otherwise from a plain JSON body — and falls back to the raw body or `HTTP <code>`.
  * [AppError.userMessage] is only filled from a structured error body (one carrying `error_code`),
  * where `detail` is copy the API owns; a raw body never reaches the screen.
+ *
+ * `field_errors`, when the structured body carries them, ride on [AppError.Server.fieldErrors] so
+ * a form can show each message on its own field instead of in a generic alert.
  */
 fun Response<*>.toAppError(): AppError {
     val code = code()
@@ -30,6 +33,7 @@ fun Response<*>.toAppError(): AppError {
             code = code,
             message = message,
             errorCode = parsed?.errorCode,
+            fieldErrors = parsed?.fieldErrors,
             userMessage = structuredDetail,
         )
     }

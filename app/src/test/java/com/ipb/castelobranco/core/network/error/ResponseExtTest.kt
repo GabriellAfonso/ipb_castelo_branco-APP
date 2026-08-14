@@ -87,6 +87,49 @@ class ResponseExtTest {
 
     // endregion
 
+    // region field errors
+
+    @Test
+    fun `toAppError carries field_errors from a structured API error`() {
+        val body = """
+            {
+              "error_code":"VALIDATION_ERROR",
+              "detail":"Validation failed.",
+              "field_errors":{
+                "min_seconds_to_count":["Value 0 is out of range. Expected an integer between 1 and 3600."]
+              }
+            }
+        """.trimIndent()
+
+        val error = errorResponse(code = 400, body = body).toAppError()
+
+        assertTrue(error is AppError.Server)
+        val fieldErrors = (error as AppError.Server).fieldErrors
+        assertEquals(1, fieldErrors?.size)
+        assertEquals(
+            listOf("Value 0 is out of range. Expected an integer between 1 and 3600."),
+            fieldErrors?.get("min_seconds_to_count"),
+        )
+    }
+
+    @Test
+    fun `toAppError leaves field_errors null when the structured body has none`() {
+        val body = """{"error_code":"VALIDATION_ERROR","detail":"Validation failed."}"""
+
+        val error = errorResponse(code = 400, body = body).toAppError()
+
+        assertNull((error as AppError.Server).fieldErrors)
+    }
+
+    @Test
+    fun `toAppError leaves field_errors null when the body is not a structured API error`() {
+        val error = errorResponse(code = 400, body = """{"detail":"Data inválida"}""").toAppError()
+
+        assertNull((error as AppError.Server).fieldErrors)
+    }
+
+    // endregion
+
     // region helpers
 
     private fun errorResponse(code: Int, body: String): Response<String> {
