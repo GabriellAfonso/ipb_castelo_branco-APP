@@ -57,29 +57,35 @@ import com.ipb.castelobranco.core.presentation.theme.BrandColors
 private val Orange = BrandColors.Orange
 private val Green = BrandColors.Green
 
+/** Respiro entre os cards e as bordas da tela. Vale para a busca e para cada item da lista. */
+private val ListEdgePadding = 8.dp
+
 /**
- * List screen shared by the chord charts and lyrics sub-features. Both render the same layout;
- * only labels, accent color, leading icon and the optional metadata chips differ.
+ * List screen shared by the songs, chord charts and lyrics sub-features. All three render the
+ * same layout; only labels, accent color, leading icon and the optional metadata chips differ.
+ *
+ * Pinning and the admin "add" action são opcionais: a lista de músicas não tem nenhum dos dois.
+ * `onTogglePin` nulo esconde o marcador de fixado.
  */
 @Composable
 fun SongContentListScreen(
     tabName: String,
     searchPlaceholder: String,
-    addItemLabel: String,
     accentColor: Color,
     leadingIcon: ImageVector,
     rows: List<SongContentRow>,
     query: String,
     isLoading: Boolean,
     error: String?,
-    isAdmin: Boolean,
     isRefreshing: Boolean,
     onQueryChange: (String) -> Unit,
     onItemClick: (id: Int) -> Unit,
-    onTogglePin: (songId: Int) -> Unit,
     onRefresh: () -> Unit,
-    onCreateClick: () -> Unit,
     onBackClick: () -> Unit,
+    onTogglePin: ((songId: Int) -> Unit)? = null,
+    isAdmin: Boolean = false,
+    addItemLabel: String = "",
+    onCreateClick: () -> Unit = {},
 ) {
     BaseScreen(
         tabName       = tabName,
@@ -133,7 +139,7 @@ fun SongContentListScreen(
                                 accentColor = accentColor,
                                 leadingIcon = leadingIcon,
                                 onClick     = { onItemClick(item.id) },
-                                onTogglePin = { onTogglePin(item.songId) },
+                                onTogglePin = onTogglePin?.let { toggle -> { toggle(item.songId) } },
                             )
                         }
                     }
@@ -153,7 +159,7 @@ private fun SearchCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = ListEdgePadding),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
@@ -207,12 +213,15 @@ private fun SongContentCard(
     accentColor: Color,
     leadingIcon: ImageVector,
     onClick: () -> Unit,
-    onTogglePin: () -> Unit,
+    onTogglePin: (() -> Unit)?,
 ) {
+    // Sem o botão de fixar, o padding final volta a ser simétrico ao inicial.
+    val endPadding = if (onTogglePin != null) 6.dp else 16.dp
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = ListEdgePadding)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -222,7 +231,7 @@ private fun SongContentCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 6.dp),
+                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = endPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
@@ -263,20 +272,18 @@ private fun SongContentCard(
                 }
             }
 
-            IconButton(onClick = onTogglePin) {
-                if (item.isPinned) {
+            if (onTogglePin != null) {
+                IconButton(onClick = onTogglePin) {
+                    val dotColor = if (item.isPinned) {
+                        Orange
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    }
                     Box(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(Orange),
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
+                            .background(dotColor),
                     )
                 }
             }

@@ -93,7 +93,12 @@ Gera sugestao de 4 musicas para o proximo domingo, priorizando musicas nao tocad
 
 Lista de todas as musicas cadastradas no sistema. Cada item mostra titulo e artista.
 
-**Busca:** campo de busca no topo, filtra por titulo e artista (accent-insensitive via `normalize()`). Mesmo padrao visual de Cifras e Letras.
+**Busca:** campo de busca no topo, filtra por titulo e artista (accent-insensitive via `normalize()`).
+
+**Tela:** mesma `SongContentListScreen` de Cifras e Letras — nao e "mesmo padrao visual", e o
+mesmo componente. Musicas passa `onTogglePin = null` (sem pin) e nao passa `isAdmin`, entao nao
+tem nem o marcador de fixado nem o menu de adicionar. O artista vai como chip unico; artista em
+branco nao vira chip. Estados de loading, erro e vazio: identicos aos da secao 4.1.
 
 **Dados:** reutiliza `GET songs/` (snapshot ja existente em `AllSongsSnapshotRepository`).
 
@@ -157,7 +162,7 @@ Tela com todas as informacoes consolidadas de uma musica. Dados vem de multiplas
 
 Lista de todas as cifras cadastradas. Cada item mostra nome da musica, tom e instrumento.
 
-**Estados (compartilhados com Letras via `SongContentListScreen`):**
+**Estados (compartilhados com Musicas e Letras via `SongContentListScreen`):**
 
 | Estado | Renderizacao |
 |--------|--------------|
@@ -415,4 +420,4 @@ Todas as listas usam busca accent-insensitive via `String.normalize()` (em `core
 ## 11. Itens Futuros
 
 - **Categorias:** campo `categoryName` existe no modelo mas nunca foi implementado como filtro na UI. Potencial filtro por categoria na lista de musicas.
-- **Pinned em Musicas:** avaliar se faz sentido ter o mesmo mecanismo de pin de Cifras/Letras na lista de Musicas.
+- **Pinned em Musicas:** avaliar se faz sentido ter o mesmo mecanismo de pin de Cifras/Letras na lista de Musicas. Como a lista ja usa a `SongContentListScreen`, basta passar `onTogglePin` e preencher `isPinned`.
