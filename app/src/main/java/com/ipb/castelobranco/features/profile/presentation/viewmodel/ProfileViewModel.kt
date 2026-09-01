@@ -46,7 +46,6 @@ class ProfileViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 userName = profile.name.trim().ifBlank { "Usuário" },
-                                profileActive = profile.active,
                                 isMember = profile.isMember,
                                 isAdmin = profile.isAdmin,
                                 photoUrl = profile.photoUrl

@@ -65,7 +65,7 @@ class LyricsDetailViewModelTest {
 
         every { themePreferences.songScrollModeFlow } returns flowOf(SongScrollMode.HORIZONTAL)
         every { profileSnapshot.observe() } returns MutableStateFlow(SnapshotState.Data(
-            MeProfile(name = "Test", active = true, isMember = true, isAdmin = false, photoUrl = null)
+            MeProfile(name = "Test", isMember = true, isAdmin = false, photoUrl = null)
         ))
     }
 

@@ -21,7 +21,6 @@ class ProfileSnapshotRepository @Inject constructor(
     mapper = { dto ->
         MeProfile(
             name = dto.name,
-            active = dto.active,
             isMember = dto.isMember,
             isAdmin = dto.isAdmin,
             photoUrl = dto.photoUrl

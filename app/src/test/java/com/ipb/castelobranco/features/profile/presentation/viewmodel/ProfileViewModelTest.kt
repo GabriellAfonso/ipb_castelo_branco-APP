@@ -41,7 +41,6 @@ class ProfileViewModelTest {
 
     private val fakeProfile = MeProfile(
         name = "João Silva",
-        active = true,
         isMember = true,
         isAdmin = false,
         photoUrl = null
@@ -253,17 +252,16 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `observeProfile SnapshotState Data updates profileActive isMember isAdmin`() = runTest {
+    fun `observeProfile SnapshotState Data updates isMember isAdmin`() = runTest {
         every { fetchProfileUseCase.observe() } returns flowOf(
             SnapshotState.Data(
-                fakeProfile.copy(active = false, isMember = false, isAdmin = true)
+                fakeProfile.copy(isMember = false, isAdmin = true)
             )
         )
 
         viewModel.initialize()
         advanceUntilIdle()
 
-        assertEquals(false, viewModel.uiState.value.profileActive)
         assertEquals(false, viewModel.uiState.value.isMember)
         assertEquals(true, viewModel.uiState.value.isAdmin)
     }

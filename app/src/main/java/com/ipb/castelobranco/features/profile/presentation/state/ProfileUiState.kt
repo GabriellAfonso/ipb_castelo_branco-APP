@@ -7,7 +7,6 @@ data class ProfileUiState(
     val localPhotoPath: String? = null,
     val localPhotoVersion: Int = 0,
     val userName: String? = null,
-    val profileActive: Boolean? = null,
     val isMember: Boolean? = null,
     val isAdmin: Boolean? = null
 )

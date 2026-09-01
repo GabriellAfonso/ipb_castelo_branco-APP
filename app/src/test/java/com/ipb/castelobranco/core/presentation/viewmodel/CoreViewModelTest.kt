@@ -60,7 +60,6 @@ class CoreViewModelTest {
 
     private val fakeProfile = MeProfile(
         name = "João",
-        active = true,
         isMember = true,
         isAdmin = false,
         photoUrl = null

@@ -522,6 +522,23 @@ O core depende de interfaces/classes de features auth para funcionar:
 
 > Nota: estas dependencias sao injetadas via Hilt. O core nao importa pacotes de features diretamente — as interfaces vivem em `core/domain/` ou sao providas via modulos Hilt das features.
 
+### Contrato de `GET /api/me/profile/`
+
+`FetchProfileUseCase` entrega `MeProfile`, mapeado de `MeProfileDto`:
+
+| Campo JSON | Campo Kotlin | Tipo | Obrigatorio |
+|------------|--------------|------|-------------|
+| `name` | `name` | `String` | sim |
+| `is_member` | `isMember` | `Boolean` | sim |
+| `is_admin` | `isAdmin` | `Boolean` | sim |
+| `photo_url` | `photoUrl` | `String?` | nao (default `null`) |
+
+O campo `active` foi removido do DTO, do dominio e do `ProfileUiState`: nenhuma permission
+class do backend o lia (as checagens usam `is_member` / `is_admin`) e nenhuma tela do app o
+exibia. O backend ainda envia a chave; `ignoreUnknownKeys = true` no `Json` do
+`SerializationModule` a descarta, e o app segue funcionando quando o backend parar de
+enviar. Regressao coberta por `MeProfileDtoBackwardCompatibilityTest`.
+
 ---
 
 ## 8. Seguranca
